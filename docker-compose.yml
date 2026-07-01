@@ -1,0 +1,30 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: smartcredit-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_dev_password
+      MYSQL_DATABASE: smart_credit_multi_agent
+      MYSQL_USER: smartcredit
+      MYSQL_PASSWORD: smartcredit_dev_password
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - smartcredit-mysql-data:/var/lib/mysql
+      - ./backend-service/src/main/resources/db:/docker-entrypoint-initdb.d:ro
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7
+    container_name: smartcredit-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - smartcredit-redis-data:/data
+
+volumes:
+  smartcredit-mysql-data:
+  smartcredit-redis-data:

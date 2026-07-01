@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/smart_credit_multi_agent?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: smartcredit
+    password: change_me_for_local_dev_only
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+jwt:
+  secret: replace-with-a-long-random-local-development-secret
+  expiration-seconds: 86400
+
+agent-service:
+  base-url: http://localhost:8001

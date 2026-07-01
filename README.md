@@ -1,2 +1,104 @@
-# ai-agent-recruitment-assistant
-AI-powered resume analysis and job matching system based on Spring Boot.
+# SmartCreditMultiAgent
+
+基于 Spring Boot + FastAPI + LangGraph 的多 Agent 智能信贷审批辅助系统。
+
+这个仓库用于展示一个“Java 后端业务系统 + Python 多 Agent 审批服务”的双服务工程项目。第一轮目标不是接入真实银行数据或真实大模型，而是跑通信贷审批辅助系统的核心工程闭环：客户、贷款申请、AI 审批建议、Agent 执行日志、人工审批、审计留痕和项目文档。
+
+## 项目架构
+
+```text
+backend-service  -> Spring Boot 3 + MyBatis + MySQL + Redis + JWT
+agent-service    -> FastAPI + LangGraph + Mock RAG/LLM extension points
+MySQL/Redis      -> docker-compose local infrastructure
+```
+
+核心原则：AI 只生成审批辅助建议，不自动做最终通过或拒绝。最终状态 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须通过人工审批接口写入，并保留审批记录和审计日志。
+
+## 目录结构
+
+```text
+docs/                       架构、接口、数据、迭代和恢复上下文文档
+backend-service/            Java 信贷业务系统
+agent-service/              Python 多 Agent 审批服务
+data/                       后续公开数据集、清洗数据和评估集占位
+docker-compose.yml          MySQL 8 + Redis
+PROJECT_CONTEXT.md          长期项目上下文
+```
+
+## 启动 MySQL 和 Redis
+
+```bash
+docker compose up -d mysql redis
+```
+
+MySQL 默认库名为 `smart_credit_multi_agent`。初始化 SQL 位于 `backend-service/src/main/resources/db/`。
+
+## 启动 agent-service
+
+```bash
+cd agent-service
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+```
+
+测试：
+
+```bash
+pytest tests -q
+```
+
+## 启动 backend-service
+
+```bash
+cd backend-service
+mvn spring-boot:run
+```
+
+Swagger UI:
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
+## 核心业务流程
+
+1. 初始化管理员账号：`POST /api/auth/init-admin`
+2. 登录并获取 JWT：`POST /api/auth/login`
+3. 创建脱敏客户：`POST /api/customers`
+4. 创建贷款申请：`POST /api/loan-applications`
+5. 提交贷款申请：`POST /api/loan-applications/{id}/submit`
+6. 执行 AI 审批辅助：`POST /api/loan-applications/{id}/ai-review`
+7. 人工审批通过、拒绝或补充材料：`POST /api/approvals/{applicationId}/approve|reject|need-more-info`
+
+## 示例 AI 审批请求
+
+```bash
+curl -X POST http://localhost:8001/api/v1/reviews \
+  -H "Content-Type: application/json" \
+  -d "{\"application_id\":1,\"customer\":{\"id\":1,\"age\":32,\"monthly_income\":12000,\"work_years\":5,\"existing_debt\":30000,\"overdue_count\":0,\"asset_proof_count\":2},\"loan_application\":{\"amount\":80000,\"term_months\":24,\"purpose\":\"personal consumption\"}}"
+```
+
+## 当前已实现
+
+- Spring Boot 后端分层：auth、customer、loan、agent review、approval、audit。
+- MyBatis mapper、schema.sql、data.sql。
+- JWT 登录和当前用户接口。
+- Java 调 Python Agent 服务并保存 AI 报告、Agent 日志、审计日志。
+- FastAPI `POST /api/v1/reviews`。
+- LangGraph 固定顺序工作流：IntakeAgent -> RiskAgent -> PolicyAgent -> ComplianceAgent -> DecisionAgent。
+- 三档规则风控评分测试：LOW、MEDIUM、HIGH。
+- Mock 制度文档和 RetrievalService 预留。
+
+## Mock 说明
+
+- RiskAgent 使用规则评分，不是训练模型。
+- PolicyAgent 使用本地 Markdown 关键词检索，不是向量库 RAG。
+- DecisionAgent 输出审批建议，不代表自动审批。
+- 当前 seed 数据是模拟数据，不包含真实身份证、手机号或银行客户信息。
+
+## 后续计划
+
+1. 接入公开信贷数据集并训练简单风控分类模型。
+2. 接入 Chroma/FAISS，构建制度文档 RAG。
+3. 接入真实 LLM，生成带制度引用的审批报告。
+4. 增加端到端集成测试、Dockerfile、评估报告和简历包装材料。

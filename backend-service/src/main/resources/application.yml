@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: smart-credit-backend-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/smart_credit_multi_agent?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${MYSQL_USER:smartcredit}
+    password: ${MYSQL_PASSWORD:smartcredit_dev_password}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+jwt:
+  secret: ${JWT_SECRET:smart-credit-dev-secret-must-be-replaced-in-real-deployments-123456}
+  expiration-seconds: ${JWT_EXPIRATION_SECONDS:86400}
+
+agent-service:
+  base-url: ${AGENT_SERVICE_BASE_URL:http://localhost:8001}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
