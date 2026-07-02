@@ -1,0 +1,43 @@
+{
+  "model_name": "logistic_regression_baseline",
+  "dataset": "UCI German Credit / Statlog German Credit",
+  "features": [
+    "age",
+    "monthly_income",
+    "work_years",
+    "existing_debt",
+    "overdue_count",
+    "asset_proof_count",
+    "amount",
+    "term_months",
+    "debt_income_ratio"
+  ],
+  "label": "ground_truth_risk",
+  "metrics": {
+    "accuracy": 0.6,
+    "precision": 0.3936,
+    "recall": 0.6167,
+    "f1": 0.4805,
+    "roc_auc": 0.6787,
+    "confusion_matrix": [
+      [
+        83,
+        57
+      ],
+      [
+        23,
+        37
+      ]
+    ],
+    "test_size": 200,
+    "train_size": 800,
+    "random_seed": 42
+  },
+  "created_at": "2026-07-02T03:26:50.648639+00:00",
+  "limitations": [
+    "German Credit is a public teaching dataset and is not Chinese bank production data.",
+    "Several project fields are simulated from coded attributes and are not real income or debt records.",
+    "The model is a baseline approval-assistance signal and must not be used for automatic lending decisions.",
+    "This artifact is not connected to RiskAgent in the current iteration."
+  ]
+}

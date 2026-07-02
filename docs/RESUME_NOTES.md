@@ -10,3 +10,7 @@
 - 第 1.5 轮工程修复：AI review 只允许 `SUBMITTED` 首次执行，`AI_REVIEWED` 仅用于演示/复评重跑；`APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须通过人工审批接口进入。
 - 第 1.5 轮新增查询链路：AI 报告可通过申请 ID 或报告 ID 查询，Agent 执行日志可通过申请 ID 或 workflow ID 查询。
 - 本地演示入口：根 README 与 `backend-service/README.md` 已补充 PowerShell `curl.exe` 流程，包含 init-admin、login、create customer、create loan、submit、AI review、report/log 查询、manual approval、approval history。
+- 第 2 轮第一段：基于 UCI German Credit 公开信贷数据集构建风控样本，清洗映射为项目字段，训练 Logistic Regression baseline。
+- 模型评估输出 accuracy、precision、recall、F1、ROC-AUC 和混淆矩阵；当前 ROC-AUC 为 0.6787，F1 为 0.4805，Recall 为 0.6167。
+- 风控模型只用于审批辅助信号，不做自动决策；当前尚未接入 RiskAgent，下一轮计划与规则评分融合。
+- 简历亮点表达：公开数据处理 + 特征映射 + baseline 模型训练 + 模型评估 + artifact 管理 + 审批辅助边界。

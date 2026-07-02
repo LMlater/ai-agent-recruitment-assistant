@@ -173,3 +173,29 @@ curl.exe -s -X POST "$base/api/approvals/$applicationId/need-more-info" `
   -H "Content-Type: application/json" `
   -d '{"comment":"please provide additional income proof"}'
 ```
+
+## 第 2 轮数据与模型 baseline
+
+本轮引入 UCI German Credit / Statlog German Credit 公开数据集，完成下载、清洗映射、Logistic Regression baseline 训练、模型评估、模型 artifact 保存和模拟 seed SQL 生成。当前模型尚未接入 `RiskAgent`，下一轮再做“规则评分 + ML 模型评分”的组合。
+
+运行命令：
+
+```bash
+cd agent-service
+python scripts/download_german_credit.py
+python scripts/prepare_credit_dataset.py
+python scripts/train_risk_model.py
+pytest tests -q
+```
+
+主要产物：
+
+- 原始公开数据：`data/raw/german_credit/german.data`、`data/raw/german_credit/german.doc`
+- 清洗数据：`data/processed/credit_cases.csv`、`data/processed/train.csv`、`data/processed/test.csv`
+- 模型文件：`agent-service/models/credit_risk_model.joblib`
+- 模型元信息：`agent-service/models/model_metadata.json`
+- 评估指标：`data/eval/model_metrics.json`
+- 评估案例：`data/eval/model_eval_cases.jsonl`
+- 模拟 seed SQL：`data/seed/generated_customers_seed.sql`、`data/seed/generated_loan_applications_seed.sql`
+
+当前 baseline 指标：accuracy 0.6000、precision 0.3936、recall 0.6167、F1 0.4805、ROC-AUC 0.6787。详见 `docs/MODEL_BASELINE.md`。
