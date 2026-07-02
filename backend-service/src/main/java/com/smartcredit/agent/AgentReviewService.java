@@ -88,13 +88,31 @@ public class AgentReviewService {
             log.setAgentName(result.getAgentName());
             log.setStatus(result.getStatus());
             log.setInputSummary(result.getInputSummary());
-            log.setOutputSummary(result.getOutputSummary());
+            log.setOutputSummary(outputSummaryWithDecisionReportGeneration(result));
             log.setErrorMessage(result.getErrorMessage());
             log.setStartedAt(result.getStartedAt());
             log.setEndedAt(result.getEndedAt());
             log.setDurationMs(result.getDurationMs());
             agentExecutionLogMapper.insert(log);
         }
+    }
+
+    private String outputSummaryWithDecisionReportGeneration(AgentResult result) {
+        Object metadata = result.getResult() == null ? null : result.getResult().get("decision_report_generation");
+        if (!(metadata instanceof java.util.Map<?, ?> generation)) {
+            return result.getOutputSummary();
+        }
+
+        String generationSummary = "decision_report_generation: llm_used=%s, llm_provider=%s, llm_error=%s".formatted(
+                generation.get("llm_used"),
+                generation.get("llm_provider"),
+                generation.get("llm_error")
+        );
+        String outputSummary = result.getOutputSummary();
+        if (outputSummary == null || outputSummary.isBlank()) {
+            return generationSummary;
+        }
+        return outputSummary + " | " + generationSummary;
     }
 
     private String toJson(Object value) {

@@ -7,8 +7,10 @@ import com.smartcredit.agent.dto.PolicyReference;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class AgentReviewResponseJsonTest {
@@ -46,6 +48,23 @@ class AgentReviewResponseJsonTest {
                           }
                         ]
                       }
+                    },
+                    {
+                      "agent_name": "DecisionAgent",
+                      "status": "SUCCESS",
+                      "input_summary": "Summarize upstream agent outputs",
+                      "output_summary": "Generated decision report",
+                      "error_message": null,
+                      "started_at": "2026-07-02T12:00:01",
+                      "ended_at": "2026-07-02T12:00:02",
+                      "duration_ms": 35,
+                      "result": {
+                        "decision_report_generation": {
+                          "llm_used": true,
+                          "llm_provider": "mock",
+                          "llm_error": null
+                        }
+                      }
                     }
                   ],
                   "report": {
@@ -75,6 +94,12 @@ class AgentReviewResponseJsonTest {
 
         assertEquals("workflow-rag-1", response.getWorkflowId());
         assertEquals("PolicyAgent", response.getAgentResults().get(0).getAgentName());
+        assertEquals("DecisionAgent", response.getAgentResults().get(1).getAgentName());
+        Object generation = response.getAgentResults().get(1).getResult().get("decision_report_generation");
+        Map<?, ?> generationMap = assertInstanceOf(Map.class, generation);
+        assertEquals(true, generationMap.get("llm_used"));
+        assertEquals("mock", generationMap.get("llm_provider"));
+        assertEquals(null, generationMap.get("llm_error"));
         assertEquals("MEDIUM", response.getReport().getRiskAssessment().get("risk_level"));
         assertEquals(68, response.getReport().getRiskAssessment().get("risk_score"));
 

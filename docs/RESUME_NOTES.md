@@ -1,5 +1,12 @@
 # Resume Notes
 
+- 第 5 轮新增根目录 `scripts/run_e2e_credit_review_demo.py`，用于面试演示 Java backend-service + Python agent-service 的端到端闭环。
+- 端到端脚本输出 `application_id`、`workflow_id`、AI 建议、风险结果、`ai_report_id`、Agent 日志数量、DecisionAgent LLM provider、policy codes 和 `manual_approval_required=true`。
+- 脚本默认不执行最终审批；如需演示人工最终确认，使用 `--manual-decision approve|reject|need-more-info`，最终状态仍由 Java 人工审批接口写入。
+- `AgentReviewService` 现在会把 `decision_report_generation` 的 `llm_used`、`llm_provider`、`llm_error` 摘要追加到现有 Agent 日志 `output_summary`，没有修改数据库表结构。
+- 后端测试覆盖 Python 返回的结构化 `policy_references`、`AgentResult.result.decision_report_generation`、AI report 保存和 AI review 状态边界。
+- 普通测试仍使用 Mock LLM，不读也不调用真实百炼；`.env` 和真实 API Key 不得提交。
+
 - Java + Python 双服务架构：Spring Boot 负责业务系统，FastAPI 负责 AI 审批辅助服务。
 - LangGraph 多 Agent 工作流：IntakeAgent、RiskAgent、PolicyAgent、ComplianceAgent、DecisionAgent。
 - 信贷审批业务流程：客户建档、贷款申请、AI 审批建议、人工审批、审计留痕。

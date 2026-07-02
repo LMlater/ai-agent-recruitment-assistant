@@ -1,5 +1,14 @@
 # Conversation Recovery
 
+## 第 5 轮最新恢复要点
+
+1. 项目级端到端演示入口为 `scripts/run_e2e_credit_review_demo.py`，默认通过 `BACKEND_BASE_URL=http://localhost:8080` 调用 Java 后端，再由后端调用 Python `agent-service`。
+2. 脚本支持 `--application-id` 复用已有 `SUBMITTED` 或 `AI_REVIEWED` 申请；不传时会创建 mock customer、mock loan application 并提交。
+3. 脚本默认只触发 AI review、查询 AI report 和 Agent logs；如果需要最终人工审批演示，可显式传 `--manual-decision approve|reject|need-more-info`。
+4. Java DTO 能接收结构化 `policy_references`，`AgentResult.result` 能保留 `decision_report_generation` 嵌套对象。
+5. Java 不改表结构，DecisionAgent 的 `llm_used`、`llm_provider`、`llm_error` 通过现有 `agent_execution_log.output_summary` 摘要展示。
+6. 普通 Python 测试继续强制 Mock LLM，不调用真实百炼；真实 API key 只允许留在本地 `.env` 或系统环境变量中，不能提交。
+
 ## 重要上下文
 
 1. 用户背景：华南理工大学数学本科，电气自动化方向研 0，本科阶段做过 Java 全栈实习。

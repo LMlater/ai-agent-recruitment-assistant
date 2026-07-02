@@ -1,5 +1,51 @@
 # SmartCreditMultiAgent
 
+## 第 5 轮：端到端演示闭环
+
+本轮新增项目级脚本 `scripts/run_e2e_credit_review_demo.py`，用于通过 Java 后端 HTTP API 串起创建或复用贷款申请、触发 Python Agent 审核、查询 AI 报告、查询 Agent 执行日志，以及可选执行人工最终审批。
+
+启动服务：
+
+```bash
+cd agent-service
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+```
+
+```bash
+cd backend-service
+mvn spring-boot:run
+```
+
+运行普通测试：
+
+```bash
+cd agent-service
+python -m pytest tests -q
+```
+
+```bash
+cd backend-service
+mvn test
+```
+
+运行 Agent 独立 demo：
+
+```bash
+cd agent-service
+python scripts/run_llm_review_demo.py --mock
+python scripts/run_llm_review_demo.py --compact
+```
+
+运行 Java + Python 端到端 demo：
+
+```bash
+python scripts/run_e2e_credit_review_demo.py
+python scripts/run_e2e_credit_review_demo.py --application-id 1
+python scripts/run_e2e_credit_review_demo.py --application-id 1 --manual-decision approve
+```
+
+`BACKEND_BASE_URL` 可用于覆盖默认后端地址 `http://localhost:8080`。默认演示建议使用 Mock LLM；真实百炼只在本地显式配置并由 agent-service 启用时才会被调用。AI/ML/RAG/LLM 只生成审批辅助建议，最终 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须由人工审批接口确认，系统会保存 AI 报告、Agent 执行日志和审计记录。不要提交 `.env` 或真实 API Key。
+
 基于 Spring Boot + FastAPI + LangGraph 的多 Agent 智能信贷审批辅助系统。
 
 这个仓库用于展示一个“Java 后端业务系统 + Python 多 Agent 审批服务”的双服务工程项目。第一轮目标不是接入真实银行数据或真实大模型，而是跑通信贷审批辅助系统的核心工程闭环：客户、贷款申请、AI 审批建议、Agent 执行日志、人工审批、审计留痕和项目文档。

@@ -118,3 +118,29 @@ curl.exe -s -X POST "$base/api/approvals/$applicationId/need-more-info" `
   -H "Content-Type: application/json" `
   -d '{"comment":"please provide additional repayment capacity proof"}'
 ```
+
+## Round 5 End-to-End Demo
+
+The project-level script `../scripts/run_e2e_credit_review_demo.py` calls this backend over HTTP. The backend then calls `agent-service`, saves the AI decision report, saves agent execution logs, and keeps the loan application at `AI_REVIEWED` until a human approval API is called.
+
+Start services first:
+
+```bash
+cd agent-service
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+```
+
+```bash
+cd backend-service
+mvn spring-boot:run
+```
+
+Run the E2E demo from the repository root:
+
+```bash
+python scripts/run_e2e_credit_review_demo.py
+python scripts/run_e2e_credit_review_demo.py --application-id 1
+python scripts/run_e2e_credit_review_demo.py --application-id 1 --manual-decision approve
+```
+
+The script reads `BACKEND_BASE_URL` when a non-default backend address is needed. It never reads or prints DashScope/Bailian keys; real LLM usage is controlled only by the already-running `agent-service` configuration. `DecisionAgent.result.decision_report_generation` is preserved in the Java response contract and summarized into `agent_execution_log.output_summary` without changing database schema.

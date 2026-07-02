@@ -1,5 +1,14 @@
 # Iteration Log
 
+## 第 5 轮：端到端演示闭环
+
+- 新增 `scripts/run_e2e_credit_review_demo.py`，通过 Java 后端 HTTP API 串起创建或复用贷款申请、触发 Python Agent 审核、查询 AI 报告、查询 Agent 执行日志，以及可选人工最终审批。
+- Java 后端继续支持结构化 `policy_references`，并增强 Python `/api/v1/reviews` 返回中 `AgentResult.result.decision_report_generation` 的合约测试。
+- `AgentReviewService` 在不修改数据库表结构的前提下，将 DecisionAgent 的 `llm_used`、`llm_provider`、`llm_error` 摘要写入现有 `agent_execution_log.output_summary`。
+- AI review 后贷款申请只更新为 `AI_REVIEWED`；最终 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 仍必须由人工审批接口确认。
+- 普通 `agent-service` 测试仍通过 `tests/conftest.py` 强制 Mock LLM，不调用真实百炼；真实 API 只允许本地显式 smoke/demo。
+- 本轮未提交 `.env` 或真实 API Key，未改 Java 数据库表结构，未删除 MockLLMClient、fallback、RAG、ML 或规则评分代码。
+
 ## 第 1 轮：双服务骨架与 Mock 多 Agent 工作流初始化
 
 - 初始化 Spring Boot backend-service。

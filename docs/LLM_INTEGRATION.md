@@ -111,6 +111,20 @@ For real demo mode, the script sets demo-only defaults when the user has not set
 
 Prompt payloads are compacted before calling the LLM: policy references keep only `policy_code`, `section_title`, and a short content excerpt, while risk assessment keeps only the review-relevant fields. `allowed_policy_codes` remains present and generated policy codes are still validated.
 
+## Java + Python E2E Demo
+
+Round 5 adds a repository-level demo script that drives the Spring Boot backend:
+
+```bash
+python scripts/run_e2e_credit_review_demo.py
+python scripts/run_e2e_credit_review_demo.py --application-id 1
+python scripts/run_e2e_credit_review_demo.py --application-id 1 --manual-decision approve
+```
+
+The script uses `BACKEND_BASE_URL` when provided, authenticates against the backend, creates or reuses a loan application, triggers `/api/loan-applications/{id}/ai-review`, then queries AI reports and Agent logs. It does not read or print `DASHSCOPE_API_KEY`; the running `agent-service` decides whether report generation uses Mock or a real provider.
+
+`DecisionAgent.result.decision_report_generation` remains visible in the Python review response and Java DTO contract. The backend also summarizes `llm_used`, `llm_provider`, and `llm_error` into the existing `agent_execution_log.output_summary` field so the metadata is visible through log query APIs without changing database schema.
+
 ## Fallback
 
 If the LLM returns non-JSON text, references an unknown policy code, or raises an exception, `ReportGenerationService` falls back to deterministic report text. `DecisionAgent` still returns a successful agent result, preserves the original final decision, and records report generation metadata in `decision_report_generation`.

@@ -119,3 +119,31 @@ python scripts/run_llm_review_demo.py --compact
 `--mock` is stable and never calls DashScope/Bailian. `--real` uses the local DashScope/Bailian configuration and may be affected by network or model latency. `--compact` uses shorter demo input and smaller generation defaults for real-model demos. If a real LLM call times out, fallback is expected protection rather than a workflow crash.
 
 Do not commit `.env` or a real API key. Use `.env.example` as the placeholder template and keep the LLM as report text generation only; `DecisionAgent` still preserves the deterministic final decision and manual approval boundary.
+
+## Round 5 Java + Python E2E Demo
+
+The repository root now contains `scripts/run_e2e_credit_review_demo.py`. That script talks to `backend-service`; the backend calls this service through `/api/v1/reviews`, stores the AI report, stores Agent logs, and then leaves final approval to the Java manual approval APIs.
+
+Start this service before running the project-level demo:
+
+```bash
+cd agent-service
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+```
+
+Run safe local checks:
+
+```bash
+python -m pytest tests -q
+python scripts/run_llm_review_demo.py --mock
+python scripts/run_llm_review_demo.py --compact
+```
+
+Then, from the repository root and with `backend-service` running:
+
+```bash
+python scripts/run_e2e_credit_review_demo.py
+python scripts/run_e2e_credit_review_demo.py --application-id 1
+```
+
+Ordinary tests still force `LLM_PROVIDER=mock` and `LLM_ENABLE_REAL_API=false`. Real DashScope/Bailian calls remain opt-in through local environment configuration and must never be committed to the repository.

@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +72,10 @@ class AgentReviewServiceTest {
         verify(aiDecisionReportMapper).insert(reportCaptor.capture());
         assertTrue(reportCaptor.getValue().getReportJson().contains("\"policy_code\":\"R-001\""));
         assertTrue(reportCaptor.getValue().getReportJson().contains("\"document_name\":\"risk_control_policy.md\""));
-        verify(agentExecutionLogMapper).insert(any(AgentExecutionLog.class));
+        var logCaptor = forClass(AgentExecutionLog.class);
+        verify(agentExecutionLogMapper).insert(logCaptor.capture());
+        assertTrue(logCaptor.getValue().getOutputSummary().contains("llm_provider=mock"));
+        assertTrue(logCaptor.getValue().getOutputSummary().contains("llm_used=true"));
         verify(loanApplicationMapper).updateAiReviewResult(
                 eq(7L),
                 eq(LoanStatus.AI_REVIEWED.name()),
@@ -165,16 +169,24 @@ class AgentReviewServiceTest {
                 List.of()
         ));
         response.setAgentResults(List.of(new AgentResult(
-                "RiskAgent",
+                "DecisionAgent",
                 "SUCCESS",
-                "score applicant",
-                "LOW risk",
+                "Summarize upstream agent outputs",
+                "Generated APPROVE recommendation using LLM report generation",
                 null,
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 12L,
-                Map.of("risk_score", 86)
+                Map.of("decision_report_generation", decisionReportGeneration())
         )));
         return response;
+    }
+
+    private Map<String, Object> decisionReportGeneration() {
+        Map<String, Object> generation = new HashMap<>();
+        generation.put("llm_used", true);
+        generation.put("llm_provider", "mock");
+        generation.put("llm_error", null);
+        return generation;
     }
 }
