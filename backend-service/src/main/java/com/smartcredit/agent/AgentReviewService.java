@@ -35,6 +35,7 @@ public class AgentReviewService {
         if (application == null) {
             throw new BusinessException("Loan application not found");
         }
+        validateReviewableStatus(application.getStatus());
         Customer customer = customerMapper.selectById(application.getCustomerId());
         if (customer == null) {
             throw new BusinessException("Customer not found");
@@ -53,6 +54,17 @@ public class AgentReviewService {
         );
         auditLogService.record(userId, "AI_REVIEW", "loan_application", applicationId, "Executed AI approval assistance", ip);
         return response;
+    }
+
+    private void validateReviewableStatus(String status) {
+        if (LoanStatus.SUBMITTED.name().equals(status)) {
+            return;
+        }
+        // Demo and reassessment path: allow rerunning AI assistance after a prior AI review.
+        if (LoanStatus.AI_REVIEWED.name().equals(status)) {
+            return;
+        }
+        throw new BusinessException("AI review can only run when application status is SUBMITTED or AI_REVIEWED");
     }
 
     private void saveReport(Long applicationId, AgentReviewResponse response) {

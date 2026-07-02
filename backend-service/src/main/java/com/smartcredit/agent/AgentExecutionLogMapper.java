@@ -3,6 +3,9 @@ package com.smartcredit.agent;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 @Mapper
 public interface AgentExecutionLogMapper {
@@ -14,4 +17,10 @@ public interface AgentExecutionLogMapper {
             """)
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(AgentExecutionLog log);
+
+    @Select("select * from agent_execution_log where application_id = #{applicationId} order by id asc")
+    List<AgentExecutionLog> selectByApplicationId(Long applicationId);
+
+    @Select("select * from agent_execution_log where workflow_id = #{workflowId} order by id asc")
+    List<AgentExecutionLog> selectByWorkflowId(String workflowId);
 }

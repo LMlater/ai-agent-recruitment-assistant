@@ -3,6 +3,9 @@ package com.smartcredit.agent;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 @Mapper
 public interface AiDecisionReportMapper {
@@ -14,4 +17,10 @@ public interface AiDecisionReportMapper {
             """)
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(AiDecisionReport report);
+
+    @Select("select * from ai_decision_report where application_id = #{applicationId} order by id desc")
+    List<AiDecisionReport> selectByApplicationId(Long applicationId);
+
+    @Select("select * from ai_decision_report where id = #{id}")
+    AiDecisionReport selectById(Long id);
 }

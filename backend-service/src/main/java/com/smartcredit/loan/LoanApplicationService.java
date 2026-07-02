@@ -64,9 +64,15 @@ public class LoanApplicationService {
     }
 
     public LoanApplication updateStatus(Long id, String status) {
-        LoanStatus nextStatus = LoanStatus.valueOf(status);
-        if (nextStatus == LoanStatus.APPROVED || nextStatus == LoanStatus.REJECTED) {
-            throw new BusinessException("Use manual approval APIs for final decisions");
+        LoanStatus nextStatus;
+        try {
+            nextStatus = LoanStatus.valueOf(status);
+        } catch (IllegalArgumentException | NullPointerException exception) {
+            throw new BusinessException("Unsupported loan application status: " + status);
+        }
+        // Final approval states must be confirmed by a human reviewer and leave approval_record traces.
+        if (nextStatus == LoanStatus.APPROVED || nextStatus == LoanStatus.REJECTED || nextStatus == LoanStatus.NEED_MORE_INFO) {
+            throw new BusinessException("Use manual approval APIs for final approval decisions");
         }
         get(id);
         loanApplicationMapper.updateStatus(id, nextStatus.name());

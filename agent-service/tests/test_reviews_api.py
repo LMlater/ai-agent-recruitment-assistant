@@ -53,7 +53,7 @@ def _post_review(payload):
     return body
 
 
-def test_low_risk_review_returns_approve_recommendation():
+def test_low_risk_review():
     body = _post_review(_payload())
 
     assert body["risk_level"] == "LOW"
@@ -63,7 +63,7 @@ def test_low_risk_review_returns_approve_recommendation():
     assert body["report"]["risk_assessment"]["risk_level"] == "LOW"
 
 
-def test_medium_risk_review_requires_manual_attention():
+def test_medium_risk_review():
     body = _post_review(
         _payload(
             customer={
@@ -82,7 +82,7 @@ def test_medium_risk_review_requires_manual_attention():
     assert body["final_decision"] in {"NEED_MORE_INFO", "REVIEW"}
 
 
-def test_high_risk_review_rejects_as_ai_suggestion_only():
+def test_high_risk_review():
     body = _post_review(
         _payload(
             customer={
@@ -101,3 +101,31 @@ def test_high_risk_review_rejects_as_ai_suggestion_only():
     assert body["final_decision"] == "REJECT"
     assert body["suggested_amount"] < 160000
     assert any("manual" in warning.lower() or "人工" in warning for warning in body["report"]["compliance_warnings"])
+
+
+def test_missing_material_review():
+    body = _post_review(
+        _payload(
+            customer={
+                "age": 17,
+                "monthly_income": 0,
+                "asset_proof_count": 0,
+            }
+        )
+    )
+
+    assert body["final_decision"] == "NEED_MORE_INFO"
+    assert body["report"]["intake_check"]["complete"] is False
+    assert body["report"]["required_materials"]
+
+
+def test_agent_results_contains_all_agents():
+    body = _post_review(_payload())
+
+    assert [item["agent_name"] for item in body["agent_results"]] == [
+        "IntakeAgent",
+        "RiskAgent",
+        "PolicyAgent",
+        "ComplianceAgent",
+        "DecisionAgent",
+    ]

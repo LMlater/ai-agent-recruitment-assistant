@@ -7,3 +7,6 @@
 - 制度检索预留：第一轮关键词检索，后续可替换为 Chroma/FAISS RAG。
 - Agent 执行日志：每个 Agent 保留输入摘要、输出摘要、耗时和状态。
 - 人工审批与审计留痕：AI 只给建议，最终审批必须人工确认。
+- 第 1.5 轮工程修复：AI review 只允许 `SUBMITTED` 首次执行，`AI_REVIEWED` 仅用于演示/复评重跑；`APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须通过人工审批接口进入。
+- 第 1.5 轮新增查询链路：AI 报告可通过申请 ID 或报告 ID 查询，Agent 执行日志可通过申请 ID 或 workflow ID 查询。
+- 本地演示入口：根 README 与 `backend-service/README.md` 已补充 PowerShell `curl.exe` 流程，包含 init-admin、login、create customer、create loan、submit、AI review、report/log 查询、manual approval、approval history。
