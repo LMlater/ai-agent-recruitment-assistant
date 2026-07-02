@@ -78,3 +78,11 @@
 - 新增 `scripts/run_llm_review_demo.py`，可用 Mock 或真实百炼跑端到端 review demo，输出 workflow、风险、制度编号和 `decision_report_generation` 元信息。
 - 新增 demo 与测试隔离相关单元测试；FastAPI review 测试确认 DecisionAgent 的 `result` 中可见 `decision_report_generation`。
 - 本轮未提交 `.env` 或真实 API Key，未修改 Java 数据库表结构，未允许 LLM 改最终审批状态。
+
+## 第 4 轮第三段：真实 LLM demo 稳定化
+
+- `scripts/run_llm_review_demo.py` 新增 `--mock`、`--real`、`--compact` 参数，分别支持稳定 Mock 展示、真实百炼尝试和短上下文演示。
+- `--real` 在用户未设置时使用 demo 默认 `LLM_TIMEOUT_SECONDS=90`、`LLM_MAX_TOKENS=600`，但不覆盖用户已有配置。
+- LLM prompt payload 现在压缩 `policy_references` 和 `risk_assessment`，减少真实模型超时概率，同时保留 `allowed_policy_codes` 与未知制度编号校验。
+- demo 输出新增 `demo_mode`、`llm_timeout_seconds`、`llm_max_tokens`，仍不输出 API Key。
+- 普通测试仍通过 pytest 隔离强制 Mock，不调用真实百炼；真实 LLM 超时 fallback 作为保护机制保留。

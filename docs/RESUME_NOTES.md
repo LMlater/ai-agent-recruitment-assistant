@@ -26,3 +26,4 @@
 - API Key 通过环境变量配置，避免密钥泄露；普通测试不依赖真实百炼 API，真实 smoke test 默认 skip。
 - 普通 pytest 通过 `agent-service/tests/conftest.py` 强制 Mock LLM；真实百炼 smoke test 需要直接运行 `python -m pytest tests/test_dashscope_live_smoke.py -q`。
 - `agent-service/scripts/run_llm_review_demo.py` 可运行端到端 LLM review demo，`LLM_ENABLE_REAL_API=false` 用 Mock，配置完整且为 `true` 时用百炼。
+- LLM review demo 支持 `--mock`、`--real`、`--compact`；`--compact` 和真实模式会使用短上下文/较小输出参数以降低超时概率，超时 fallback 属于预期保护机制。

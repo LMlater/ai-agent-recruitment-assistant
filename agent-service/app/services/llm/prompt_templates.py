@@ -4,6 +4,17 @@ from typing import Any
 
 
 POLICY_CODE_RE = re.compile(r"\b[A-Z]-\d{3}\b")
+MAX_POLICY_CONTENT_CHARS = 120
+RISK_ASSESSMENT_PROMPT_KEYS = {
+    "risk_score",
+    "risk_level",
+    "rule_reasons",
+    "model_used",
+    "model_risk_probability",
+    "model_risk_level",
+    "model_version",
+    "fusion_strategy",
+}
 
 
 SYSTEM_PROMPT = """你是信贷审批辅助系统中的报告生成组件，不是最终审批人。
@@ -22,11 +33,9 @@ def build_report_messages(context: dict[str, Any]) -> list[dict[str, str]]:
         "risk_level": context.get("risk_level"),
         "risk_score": context.get("risk_score"),
         "suggested_amount": context.get("suggested_amount"),
-        "risk_assessment": context.get("risk_assessment", {}),
-        "policy_references": context.get("policy_references", []),
+        "risk_assessment": _compact_risk_assessment(context),
+        "policy_references": _compact_policy_references(context),
         "allowed_policy_codes": allowed_policy_codes,
-        "compliance_warnings": context.get("compliance_warnings", []),
-        "required_materials": context.get("required_materials", []),
         "base_summary": context.get("summary"),
         "base_decision_reasons": context.get("decision_reasons", []),
     }
@@ -49,3 +58,42 @@ def _policy_codes(context: dict[str, Any]) -> list[str]:
         if code and POLICY_CODE_RE.fullmatch(str(code)):
             codes.append(str(code))
     return sorted(set(codes))
+
+
+def _compact_risk_assessment(context: dict[str, Any]) -> dict[str, Any]:
+    risk_assessment = context.get("risk_assessment", {})
+    compact = {
+        key: risk_assessment[key]
+        for key in RISK_ASSESSMENT_PROMPT_KEYS
+        if key in risk_assessment
+    }
+    compact.setdefault("risk_score", context.get("risk_score"))
+    compact.setdefault("risk_level", context.get("risk_level"))
+    return {key: value for key, value in compact.items() if value is not None}
+
+
+def _compact_policy_references(context: dict[str, Any]) -> list[dict[str, Any]]:
+    compact_references: list[dict[str, Any]] = []
+    for reference in context.get("policy_references", []):
+        if isinstance(reference, dict):
+            policy_code = reference.get("policy_code")
+            section_title = reference.get("section_title")
+            content = reference.get("content", "")
+        else:
+            policy_code = getattr(reference, "policy_code", None)
+            section_title = getattr(reference, "section_title", None)
+            content = getattr(reference, "content", "")
+        compact_references.append(
+            {
+                "policy_code": policy_code,
+                "section_title": section_title,
+                "content": _truncate_text(str(content)),
+            }
+        )
+    return compact_references
+
+
+def _truncate_text(text: str, limit: int = MAX_POLICY_CONTENT_CHARS) -> str:
+    if len(text) <= limit:
+        return text
+    return text[: limit - 3] + "..."

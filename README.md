@@ -253,7 +253,11 @@ DASHSCOPE_MODEL=qwen3.7-plus
 LLM review demo：
 
 ```bash
-python scripts/run_llm_review_demo.py
+python scripts/run_llm_review_demo.py --mock
+python scripts/run_llm_review_demo.py --real
+python scripts/run_llm_review_demo.py --compact
 ```
+
+`--mock` 用于稳定展示，不调用百炼；`--real` 使用本地百炼配置，可能受网络和模型响应影响；`--compact` 使用更短上下文和较小生成参数，更适合真实模型演示。真实 LLM 超时时 fallback 是预期保护机制，不是系统崩溃。
 
 配置方式和安全边界见 `docs/LLM_INTEGRATION.md`。仓库只提交 `.env.example` 占位符，不提交真实 API Key。

@@ -1,10 +1,13 @@
 import json
+import os
 import re
 from typing import Any
 
 from app.core.config import settings
 from app.services.llm.base import LLMClient
 from app.services.llm.llm_client_factory import create_llm_client, current_llm_provider_name
+from app.services.llm.mock_llm_client import MockLLMClient
+from app.services.llm.openai_compatible_client import OpenAICompatibleLLMClient
 from app.services.llm.prompt_templates import build_report_messages
 
 
@@ -14,15 +17,15 @@ POLICY_CODE_RE = re.compile(r"\b[A-Z]-\d{3}\b")
 class ReportGenerationService:
     def __init__(self, llm_client: LLMClient | None = None, llm_provider: str | None = None) -> None:
         self.llm_client = llm_client or create_llm_client()
-        self.llm_provider = llm_provider or current_llm_provider_name()
+        self.llm_provider = llm_provider or self._infer_llm_provider(self.llm_client)
 
     def generate(self, context: dict[str, Any]) -> dict[str, Any]:
         messages = build_report_messages(context)
         try:
             raw_text = self.llm_client.generate(
                 messages,
-                temperature=settings.llm_temperature,
-                max_tokens=settings.llm_max_tokens,
+                temperature=self._llm_temperature(),
+                max_tokens=self._llm_max_tokens(),
             )
             parsed = self._parse_json(raw_text)
             self._validate_policy_codes(parsed, context)
@@ -120,3 +123,16 @@ class ReportGenerationService:
     def _append_unique(self, reasons: list[str], reason: str) -> None:
         if reason not in reasons:
             reasons.append(reason)
+
+    def _llm_temperature(self) -> float:
+        return float(os.getenv("LLM_TEMPERATURE", str(settings.llm_temperature)))
+
+    def _llm_max_tokens(self) -> int:
+        return int(os.getenv("LLM_MAX_TOKENS", str(settings.llm_max_tokens)))
+
+    def _infer_llm_provider(self, llm_client: LLMClient) -> str:
+        if isinstance(llm_client, MockLLMClient):
+            return "mock"
+        if isinstance(llm_client, OpenAICompatibleLLMClient):
+            return current_llm_provider_name()
+        return current_llm_provider_name()

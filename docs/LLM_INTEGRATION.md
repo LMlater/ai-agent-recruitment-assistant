@@ -98,10 +98,18 @@ Run the optional end-to-end review demo:
 
 ```bash
 cd agent-service
-python scripts/run_llm_review_demo.py
+python scripts/run_llm_review_demo.py --mock
+python scripts/run_llm_review_demo.py --real
+python scripts/run_llm_review_demo.py --compact
 ```
 
-When `LLM_ENABLE_REAL_API=false`, the demo uses `MockLLMClient`. When `LLM_ENABLE_REAL_API=true` and local DashScope/Bailian key/base URL settings are valid, the demo uses the OpenAI-compatible client. The output includes workflow id, final decision, risk score, policy codes, summary, decision reasons, and `decision_report_generation` metadata, but never prints an API key.
+- `--mock` forces `MockLLMClient` and is the stable choice for demos that should not call DashScope/Bailian.
+- `--real` sets `LLM_PROVIDER=dashscope` and `LLM_ENABLE_REAL_API=true`; it requires local key, base URL, and model settings, and can still be affected by network or model latency.
+- `--compact` keeps the provider mode from the environment but uses shorter demo input and smaller generation defaults, making it better suited for real-model demonstrations.
+
+For real demo mode, the script sets demo-only defaults when the user has not set them: `LLM_TIMEOUT_SECONDS=90` and `LLM_MAX_TOKENS=600`. Real LLM timeout fallback is expected protection, not a workflow crash. The output includes workflow id, final decision, risk score, policy codes, summary, decision reasons, `demo_mode`, token/timeout metadata, and `decision_report_generation`, but never prints an API key.
+
+Prompt payloads are compacted before calling the LLM: policy references keep only `policy_code`, `section_title`, and a short content excerpt, while risk assessment keeps only the review-relevant fields. `allowed_policy_codes` remains present and generated policy codes are still validated.
 
 ## Fallback
 

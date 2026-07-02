@@ -111,7 +111,11 @@ python -m pytest tests/test_dashscope_live_smoke.py -q
 Run the optional LLM review demo:
 
 ```bash
-python scripts/run_llm_review_demo.py
+python scripts/run_llm_review_demo.py --mock
+python scripts/run_llm_review_demo.py --real
+python scripts/run_llm_review_demo.py --compact
 ```
+
+`--mock` is stable and never calls DashScope/Bailian. `--real` uses the local DashScope/Bailian configuration and may be affected by network or model latency. `--compact` uses shorter demo input and smaller generation defaults for real-model demos. If a real LLM call times out, fallback is expected protection rather than a workflow crash.
 
 Do not commit `.env` or a real API key. Use `.env.example` as the placeholder template and keep the LLM as report text generation only; `DecisionAgent` still preserves the deterministic final decision and manual approval boundary.
