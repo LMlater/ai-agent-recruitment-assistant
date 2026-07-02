@@ -24,5 +24,7 @@
 20. 第 3 轮第一段已加入本地制度 RAG 检索：模拟制度 Markdown 被切分为条款 chunk，TF-IDF + cosine similarity 返回结构化 `PolicyReference`，`/api/v1/reviews` 包含结构化 `policy_references`。
 21. RAG 评估文件是 `data/eval/rag_questions.jsonl` 和 `data/eval/rag_eval_results.json`；运行 `cd agent-service && python scripts/evaluate_policy_retrieval.py` 可刷新指标。
 22. 仍无真实 LLM、外部 Embedding API、Chroma/FAISS、真实银行制度、敏感数据、Java 数据库表结构修改或自动审批。
+23. 第 3.1 轮修复 Java 后端 DTO 兼容：新增 `backend-service/src/main/java/com/smartcredit/agent/dto/PolicyReference.java`，`ReviewReport.policyReferences` 改为结构化引用列表，并新增 Jackson 反序列化测试。
+24. RAG 评估结果 metadata 已改为相对路径；`rag_questions.jsonl` 和 `rag_eval_results.json` case 均保留 `expected_documents`。
 
 不要写入真实密钥、真实身份证、真实手机号或其他敏感信息。

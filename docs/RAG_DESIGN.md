@@ -41,7 +41,7 @@ The loader stores:
 
 ## Evaluation
 
-The RAG eval set is `data/eval/rag_questions.jsonl`. It includes 12 mock questions covering age eligibility, income proof, work years, amount-to-income pressure, DTI, overdue records, asset proof, missing materials, medium/high-risk manual review, AI non-auto-approval, ML auxiliary signal, audit trace, and privacy boundaries.
+The RAG eval set is `data/eval/rag_questions.jsonl`. It includes 12 mock questions covering age eligibility, income proof, work years, amount-to-income pressure, DTI, overdue records, asset proof, missing materials, medium/high-risk manual review, AI non-auto-approval, ML auxiliary signal, audit trace, and privacy boundaries. Each question records both `expected_policy_codes` and `expected_documents` so code-level and document-level expectations are visible in review.
 
 Run:
 
@@ -50,7 +50,19 @@ cd agent-service
 python scripts/evaluate_policy_retrieval.py
 ```
 
-The script writes `data/eval/rag_eval_results.json` with `recall_at_3`, `recall_at_5`, `hit_rate`, and `mrr`. Metrics are computed from current retrieval results and expected clause codes; they are not hand-filled.
+The script writes `data/eval/rag_eval_results.json` with `recall_at_3`, `recall_at_5`, `hit_rate`, and `mrr`. Metrics are computed from current retrieval results and expected clause codes; they are not hand-filled. Metadata uses repository-relative paths such as `agent-service/knowledge_base` and `data/eval/rag_questions.jsonl`, not local absolute machine paths.
+
+## Java Contract
+
+The Java backend models structured policy references with `backend-service/src/main/java/com/smartcredit/agent/dto/PolicyReference.java`. `ReviewReport.policyReferences` is `List<PolicyReference>`, matching the Python response fields:
+
+- `policy_code`
+- `document_name`
+- `section_title`
+- `content`
+- `score`
+
+`AgentReviewResponseJsonTest` verifies Jackson can deserialize Python-style structured `policy_references`. `AgentReviewServiceTest` verifies `objectMapper.writeValueAsString(response.getReport())` still preserves structured policy references in `report_json`. No database schema change is required because the report remains stored as JSON text.
 
 ## Guardrails
 

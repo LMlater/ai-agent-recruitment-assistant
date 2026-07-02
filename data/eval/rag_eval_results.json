@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "created_at": "2026-07-02T04:20:32.882227+00:00",
-    "knowledge_base_dir": "D:\\PythonProject\\ai-agent-recruitment-assistant\\agent-service\\knowledge_base",
-    "questions_path": "D:\\PythonProject\\ai-agent-recruitment-assistant\\data\\eval\\rag_questions.jsonl",
+    "created_at": "2026-07-02T04:39:05.490297+00:00",
+    "knowledge_base_dir": "agent-service/knowledge_base",
+    "questions_path": "data/eval/rag_questions.jsonl",
     "top_k": 5,
     "retrieval_method": "local TfidfVectorizer char n-gram + cosine similarity",
     "disclaimer": "Mock policy documents for learning and engineering demonstration only."
@@ -20,6 +20,9 @@
       "question": "申请人年龄不足 18 岁，是否可以直接进入个人信贷审批？",
       "expected_policy_codes": [
         "P-001"
+      ],
+      "expected_documents": [
+        "personal_credit_policy.md"
       ],
       "retrieved_policy_codes": [
         "P-001",
@@ -64,6 +67,10 @@
       "expected_policy_codes": [
         "P-002",
         "M-002"
+      ],
+      "expected_documents": [
+        "personal_credit_policy.md",
+        "material_review_policy.md"
       ],
       "retrieved_policy_codes": [
         "P-002",
@@ -116,6 +123,9 @@
       "expected_policy_codes": [
         "P-003"
       ],
+      "expected_documents": [
+        "personal_credit_policy.md"
+      ],
       "retrieved_policy_codes": [
         "P-003",
         "R-001",
@@ -167,6 +177,9 @@
       "expected_policy_codes": [
         "R-001"
       ],
+      "expected_documents": [
+        "risk_control_policy.md"
+      ],
       "retrieved_policy_codes": [
         "R-001",
         "P-003",
@@ -217,6 +230,9 @@
       "question": "申请人存在多次逾期记录，人工复核依据是什么？",
       "expected_policy_codes": [
         "R-002"
+      ],
+      "expected_documents": [
+        "risk_control_policy.md"
       ],
       "retrieved_policy_codes": [
         "R-002",
@@ -270,6 +286,10 @@
         "R-003",
         "C-002"
       ],
+      "expected_documents": [
+        "risk_control_policy.md",
+        "compliance_review_policy.md"
+      ],
       "retrieved_policy_codes": [
         "R-003",
         "C-001",
@@ -320,6 +340,9 @@
       "question": "资产证明可以替代收入证明和负债审查吗？",
       "expected_policy_codes": [
         "M-003"
+      ],
+      "expected_documents": [
+        "material_review_policy.md"
       ],
       "retrieved_policy_codes": [
         "M-003",
@@ -373,6 +396,10 @@
         "M-004",
         "C-003"
       ],
+      "expected_documents": [
+        "material_review_policy.md",
+        "compliance_review_policy.md"
+      ],
       "retrieved_policy_codes": [
         "M-004",
         "P-004",
@@ -425,6 +452,10 @@
         "C-001",
         "P-004"
       ],
+      "expected_documents": [
+        "compliance_review_policy.md",
+        "personal_credit_policy.md"
+      ],
       "retrieved_policy_codes": [
         "C-001",
         "R-004",
@@ -476,6 +507,9 @@
       "expected_policy_codes": [
         "C-002"
       ],
+      "expected_documents": [
+        "compliance_review_policy.md"
+      ],
       "retrieved_policy_codes": [
         "C-002",
         "P-004",
@@ -510,6 +544,9 @@
       "question": "规则评分和 ML 模型风险等级不一致时，报告需要保留哪些模型信息？",
       "expected_policy_codes": [
         "R-004"
+      ],
+      "expected_documents": [
+        "risk_control_policy.md"
       ],
       "retrieved_policy_codes": [
         "R-004",
@@ -561,6 +598,9 @@
       "question": "项目是否可以保存真实证件号、手机号或银行内部制度？",
       "expected_policy_codes": [
         "C-004"
+      ],
+      "expected_documents": [
+        "compliance_review_policy.md"
       ],
       "retrieved_policy_codes": [
         "C-004",

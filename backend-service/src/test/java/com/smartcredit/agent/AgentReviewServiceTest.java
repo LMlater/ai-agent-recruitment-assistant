@@ -3,6 +3,7 @@ package com.smartcredit.agent;
 import com.smartcredit.agent.client.AgentReviewClient;
 import com.smartcredit.agent.dto.AgentResult;
 import com.smartcredit.agent.dto.AgentReviewResponse;
+import com.smartcredit.agent.dto.PolicyReference;
 import com.smartcredit.agent.dto.ReviewReport;
 import com.smartcredit.audit.AuditLogService;
 import com.smartcredit.common.BusinessException;
@@ -22,7 +23,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -64,7 +67,10 @@ class AgentReviewServiceTest {
 
         agentReviewService.executeAiReview(7L, 99L, "127.0.0.1");
 
-        verify(aiDecisionReportMapper).insert(any(AiDecisionReport.class));
+        var reportCaptor = forClass(AiDecisionReport.class);
+        verify(aiDecisionReportMapper).insert(reportCaptor.capture());
+        assertTrue(reportCaptor.getValue().getReportJson().contains("\"policy_code\":\"R-001\""));
+        assertTrue(reportCaptor.getValue().getReportJson().contains("\"document_name\":\"risk_control_policy.md\""));
         verify(agentExecutionLogMapper).insert(any(AgentExecutionLog.class));
         verify(loanApplicationMapper).updateAiReviewResult(
                 eq(7L),
@@ -147,7 +153,13 @@ class AgentReviewServiceTest {
         response.setReport(new ReviewReport(
                 Map.of("complete", true),
                 Map.of("risk_level", "LOW"),
-                List.of("mock policy"),
+                List.of(new PolicyReference(
+                        "R-001",
+                        "risk_control_policy.md",
+                        "R-001 Debt-to-Income Ratio Control",
+                        "Debt-to-income ratio above 80% requires high-risk manual review.",
+                        new BigDecimal("0.82")
+                )),
                 List.of("AI suggestion requires manual approval"),
                 List.of("stable income"),
                 List.of()

@@ -19,6 +19,8 @@ EVAL_DIR = REPO_ROOT / "data" / "eval"
 QUESTIONS_PATH = EVAL_DIR / "rag_questions.jsonl"
 RESULTS_PATH = EVAL_DIR / "rag_eval_results.json"
 KNOWLEDGE_BASE_DIR = AGENT_SERVICE_ROOT / "knowledge_base"
+RELATIVE_KNOWLEDGE_BASE_DIR = "agent-service/knowledge_base"
+RELATIVE_QUESTIONS_PATH = "data/eval/rag_questions.jsonl"
 
 
 def load_questions(path: Path = QUESTIONS_PATH) -> list[dict[str, Any]]:
@@ -32,7 +34,11 @@ def load_questions(path: Path = QUESTIONS_PATH) -> list[dict[str, Any]]:
             if not stripped:
                 continue
             record = json.loads(stripped)
-            if "question" not in record or "expected_policy_codes" not in record:
+            if (
+                "question" not in record
+                or "expected_policy_codes" not in record
+                or "expected_documents" not in record
+            ):
                 raise ValueError(f"Invalid RAG eval record at line {line_number}: {record}")
             questions.append(record)
     return questions
@@ -95,6 +101,7 @@ def evaluate_policy_retrieval(top_k: int = 5) -> dict[str, Any]:
                 "id": question.get("id"),
                 "question": question["question"],
                 "expected_policy_codes": question["expected_policy_codes"],
+                "expected_documents": question["expected_documents"],
                 "retrieved_policy_codes": retrieved_codes,
                 "references": [reference.model_dump() for reference in references],
             }
@@ -104,8 +111,8 @@ def evaluate_policy_retrieval(top_k: int = 5) -> dict[str, Any]:
     return {
         "metadata": {
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "knowledge_base_dir": str(KNOWLEDGE_BASE_DIR),
-            "questions_path": str(QUESTIONS_PATH),
+            "knowledge_base_dir": RELATIVE_KNOWLEDGE_BASE_DIR,
+            "questions_path": RELATIVE_QUESTIONS_PATH,
             "top_k": top_k,
             "retrieval_method": "local TfidfVectorizer char n-gram + cosine similarity",
             "disclaimer": "Mock policy documents for learning and engineering demonstration only.",

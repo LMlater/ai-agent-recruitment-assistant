@@ -50,3 +50,12 @@
 - 重写四份模拟制度文档为 `P-001`、`M-001`、`R-001`、`C-001` 等条款结构。
 - 新增 `data/eval/rag_questions.jsonl`、`agent-service/scripts/evaluate_policy_retrieval.py`、生成 `data/eval/rag_eval_results.json`，并新增 `docs/RAG_DESIGN.md`。
 - 本轮仍不使用真实银行制度、真实客户敏感数据、真实 LLM、外部向量库或自动审批，也不修改 Java 后端表结构。
+
+## 第 3.1 轮：RAG 结构化引用与 Java 后端兼容性修复
+
+- Java 后端新增 `PolicyReference` DTO，`ReviewReport.policyReferences` 支持 Python `policy_references` 返回的结构化对象。
+- 新增 `AgentReviewResponseJsonTest`，覆盖 Jackson 反序列化结构化 `policy_references`、`agent_results` 和 `risk_assessment`。
+- 更新 `AgentReviewServiceTest`，确认 `objectMapper.writeValueAsString(response.getReport())` 保存 `report_json` 时仍保留结构化制度引用。
+- 清理 `data/eval/rag_eval_results.json` metadata 中的本地绝对路径，改为仓库相对路径。
+- 补充 `data/eval/rag_questions.jsonl` 的 `expected_documents`，并在评估结果 case 中保留该字段。
+- 本轮未接入真实 LLM，未调用阿里云百炼，未读取 API Key，未修改数据库表结构。

@@ -17,7 +17,7 @@ public class ReviewReport {
     @JsonProperty("risk_assessment")
     private Map<String, Object> riskAssessment;
     @JsonProperty("policy_references")
-    private List<String> policyReferences;
+    private List<PolicyReference> policyReferences;
     @JsonProperty("compliance_warnings")
     private List<String> complianceWarnings;
     @JsonProperty("decision_reasons")
