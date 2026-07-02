@@ -9,7 +9,22 @@ class DecisionAgent(BaseAgent):
     def process(self, state: dict[str, Any]) -> tuple[dict[str, Any], str, str]:
         risk_level = state["risk_level"]
         required_materials = state.get("required_materials", [])
-        reasons = list(state["risk_assessment"].get("reasons", []))
+        risk_assessment = state["risk_assessment"]
+        reasons = list(risk_assessment.get("rule_reasons", risk_assessment.get("reasons", [])))
+
+        if risk_assessment.get("model_used"):
+            reasons.append(
+                "ML model signal: "
+                f"probability={risk_assessment.get('model_risk_probability')}, "
+                f"level={risk_assessment.get('model_risk_level')}, "
+                f"version={risk_assessment.get('model_version')}."
+            )
+        else:
+            reasons.append(
+                "ML model unavailable; rule scoring fallback was used. "
+                f"Reason: {risk_assessment.get('model_error')}"
+            )
+        reasons.append("AI and ML outputs are approval assistance only; final approval must remain manual.")
 
         if required_materials:
             final_decision = "NEED_MORE_INFO"

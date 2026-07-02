@@ -18,6 +18,8 @@
 14. 第 1.5 轮重点：修复 AI review 和普通状态更新的状态边界，补齐 AI 报告/Agent 日志查询接口，完善 seed 数据、测试和本地演示文档。
 15. 对外检查建议：让下一位检查者优先看 README 的本地演示流程、`docs/ITERATION_LOG.md` 的第 1.5 轮记录，以及 Java/Python 测试覆盖。
 16. 第 2 轮第一段重点：引入 UCI German Credit 公开数据集，完成下载、清洗映射、Logistic Regression baseline、模型评估、模型 artifact、RiskModelService 和模拟 seed SQL。
-17. 第 2 轮边界：模型尚未接入 RiskAgent；没有接入真实 LLM；没有接入 Chroma/FAISS；没有修改 LangGraph 工作流。
+17. 第 2 轮第一段边界：当时模型只作为 artifact 和服务类存在；没有接入真实 LLM；没有接入 Chroma/FAISS；没有修改 LangGraph 工作流。
+18. 第 2 轮第二段重点：RiskAgent 已接入 ML baseline，采用规则评分 + 模型概率融合，模型不可用时 fallback 到规则评分。
+19. 当前仍未接入真实 LLM、RAG 向量库，也未修改 Java 数据库表；模型和 AI 都只作为审批辅助信号。
 
 不要写入真实密钥、真实身份证、真实手机号或其他敏感信息。

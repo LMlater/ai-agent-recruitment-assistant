@@ -9,6 +9,7 @@ class ComplianceAgent(BaseAgent):
     def process(self, state: dict[str, Any]) -> tuple[dict[str, Any], str, str]:
         warnings = [
             "AI output is an approval assistance suggestion only; final approval must be performed manually.",
+            "ML model output is an auxiliary signal and must be reviewed with rule reasons and policy references.",
             "Audit records must be retained for review workflow traceability.",
         ]
         risk_level = state.get("risk_level")

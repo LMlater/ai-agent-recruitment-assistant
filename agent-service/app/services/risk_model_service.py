@@ -27,6 +27,8 @@ class RiskModelService:
         self.model_path = Path(model_path)
         self.metadata_path = Path(metadata_path)
         self.threshold = threshold
+        self.low_threshold = 0.35
+        self.high_threshold = 0.65
         self._artifact: Any | None = None
         self._metadata: dict[str, Any] | None = None
 
@@ -40,7 +42,7 @@ class RiskModelService:
 
         input_frame = pd.DataFrame([{name: features[name] for name in feature_names}])
         probability = self._predict_high_risk_probability(model, input_frame)
-        risk_label = "HIGH" if probability >= self.threshold else "LOW"
+        risk_label = self._risk_label_from_probability(probability)
         return {
             "model_risk_probability": round(probability, 4),
             "model_risk_label": risk_label,
@@ -97,3 +99,10 @@ class RiskModelService:
         if int(features.get("asset_proof_count", 0)) == 0:
             explanation.append("No mapped asset proof signal is present.")
         return explanation
+
+    def _risk_label_from_probability(self, probability: float) -> str:
+        if probability < self.low_threshold:
+            return "LOW"
+        if probability < self.high_threshold:
+            return "MEDIUM"
+        return "HIGH"

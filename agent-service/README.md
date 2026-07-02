@@ -25,13 +25,13 @@ curl -X POST http://localhost:8001/api/v1/reviews \
 
 ## Current Mock Pieces
 
-- RiskAgent uses deterministic rules, not a trained risk model.
+- RiskAgent combines deterministic rules with the Logistic Regression baseline probability signal.
 - PolicyAgent uses keyword matching over local markdown documents, not vector retrieval.
 - DecisionAgent returns AI suggestions only; the Java backend must still require human approval.
 
 ## Round 2 Data And Model Baseline
 
-This round adds public-credit-data infrastructure without changing the LangGraph workflow. The trained model is not connected to `RiskAgent` yet.
+This round adds public-credit-data infrastructure without changing the LangGraph workflow. The second segment connects the trained baseline to `RiskAgent` as an auxiliary signal while preserving deterministic rule scoring.
 
 ```bash
 python scripts/download_german_credit.py
@@ -52,4 +52,12 @@ Generated files:
 
 Current Logistic Regression baseline metrics: accuracy 0.6000, precision 0.3936, recall 0.6167, F1 0.4805, ROC-AUC 0.6787.
 
-If the download script cannot access UCI, manually place `german.data` and `german.doc` under `../data/raw/german_credit/`, then run the prepare and training scripts. See `../docs/MODEL_BASELINE.md` for mapping logic, limitations, and the next-step plan for combining this model with the rule-based RiskAgent.
+If the download script cannot access UCI, manually place `german.data` and `german.doc` under `../data/raw/german_credit/`, then run the prepare and training scripts. See `../docs/MODEL_BASELINE.md` for mapping logic, limitations, and the RiskAgent fusion design.
+
+RiskAgent fusion behavior:
+
+- Rule scoring remains the primary explainable baseline.
+- `RiskModelService.predict_risk()` provides `model_risk_probability`, `model_risk_label`, version, features, and explanation.
+- Final level takes the higher risk level from rule and model.
+- Final score uses `0.65 * rule_score + 0.35 * model_score`.
+- If the model is unavailable, RiskAgent falls back to rule scoring and records `model_used=false` plus `model_error`.

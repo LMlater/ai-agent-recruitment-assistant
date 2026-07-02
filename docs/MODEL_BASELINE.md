@@ -57,7 +57,7 @@ Logistic Regression baseline 当前使用以下数值特征：
 - 输出概率，方便后续和规则评分融合。
 - 可解释性强于复杂黑盒模型，适合面试讲解 baseline。
 
-当前没有接入 RandomForest，也没有接入真实 LLM、RAG、RiskAgent 工作流。
+当前没有接入 RandomForest，也没有接入真实 LLM 或 RAG；第 2 轮第二段已将 baseline 作为辅助信号接入 RiskAgent，但没有修改 LangGraph 编排顺序。
 
 ## 训练流程
 
@@ -127,7 +127,26 @@ data/raw/german_credit/
 }
 ```
 
-本轮只提供服务类和测试，不把模型接入 `RiskAgent`。
+第 2 轮第二段已将服务接入 `RiskAgent`，但模型仍只作为辅助风险概率信号，不替代规则评分。
+
+## 模型如何接入 RiskAgent
+
+`RiskAgent` 现在采用“规则评分 + ML 模型概率”的组合式风险评估：
+
+1. 先运行原有规则评分，保留 `rule_score`、`rule_level` 和 `rule_reasons`。
+2. 从 `ReviewRequest` 构造模型特征：`age`、`monthly_income`、`work_years`、`existing_debt`、`overdue_count`、`asset_proof_count`、`amount`、`term_months`、`debt_income_ratio`。
+3. 调用 `RiskModelService.predict_risk(features)` 获得 `model_risk_probability`、`model_risk_level`、`model_version`、特征列表和解释。
+4. 融合风险等级采用更保守策略：规则或模型任一为 `HIGH`，最终为 `HIGH`；否则任一为 `MEDIUM`，最终为 `MEDIUM`；否则为 `LOW`。
+5. 融合风险分采用：`final_score = round(0.65 * rule_score + 0.35 * model_score)`，其中 `model_score = round(100 * (1 - model_risk_probability))`。
+6. 建议额度继续根据融合后的风险等级计算：`LOW` 保留申请额度，`MEDIUM` 限制在月收入 10 倍内，`HIGH` 限制在月收入 6 倍内。
+
+如果模型文件不存在、加载失败、特征缺失或预测异常，`RiskAgent` 不会让整个 AI review 失败，而是降级为纯规则评分，并在 `risk_assessment` 中写入 `model_used=false` 和 `model_error`。这样保留企业系统常见的降级能力，也避免模型服务波动影响主审批辅助链路。
+
+模型不能直接审批，原因是：
+
+- 训练数据来自公开教学数据集和模拟映射，不代表真实银行生产数据。
+- 模型指标只能作为工程 baseline 参考，不能证明生产风控效果。
+- 信贷审批需要制度、合规、人工复核和审计留痕，最终状态必须由人工审批接口确认。
 
 ## 模型局限性
 
@@ -141,12 +160,11 @@ data/raw/german_credit/
 
 真实银行风控模型需要合规授权数据、严格特征治理、样本时间窗设计、拒绝推断、稳定性监控、公平性评估、模型审批、灰度验证和贷后表现回流。本项目当前只完成公开数据到工程链路的 baseline，因此简历表达应强调“公开数据 + 模拟映射 + baseline + 审批辅助”，不能表述为“银行级真实风控模型”。
 
-## 下一轮接入 RiskAgent
+## 下一轮建议
 
-下一轮可以把 `RiskAgent` 从纯规则评分升级为“规则评分 + ML 模型概率”的组合：
+下一轮可以在当前融合基础上继续增强：
 
-1. 保留当前规则评分，保证可解释和稳定。
-2. 调用 `RiskModelService.predict_risk()` 获得模型概率。
-3. 将规则分、模型概率、命中原因一起写入 `risk_assessment`。
-4. 在 AI 报告中明确区分规则原因和模型信号。
-5. 继续由人工审批接口决定最终 `APPROVED`、`REJECTED` 或 `NEED_MORE_INFO`。
+1. 用更多评估样本验证规则评分和模型概率冲突时的表现。
+2. 在 AI 报告中更清晰地区分规则原因、模型信号和政策引用。
+3. 增加人工审批后的样本回流设计，但仍不使用真实个人隐私数据。
+4. 保持最终 `APPROVED`、`REJECTED` 或 `NEED_MORE_INFO` 由人工审批接口确认。

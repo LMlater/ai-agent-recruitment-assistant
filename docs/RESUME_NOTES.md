@@ -12,5 +12,8 @@
 - 本地演示入口：根 README 与 `backend-service/README.md` 已补充 PowerShell `curl.exe` 流程，包含 init-admin、login、create customer、create loan、submit、AI review、report/log 查询、manual approval、approval history。
 - 第 2 轮第一段：基于 UCI German Credit 公开信贷数据集构建风控样本，清洗映射为项目字段，训练 Logistic Regression baseline。
 - 模型评估输出 accuracy、precision、recall、F1、ROC-AUC 和混淆矩阵；当前 ROC-AUC 为 0.6787，F1 为 0.4805，Recall 为 0.6167。
-- 风控模型只用于审批辅助信号，不做自动决策；当前尚未接入 RiskAgent，下一轮计划与规则评分融合。
+- 风控模型只用于审批辅助信号，不做自动决策；第 2 轮第二段已接入 RiskAgent 并与规则评分融合。
 - 简历亮点表达：公开数据处理 + 特征映射 + baseline 模型训练 + 模型评估 + artifact 管理 + 审批辅助边界。
+- 第 2 轮第二段：RiskAgent 已采用规则评分 + Logistic Regression baseline 概率融合，输出规则原因、模型概率、模型等级、融合风险分和融合风险等级。
+- 模型不可用时会降级为规则评分，`risk_assessment` 记录 `model_used=false` 和 `model_error`，避免 AI review 主链路失败。
+- DecisionAgent 和 ComplianceAgent 会说明模型只是审批辅助信号，不自动审批，最终审批仍走人工审批接口。

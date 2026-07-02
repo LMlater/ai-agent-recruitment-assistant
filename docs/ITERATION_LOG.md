@@ -30,3 +30,13 @@
 - 新增 `RiskModelService`，可加载模型并输出结构化风险概率、标签、版本、特征和解释。
 - 生成低、中、高风险覆盖的模拟 seed SQL 和模型评估案例。
 - 当前模型尚未接入 `RiskAgent`，下一轮计划接入为“规则评分 + ML 模型评分”组合。
+
+## 第 2 轮第二段：RiskAgent 接入 ML baseline
+
+- `RiskAgent` 新增规则评分 + Logistic Regression baseline 概率融合，保留原有规则扣分原因。
+- `risk_assessment` 现在输出规则分、规则等级、模型概率、模型等级、模型解释、融合分、融合等级、建议额度、`model_used` 和 `model_error`。
+- 模型不可用、加载失败、特征缺失或预测异常时，自动降级为纯规则评分，AgentResult 仍保持 `SUCCESS`。
+- `DecisionAgent` 增强模型信号解释，明确模型概率、模型等级和模型版本，或说明规则 fallback。
+- `ComplianceAgent` 增加“模型输出只是辅助信号，必须结合规则原因和制度引用复核”的合规提示。
+- 新增 RiskAgent 融合单元测试、FastAPI review 融合字段断言、RiskModelService 三档阈值和缺失特征测试。
+- 本轮未接入 RAG、未接入真实 LLM、未修改 Java 后端表结构。

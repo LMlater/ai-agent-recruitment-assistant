@@ -38,6 +38,11 @@ def _post_review(payload):
     assert body["final_decision"]
     assert body["agent_results"]
     assert body["report"]
+    risk_assessment = body["report"]["risk_assessment"]
+    assert "rule_score" in risk_assessment
+    assert "model_used" in risk_assessment
+    assert "fusion_strategy" in risk_assessment
+    assert any("ML model output is an auxiliary signal" in warning for warning in body["report"]["compliance_warnings"])
     assert {item["agent_name"] for item in body["agent_results"]} == {
         "IntakeAgent",
         "RiskAgent",
