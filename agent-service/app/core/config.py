@@ -4,6 +4,19 @@ import os
 from pydantic import BaseModel
 
 
+def _load_local_env() -> None:
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return
+
+    env_path = Path(__file__).resolve().parents[2] / ".env"
+    load_dotenv(env_path, override=False)
+
+
+_load_local_env()
+
+
 def _env_bool(name: str, default: bool) -> bool:
     raw = os.getenv(name)
     if raw is None:

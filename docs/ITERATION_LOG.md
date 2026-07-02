@@ -65,6 +65,7 @@
 - 新增 `LLMClient` 抽象层，`DecisionAgent` 通过 `ReportGenerationService` 调用可替换的报告生成客户端。
 - 新增 `MockLLMClient`，默认用于本地开发、普通单元测试和无 API Key 场景。
 - 新增 `OpenAICompatibleLLMClient`，支持通过环境变量配置阿里云百炼 OpenAI-compatible chat completions。
+- `agent-service/.env` 可由 `python-dotenv` 自动加载，且系统环境变量优先，`.env` 继续保持不提交。
 - `DecisionAgent` 可基于规则评分、ML 模型信号和 RAG 制度引用生成更自然的审批辅助报告，但不改变 `final_decision`、`risk_score` 或 `risk_level`。
 - LLM 返回非 JSON、引用未知制度编号或调用异常时，会 fallback 到确定性报告文本，Agent 工作流保持稳定。
 - 单元测试不依赖真实 API；真实 DashScope smoke test 默认 skip，只有本地显式配置 `DASHSCOPE_API_KEY` 和 `LLM_ENABLE_REAL_API=true` 才运行。

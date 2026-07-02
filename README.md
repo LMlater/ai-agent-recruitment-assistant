@@ -232,7 +232,7 @@ cd agent-service
 pytest tests -q
 ```
 
-真实百炼 smoke test 仅在本地配置 `.env` 或环境变量后手动运行，默认会跳过：
+真实百炼 smoke test 仅在本地配置 `agent-service/.env` 或环境变量后手动运行，默认会跳过；如果系统环境变量和 `.env` 同时存在，系统环境变量优先：
 
 ```bash
 LLM_ENABLE_REAL_API=true pytest tests/test_dashscope_live_smoke.py -q

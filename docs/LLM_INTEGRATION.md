@@ -34,7 +34,7 @@ generate(messages, temperature=0.2, max_tokens=1200) -> str
 
 ## Configuration
 
-Use environment variables or a local `.env` file. Do not commit `.env`.
+Use environment variables or a local `agent-service/.env` file. The service loads that file at startup with `python-dotenv`, and existing shell environment variables take precedence. Do not commit `.env`.
 
 ```env
 LLM_PROVIDER=mock
@@ -58,7 +58,7 @@ Default behavior is safe:
 
 ## DashScope/Bailian Setup
 
-For local smoke testing only, configure the API key outside the repository, for example in a local `.env` or shell environment. The repository must not contain a real key, workspace id, or secret-bearing log.
+For local smoke testing only, configure the API key outside the repository, for example in `agent-service/.env` or the shell environment. The repository must not contain a real key, workspace id, or secret-bearing log.
 
 The base URL must come from environment configuration. The checked-in `.env.example` only contains placeholders.
 

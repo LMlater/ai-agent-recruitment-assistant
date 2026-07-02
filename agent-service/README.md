@@ -83,7 +83,7 @@ The retriever returns structured policy references for `/api/v1/reviews`. It doe
 
 ## 第 4 轮第一段：LLM Provider 抽象
 
-The service now has a replaceable LLM provider layer under `app/services/llm/`. The default provider is `MockLLMClient`, so local development and unit tests do not require an API key. `OpenAICompatibleLLMClient` can be enabled locally for DashScope/Bailian through environment variables.
+The service now has a replaceable LLM provider layer under `app/services/llm/`. The default provider is `MockLLMClient`, so local development and unit tests do not require an API key. `OpenAICompatibleLLMClient` can be enabled locally for DashScope/Bailian through environment variables or `agent-service/.env`; shell environment variables take precedence.
 
 Run ordinary tests:
 
