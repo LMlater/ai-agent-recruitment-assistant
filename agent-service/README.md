@@ -26,7 +26,7 @@ curl -X POST http://localhost:8001/api/v1/reviews \
 ## Current Mock Pieces
 
 - RiskAgent combines deterministic rules with the Logistic Regression baseline probability signal.
-- PolicyAgent uses keyword matching over local markdown documents, not vector retrieval.
+- PolicyAgent uses local TF-IDF policy retrieval over structured mock markdown clauses.
 - DecisionAgent returns AI suggestions only; the Java backend must still require human approval.
 
 ## Round 2 Data And Model Baseline
@@ -61,3 +61,22 @@ RiskAgent fusion behavior:
 - Final level takes the higher risk level from rule and model.
 - Final score uses `0.65 * rule_score + 0.35 * model_score`.
 - If the model is unavailable, RiskAgent falls back to rule scoring and records `model_used=false` plus `model_error`.
+
+## Round 3 Policy RAG Baseline
+
+Policy retrieval is fully local and deterministic in this round:
+
+- Loader: `app/services/policy_document_loader.py`
+- Retriever: `app/services/policy_retrieval_service.py`
+- Schema: `app/schemas/policy.py`
+- Knowledge base: `knowledge_base/*.md`
+- Eval set: `../data/eval/rag_questions.jsonl`
+- Eval output: `../data/eval/rag_eval_results.json`
+
+Run retrieval evaluation:
+
+```bash
+python scripts/evaluate_policy_retrieval.py
+```
+
+The retriever returns structured policy references for `/api/v1/reviews`. It does not call a real LLM, external embedding API, Chroma, FAISS, or real bank policy source.

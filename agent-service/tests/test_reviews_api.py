@@ -42,6 +42,19 @@ def _post_review(payload):
     assert "rule_score" in risk_assessment
     assert "model_used" in risk_assessment
     assert "fusion_strategy" in risk_assessment
+    policy_references = body["report"]["policy_references"]
+    assert policy_references
+    first_policy_reference = policy_references[0]
+    assert set(first_policy_reference) == {
+        "policy_code",
+        "document_name",
+        "section_title",
+        "content",
+        "score",
+    }
+    assert first_policy_reference["document_name"].endswith(".md")
+    assert first_policy_reference["content"]
+    assert first_policy_reference["score"] > 0
     assert any("ML model output is an auxiliary signal" in warning for warning in body["report"]["compliance_warnings"])
     assert {item["agent_name"] for item in body["agent_results"]} == {
         "IntakeAgent",

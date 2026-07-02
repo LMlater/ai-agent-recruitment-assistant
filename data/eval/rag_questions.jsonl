@@ -1,0 +1,12 @@
+{"id":"rag-001","question":"申请人年龄不足 18 岁，是否可以直接进入个人信贷审批？","expected_policy_codes":["P-001"]}
+{"id":"rag-002","question":"客户缺少收入证明且工作年限不足一年，需要引用哪些制度依据？","expected_policy_codes":["P-002","M-002"]}
+{"id":"rag-003","question":"贷款金额超过申请人年收入，应如何审查金额与收入比例？","expected_policy_codes":["P-003"]}
+{"id":"rag-004","question":"债务收入比超过 80%，系统应检索哪类风险控制条款？","expected_policy_codes":["R-001"]}
+{"id":"rag-005","question":"申请人存在多次逾期记录，人工复核依据是什么？","expected_policy_codes":["R-002"]}
+{"id":"rag-006","question":"中风险或高风险申请为什么不能自动审批，需要进入人工复核？","expected_policy_codes":["R-003","C-002"]}
+{"id":"rag-007","question":"资产证明可以替代收入证明和负债审查吗？","expected_policy_codes":["M-003"]}
+{"id":"rag-008","question":"材料补充和材料修改为什么要保留审计追踪？","expected_policy_codes":["M-004","C-003"]}
+{"id":"rag-009","question":"AI 或机器学习模型能不能自动批准个人贷款？","expected_policy_codes":["C-001","P-004"]}
+{"id":"rag-010","question":"最终通过、拒绝或补件责任应由谁承担？","expected_policy_codes":["C-002"]}
+{"id":"rag-011","question":"规则评分和 ML 模型风险等级不一致时，报告需要保留哪些模型信息？","expected_policy_codes":["R-004"]}
+{"id":"rag-012","question":"项目是否可以保存真实证件号、手机号或银行内部制度？","expected_policy_codes":["C-004"]}

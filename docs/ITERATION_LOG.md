@@ -40,3 +40,13 @@
 - `ComplianceAgent` 增加“模型输出只是辅助信号，必须结合规则原因和制度引用复核”的合规提示。
 - 新增 RiskAgent 融合单元测试、FastAPI review 融合字段断言、RiskModelService 三档阈值和缺失特征测试。
 - 本轮未接入 RAG、未接入真实 LLM、未修改 Java 后端表结构。
+
+## 第 3 轮第一段：制度 RAG baseline
+
+- 新增 `PolicyDocumentLoader`，将模拟制度 Markdown 按条款切分为稳定 chunk，并提取制度编号。
+- 新增 `PolicyRetrievalService`，使用本地 `TfidfVectorizer` + cosine similarity 检索制度依据，不接入外部 Embedding API、Chroma、FAISS 或真实 LLM。
+- 新增结构化 `PolicyReference` schema，`ReviewReport.policy_references` 从 `list[str]` 升级为结构化 JSON 对象。
+- 增强 `PolicyAgent` 查询构造，纳入申请用途、金额、风险等级、规则原因、模型信号、缺失材料、合规提示、DTI、逾期、人工复核和 AI/ML 边界词。
+- 重写四份模拟制度文档为 `P-001`、`M-001`、`R-001`、`C-001` 等条款结构。
+- 新增 `data/eval/rag_questions.jsonl`、`agent-service/scripts/evaluate_policy_retrieval.py`、生成 `data/eval/rag_eval_results.json`，并新增 `docs/RAG_DESIGN.md`。
+- 本轮仍不使用真实银行制度、真实客户敏感数据、真实 LLM、外部向量库或自动审批，也不修改 Java 后端表结构。

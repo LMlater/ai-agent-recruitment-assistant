@@ -3,6 +3,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.schemas.policy import PolicyReference
+
 
 class CustomerPayload(BaseModel):
     id: int
@@ -41,7 +43,7 @@ class AgentResult(BaseModel):
 class ReviewReport(BaseModel):
     intake_check: dict[str, Any] = Field(default_factory=dict)
     risk_assessment: dict[str, Any] = Field(default_factory=dict)
-    policy_references: list[str] = Field(default_factory=list)
+    policy_references: list[PolicyReference] = Field(default_factory=list)
     compliance_warnings: list[str] = Field(default_factory=list)
     decision_reasons: list[str] = Field(default_factory=list)
     required_materials: list[str] = Field(default_factory=list)

@@ -21,5 +21,8 @@
 17. 第 2 轮第一段边界：当时模型只作为 artifact 和服务类存在；没有接入真实 LLM；没有接入 Chroma/FAISS；没有修改 LangGraph 工作流。
 18. 第 2 轮第二段重点：RiskAgent 已接入 ML baseline，采用规则评分 + 模型概率融合，模型不可用时 fallback 到规则评分。
 19. 当前仍未接入真实 LLM、RAG 向量库，也未修改 Java 数据库表；模型和 AI 都只作为审批辅助信号。
+20. 第 3 轮第一段已加入本地制度 RAG 检索：模拟制度 Markdown 被切分为条款 chunk，TF-IDF + cosine similarity 返回结构化 `PolicyReference`，`/api/v1/reviews` 包含结构化 `policy_references`。
+21. RAG 评估文件是 `data/eval/rag_questions.jsonl` 和 `data/eval/rag_eval_results.json`；运行 `cd agent-service && python scripts/evaluate_policy_retrieval.py` 可刷新指标。
+22. 仍无真实 LLM、外部 Embedding API、Chroma/FAISS、真实银行制度、敏感数据、Java 数据库表结构修改或自动审批。
 
 不要写入真实密钥、真实身份证、真实手机号或其他敏感信息。

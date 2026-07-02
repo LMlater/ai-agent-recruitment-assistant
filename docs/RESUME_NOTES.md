@@ -17,3 +17,6 @@
 - 第 2 轮第二段：RiskAgent 已采用规则评分 + Logistic Regression baseline 概率融合，输出规则原因、模型概率、模型等级、融合风险分和融合风险等级。
 - 模型不可用时会降级为规则评分，`risk_assessment` 记录 `model_used=false` 和 `model_error`，避免 AI review 主链路失败。
 - DecisionAgent 和 ComplianceAgent 会说明模型只是审批辅助信号，不自动审批，最终审批仍走人工审批接口。
+- 第 3 轮第一段已加入本地制度 RAG baseline：`PolicyDocumentLoader`、`PolicyRetrievalService`、结构化 `PolicyReference`、增强版 `PolicyAgent`、条款化模拟制度文档、RAG 评估集/结果和 `docs/RAG_DESIGN.md`。
+- `/api/v1/reviews` 现在返回结构化 `policy_references`；Java 后端可继续按 JSON 字符串保存 AI report，不需要改数据库表结构。
+- 当前 RAG 仅使用本地 `scikit-learn` TF-IDF + cosine similarity，不使用真实 LLM API、外部 Embedding、Chroma、FAISS、真实银行制度或敏感数据。

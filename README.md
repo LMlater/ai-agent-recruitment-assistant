@@ -201,3 +201,22 @@ pytest tests -q
 当前 baseline 指标：accuracy 0.6000、precision 0.3936、recall 0.6167、F1 0.4805、ROC-AUC 0.6787。详见 `docs/MODEL_BASELINE.md`。
 
 第 2 轮第二段输出的 `risk_assessment` 同时包含 `rule_score`、`rule_level`、`rule_reasons`、`model_risk_probability`、`model_risk_level`、`model_explanation`、`model_used`、`model_error`、融合后的 `risk_score` 和 `risk_level`。如果模型 artifact 不可用，Agent 会降级为纯规则评分并保持 AgentResult 为 `SUCCESS`。
+
+## 第 3 轮第一段：制度 RAG baseline
+
+本轮将 `PolicyAgent` 从本地 Markdown 关键词检索升级为可测试、可解释、可引用来源的本地制度检索：
+
+- `PolicyDocumentLoader` 将 `agent-service/knowledge_base/*.md` 按 `##` 条款切分，并提取 `P-001`、`M-001`、`R-001`、`C-001` 等条款编号。
+- `PolicyRetrievalService` 使用本地 `TfidfVectorizer` + cosine similarity，不使用外部 Embedding API、Chroma、FAISS、真实 LLM API 或真实银行制度。
+- `/api/v1/reviews` 的 `report.policy_references` 现在是结构化 JSON，包含 `policy_code`、`document_name`、`section_title`、`content`、`score`。
+- RAG 评估集为 `data/eval/rag_questions.jsonl`，评估结果由 `agent-service/scripts/evaluate_policy_retrieval.py` 生成到 `data/eval/rag_eval_results.json`。
+
+运行：
+
+```bash
+cd agent-service
+python scripts/evaluate_policy_retrieval.py
+pytest tests -q
+```
+
+设计边界见 `docs/RAG_DESIGN.md`。AI、ML 和 RAG 均只作为审批辅助依据，最终审批仍必须走人工审批链路。

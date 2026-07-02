@@ -18,7 +18,7 @@ class WorkflowState(TypedDict, total=False):
     risk_score: int
     risk_level: str
     suggested_amount: float
-    policy_references: list[str]
+    policy_references: list[dict[str, Any]]
     compliance_warnings: list[str]
     final_decision: str
     summary: str

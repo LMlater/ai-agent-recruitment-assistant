@@ -1,0 +1,587 @@
+{
+  "metadata": {
+    "created_at": "2026-07-02T04:20:32.882227+00:00",
+    "knowledge_base_dir": "D:\\PythonProject\\ai-agent-recruitment-assistant\\agent-service\\knowledge_base",
+    "questions_path": "D:\\PythonProject\\ai-agent-recruitment-assistant\\data\\eval\\rag_questions.jsonl",
+    "top_k": 5,
+    "retrieval_method": "local TfidfVectorizer char n-gram + cosine similarity",
+    "disclaimer": "Mock policy documents for learning and engineering demonstration only."
+  },
+  "metrics": {
+    "case_count": 12,
+    "recall_at_3": 0.875,
+    "recall_at_5": 0.9583333333333334,
+    "hit_rate": 1.0,
+    "mrr": 1.0
+  },
+  "cases": [
+    {
+      "id": "rag-001",
+      "question": "申请人年龄不足 18 岁，是否可以直接进入个人信贷审批？",
+      "expected_policy_codes": [
+        "P-001"
+      ],
+      "retrieved_policy_codes": [
+        "P-001",
+        "P-002",
+        "M-002",
+        "M-001"
+      ],
+      "references": [
+        {
+          "policy_code": "P-001",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-001 Adult Borrower and Basic Eligibility",
+          "content": "P-001 Adult Borrower and Basic Eligibility\n\nPersonal credit applicants should be adult borrowers. If applicant age is below 18, the application must not enter a direct approval path and should request supplementary handling or manual review.\n个人信贷申请人应为成年人；年龄不足 18 岁时，应补充核验基础身份与申请资格，不能由 AI 自动给出通过结论。",
+          "score": 0.208
+        },
+        {
+          "policy_code": "P-002",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-002 Income Proof and Stable Work History",
+          "content": "P-002 Income Proof and Stable Work History\n\nApplicants should provide valid income proof and stable work history information. Monthly income, work years, and income source should be reviewed together before a final manual approval decision.\n申请人应提交可核验收入证明；工作年限不足一年、收入证明缺失或收入明显不稳定时，应进入补充材料或人工复核。",
+          "score": 0.0433
+        },
+        {
+          "policy_code": "M-002",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-002 Missing Income Proof or Purpose Information",
+          "content": "M-002 Missing Income Proof or Purpose Information\n\nMissing income proof, missing loan purpose, invalid term, or amount errors should trigger supplementary material review. A reviewer should request follow-up material instead of approving directly.\n收入证明缺失、贷款用途不清、期限或金额异常时，应触发补件，不得直接进入自动审批。",
+          "score": 0.0425
+        },
+        {
+          "policy_code": "M-001",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-001 Required Application Materials",
+          "content": "M-001 Required Application Materials\n\nThe application package should include borrower identity eligibility, valid income proof, loan purpose information, and available asset proof. Material completeness must be checked before risk and compliance conclusions are used by staff.\n申请材料至少应覆盖基础资格、收入证明、贷款用途和可选资产证明；材料完整性结论应早于风险和合规结论输出。",
+          "score": 0.0144
+        }
+      ]
+    },
+    {
+      "id": "rag-002",
+      "question": "客户缺少收入证明且工作年限不足一年，需要引用哪些制度依据？",
+      "expected_policy_codes": [
+        "P-002",
+        "M-002"
+      ],
+      "retrieved_policy_codes": [
+        "P-002",
+        "M-001",
+        "R-001",
+        "M-002",
+        "M-003"
+      ],
+      "references": [
+        {
+          "policy_code": "P-002",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-002 Income Proof and Stable Work History",
+          "content": "P-002 Income Proof and Stable Work History\n\nApplicants should provide valid income proof and stable work history information. Monthly income, work years, and income source should be reviewed together before a final manual approval decision.\n申请人应提交可核验收入证明；工作年限不足一年、收入证明缺失或收入明显不稳定时，应进入补充材料或人工复核。",
+          "score": 0.1971
+        },
+        {
+          "policy_code": "M-001",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-001 Required Application Materials",
+          "content": "M-001 Required Application Materials\n\nThe application package should include borrower identity eligibility, valid income proof, loan purpose information, and available asset proof. Material completeness must be checked before risk and compliance conclusions are used by staff.\n申请材料至少应覆盖基础资格、收入证明、贷款用途和可选资产证明；材料完整性结论应早于风险和合规结论输出。",
+          "score": 0.0256
+        },
+        {
+          "policy_code": "R-001",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-001 Debt-to-Income Ratio Control",
+          "content": "R-001 Debt-to-Income Ratio Control\n\nDebt-to-income ratio is a key repayment-capacity indicator. Debt-to-income ratio above 40% should receive attention, above 60% should trigger medium-risk manual review, and above 80% should be treated as high repayment pressure.\n债务收入比是偿债能力核心指标；债务收入比较高时，应结合贷款金额、收入证明和人工复核判断，不得单靠模型通过。",
+          "score": 0.0234
+        },
+        {
+          "policy_code": "M-002",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-002 Missing Income Proof or Purpose Information",
+          "content": "M-002 Missing Income Proof or Purpose Information\n\nMissing income proof, missing loan purpose, invalid term, or amount errors should trigger supplementary material review. A reviewer should request follow-up material instead of approving directly.\n收入证明缺失、贷款用途不清、期限或金额异常时，应触发补件，不得直接进入自动审批。",
+          "score": 0.0223
+        },
+        {
+          "policy_code": "M-003",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-003 Asset Proof Review",
+          "content": "M-003 Asset Proof Review\n\nAsset proof may improve confidence in repayment capacity, but it cannot replace income proof, debt review, overdue review, or compliance guardrails. No asset proof should be recorded as a material warning.\n资产证明可作为偿付能力辅助依据，但不能替代收入、负债、逾期和合规审查；缺少资产证明时应提示人工材料复核。",
+          "score": 0.0222
+        }
+      ]
+    },
+    {
+      "id": "rag-003",
+      "question": "贷款金额超过申请人年收入，应如何审查金额与收入比例？",
+      "expected_policy_codes": [
+        "P-003"
+      ],
+      "retrieved_policy_codes": [
+        "P-003",
+        "R-001",
+        "P-002",
+        "P-001",
+        "M-002"
+      ],
+      "references": [
+        {
+          "policy_code": "P-003",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-003 Amount-to-Income and Repayment Capacity",
+          "content": "P-003 Amount-to-Income and Repayment Capacity\n\nThe requested amount should remain proportionate to monthly income and repayment capacity. Amount greater than 12 months of income requires stricter review; amount greater than 24 months of income should be treated as high repayment pressure.\n贷款金额与收入比例是还款能力审查重点；申请金额超过年收入或明显高于收入承受能力时，应结合债务收入比、逾期记录和人工复核意见处理。",
+          "score": 0.1954
+        },
+        {
+          "policy_code": "R-001",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-001 Debt-to-Income Ratio Control",
+          "content": "R-001 Debt-to-Income Ratio Control\n\nDebt-to-income ratio is a key repayment-capacity indicator. Debt-to-income ratio above 40% should receive attention, above 60% should trigger medium-risk manual review, and above 80% should be treated as high repayment pressure.\n债务收入比是偿债能力核心指标；债务收入比较高时，应结合贷款金额、收入证明和人工复核判断，不得单靠模型通过。",
+          "score": 0.0618
+        },
+        {
+          "policy_code": "P-002",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-002 Income Proof and Stable Work History",
+          "content": "P-002 Income Proof and Stable Work History\n\nApplicants should provide valid income proof and stable work history information. Monthly income, work years, and income source should be reviewed together before a final manual approval decision.\n申请人应提交可核验收入证明；工作年限不足一年、收入证明缺失或收入明显不稳定时，应进入补充材料或人工复核。",
+          "score": 0.0303
+        },
+        {
+          "policy_code": "P-001",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-001 Adult Borrower and Basic Eligibility",
+          "content": "P-001 Adult Borrower and Basic Eligibility\n\nPersonal credit applicants should be adult borrowers. If applicant age is below 18, the application must not enter a direct approval path and should request supplementary handling or manual review.\n个人信贷申请人应为成年人；年龄不足 18 岁时，应补充核验基础身份与申请资格，不能由 AI 自动给出通过结论。",
+          "score": 0.0206
+        },
+        {
+          "policy_code": "M-002",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-002 Missing Income Proof or Purpose Information",
+          "content": "M-002 Missing Income Proof or Purpose Information\n\nMissing income proof, missing loan purpose, invalid term, or amount errors should trigger supplementary material review. A reviewer should request follow-up material instead of approving directly.\n收入证明缺失、贷款用途不清、期限或金额异常时，应触发补件，不得直接进入自动审批。",
+          "score": 0.0192
+        }
+      ]
+    },
+    {
+      "id": "rag-004",
+      "question": "债务收入比超过 80%，系统应检索哪类风险控制条款？",
+      "expected_policy_codes": [
+        "R-001"
+      ],
+      "retrieved_policy_codes": [
+        "R-001",
+        "P-003",
+        "R-002",
+        "R-003",
+        "C-002"
+      ],
+      "references": [
+        {
+          "policy_code": "R-001",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-001 Debt-to-Income Ratio Control",
+          "content": "R-001 Debt-to-Income Ratio Control\n\nDebt-to-income ratio is a key repayment-capacity indicator. Debt-to-income ratio above 40% should receive attention, above 60% should trigger medium-risk manual review, and above 80% should be treated as high repayment pressure.\n债务收入比是偿债能力核心指标；债务收入比较高时，应结合贷款金额、收入证明和人工复核判断，不得单靠模型通过。",
+          "score": 0.2011
+        },
+        {
+          "policy_code": "P-003",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-003 Amount-to-Income and Repayment Capacity",
+          "content": "P-003 Amount-to-Income and Repayment Capacity\n\nThe requested amount should remain proportionate to monthly income and repayment capacity. Amount greater than 12 months of income requires stricter review; amount greater than 24 months of income should be treated as high repayment pressure.\n贷款金额与收入比例是还款能力审查重点；申请金额超过年收入或明显高于收入承受能力时，应结合债务收入比、逾期记录和人工复核意见处理。",
+          "score": 0.0768
+        },
+        {
+          "policy_code": "R-002",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-002 Overdue Records and Credit History",
+          "content": "R-002 Overdue Records and Credit History\n\nOverdue records should reduce the mock risk score. Multiple overdue records, recent overdue behavior, or severe overdue history should trigger high-risk manual review before any final business decision.\n存在多次逾期记录时，应降低风险评分并进入高风险人工复核；逾期风险不能被资产证明或模型低风险结果直接抵消。",
+          "score": 0.0166
+        },
+        {
+          "policy_code": "R-003",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-003 Medium and High Risk Manual Review",
+          "content": "R-003 Medium and High Risk Manual Review\n\nMedium-risk applications should request additional review of repayment capacity and materials. High-risk customers must be reviewed by a human reviewer before any final approval, rejection, or supplementary-material conclusion.\n中风险申请应补充核验收入、负债、用途和资产材料；高风险申请必须人工复核后才能形成最终业务结论。",
+          "score": 0.0138
+        },
+        {
+          "policy_code": "C-002",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-002 Final Manual Approval Responsibility",
+          "content": "C-002 Final Manual Approval Responsibility\n\nFinal approval, rejection, or supplementary-material handling must be completed by manual review APIs or reviewer operations. The report may cite policy references, but the reviewer remains responsible for the final decision.\n最终通过、拒绝或补件处理必须由人工审批动作完成；系统报告只能提供依据和建议。",
+          "score": 0.0102
+        }
+      ]
+    },
+    {
+      "id": "rag-005",
+      "question": "申请人存在多次逾期记录，人工复核依据是什么？",
+      "expected_policy_codes": [
+        "R-002"
+      ],
+      "retrieved_policy_codes": [
+        "R-002",
+        "P-002",
+        "P-003",
+        "R-003",
+        "P-001"
+      ],
+      "references": [
+        {
+          "policy_code": "R-002",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-002 Overdue Records and Credit History",
+          "content": "R-002 Overdue Records and Credit History\n\nOverdue records should reduce the mock risk score. Multiple overdue records, recent overdue behavior, or severe overdue history should trigger high-risk manual review before any final business decision.\n存在多次逾期记录时，应降低风险评分并进入高风险人工复核；逾期风险不能被资产证明或模型低风险结果直接抵消。",
+          "score": 0.1363
+        },
+        {
+          "policy_code": "P-002",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-002 Income Proof and Stable Work History",
+          "content": "P-002 Income Proof and Stable Work History\n\nApplicants should provide valid income proof and stable work history information. Monthly income, work years, and income source should be reviewed together before a final manual approval decision.\n申请人应提交可核验收入证明；工作年限不足一年、收入证明缺失或收入明显不稳定时，应进入补充材料或人工复核。",
+          "score": 0.0558
+        },
+        {
+          "policy_code": "P-003",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-003 Amount-to-Income and Repayment Capacity",
+          "content": "P-003 Amount-to-Income and Repayment Capacity\n\nThe requested amount should remain proportionate to monthly income and repayment capacity. Amount greater than 12 months of income requires stricter review; amount greater than 24 months of income should be treated as high repayment pressure.\n贷款金额与收入比例是还款能力审查重点；申请金额超过年收入或明显高于收入承受能力时，应结合债务收入比、逾期记录和人工复核意见处理。",
+          "score": 0.0447
+        },
+        {
+          "policy_code": "R-003",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-003 Medium and High Risk Manual Review",
+          "content": "R-003 Medium and High Risk Manual Review\n\nMedium-risk applications should request additional review of repayment capacity and materials. High-risk customers must be reviewed by a human reviewer before any final approval, rejection, or supplementary-material conclusion.\n中风险申请应补充核验收入、负债、用途和资产材料；高风险申请必须人工复核后才能形成最终业务结论。",
+          "score": 0.0258
+        },
+        {
+          "policy_code": "P-001",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-001 Adult Borrower and Basic Eligibility",
+          "content": "P-001 Adult Borrower and Basic Eligibility\n\nPersonal credit applicants should be adult borrowers. If applicant age is below 18, the application must not enter a direct approval path and should request supplementary handling or manual review.\n个人信贷申请人应为成年人；年龄不足 18 岁时，应补充核验基础身份与申请资格，不能由 AI 自动给出通过结论。",
+          "score": 0.0216
+        }
+      ]
+    },
+    {
+      "id": "rag-006",
+      "question": "中风险或高风险申请为什么不能自动审批，需要进入人工复核？",
+      "expected_policy_codes": [
+        "R-003",
+        "C-002"
+      ],
+      "retrieved_policy_codes": [
+        "R-003",
+        "C-001",
+        "R-002",
+        "M-002",
+        "P-002"
+      ],
+      "references": [
+        {
+          "policy_code": "R-003",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-003 Medium and High Risk Manual Review",
+          "content": "R-003 Medium and High Risk Manual Review\n\nMedium-risk applications should request additional review of repayment capacity and materials. High-risk customers must be reviewed by a human reviewer before any final approval, rejection, or supplementary-material conclusion.\n中风险申请应补充核验收入、负债、用途和资产材料；高风险申请必须人工复核后才能形成最终业务结论。",
+          "score": 0.1746
+        },
+        {
+          "policy_code": "C-001",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-001 AI Assistance Only",
+          "content": "C-001 AI Assistance Only\n\nAI output can only be used as approval assistance and cannot be treated as an automatic decision. AI must not automatically approve, reject, or bypass manual review for personal credit applications.\nAI 输出仅可作为审批辅助，不能自动审批、自动拒绝或绕过人工复核。",
+          "score": 0.1101
+        },
+        {
+          "policy_code": "R-002",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-002 Overdue Records and Credit History",
+          "content": "R-002 Overdue Records and Credit History\n\nOverdue records should reduce the mock risk score. Multiple overdue records, recent overdue behavior, or severe overdue history should trigger high-risk manual review before any final business decision.\n存在多次逾期记录时，应降低风险评分并进入高风险人工复核；逾期风险不能被资产证明或模型低风险结果直接抵消。",
+          "score": 0.0573
+        },
+        {
+          "policy_code": "M-002",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-002 Missing Income Proof or Purpose Information",
+          "content": "M-002 Missing Income Proof or Purpose Information\n\nMissing income proof, missing loan purpose, invalid term, or amount errors should trigger supplementary material review. A reviewer should request follow-up material instead of approving directly.\n收入证明缺失、贷款用途不清、期限或金额异常时，应触发补件，不得直接进入自动审批。",
+          "score": 0.0381
+        },
+        {
+          "policy_code": "P-002",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-002 Income Proof and Stable Work History",
+          "content": "P-002 Income Proof and Stable Work History\n\nApplicants should provide valid income proof and stable work history information. Monthly income, work years, and income source should be reviewed together before a final manual approval decision.\n申请人应提交可核验收入证明；工作年限不足一年、收入证明缺失或收入明显不稳定时，应进入补充材料或人工复核。",
+          "score": 0.0246
+        }
+      ]
+    },
+    {
+      "id": "rag-007",
+      "question": "资产证明可以替代收入证明和负债审查吗？",
+      "expected_policy_codes": [
+        "M-003"
+      ],
+      "retrieved_policy_codes": [
+        "M-003",
+        "M-001",
+        "P-002",
+        "R-001",
+        "R-002"
+      ],
+      "references": [
+        {
+          "policy_code": "M-003",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-003 Asset Proof Review",
+          "content": "M-003 Asset Proof Review\n\nAsset proof may improve confidence in repayment capacity, but it cannot replace income proof, debt review, overdue review, or compliance guardrails. No asset proof should be recorded as a material warning.\n资产证明可作为偿付能力辅助依据，但不能替代收入、负债、逾期和合规审查；缺少资产证明时应提示人工材料复核。",
+          "score": 0.1774
+        },
+        {
+          "policy_code": "M-001",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-001 Required Application Materials",
+          "content": "M-001 Required Application Materials\n\nThe application package should include borrower identity eligibility, valid income proof, loan purpose information, and available asset proof. Material completeness must be checked before risk and compliance conclusions are used by staff.\n申请材料至少应覆盖基础资格、收入证明、贷款用途和可选资产证明；材料完整性结论应早于风险和合规结论输出。",
+          "score": 0.0598
+        },
+        {
+          "policy_code": "P-002",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-002 Income Proof and Stable Work History",
+          "content": "P-002 Income Proof and Stable Work History\n\nApplicants should provide valid income proof and stable work history information. Monthly income, work years, and income source should be reviewed together before a final manual approval decision.\n申请人应提交可核验收入证明；工作年限不足一年、收入证明缺失或收入明显不稳定时，应进入补充材料或人工复核。",
+          "score": 0.0572
+        },
+        {
+          "policy_code": "R-001",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-001 Debt-to-Income Ratio Control",
+          "content": "R-001 Debt-to-Income Ratio Control\n\nDebt-to-income ratio is a key repayment-capacity indicator. Debt-to-income ratio above 40% should receive attention, above 60% should trigger medium-risk manual review, and above 80% should be treated as high repayment pressure.\n债务收入比是偿债能力核心指标；债务收入比较高时，应结合贷款金额、收入证明和人工复核判断，不得单靠模型通过。",
+          "score": 0.0502
+        },
+        {
+          "policy_code": "R-002",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-002 Overdue Records and Credit History",
+          "content": "R-002 Overdue Records and Credit History\n\nOverdue records should reduce the mock risk score. Multiple overdue records, recent overdue behavior, or severe overdue history should trigger high-risk manual review before any final business decision.\n存在多次逾期记录时，应降低风险评分并进入高风险人工复核；逾期风险不能被资产证明或模型低风险结果直接抵消。",
+          "score": 0.0273
+        }
+      ]
+    },
+    {
+      "id": "rag-008",
+      "question": "材料补充和材料修改为什么要保留审计追踪？",
+      "expected_policy_codes": [
+        "M-004",
+        "C-003"
+      ],
+      "retrieved_policy_codes": [
+        "M-004",
+        "P-004",
+        "M-001",
+        "C-003",
+        "R-003"
+      ],
+      "references": [
+        {
+          "policy_code": "M-004",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-004 Material Review Traceability",
+          "content": "M-004 Material Review Traceability\n\nMaterial review actions, supplementary requests, and material changes must be traceable in the approval record and audit log. High-risk or incomplete applications should enter manual review.\n材料补充、修改和复核动作应记录在审批链路与审计日志中，方便后续追溯。",
+          "score": 0.138
+        },
+        {
+          "policy_code": "P-004",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-004 Personal Credit Decision Boundary",
+          "content": "P-004 Personal Credit Decision Boundary\n\nAI and ML model output must not automatically approve or reject a personal credit application. Final approval, rejection, or supplementary material handling must be confirmed by a human reviewer and retained in audit records.\nAI 结果只能作为审批辅助；最终通过、拒绝或补件结论必须由人工审批确认，并保留审查依据。",
+          "score": 0.0318
+        },
+        {
+          "policy_code": "M-001",
+          "document_name": "material_review_policy.md",
+          "section_title": "M-001 Required Application Materials",
+          "content": "M-001 Required Application Materials\n\nThe application package should include borrower identity eligibility, valid income proof, loan purpose information, and available asset proof. Material completeness must be checked before risk and compliance conclusions are used by staff.\n申请材料至少应覆盖基础资格、收入证明、贷款用途和可选资产证明；材料完整性结论应早于风险和合规结论输出。",
+          "score": 0.0192
+        },
+        {
+          "policy_code": "C-003",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-003 Audit Trace and Agent Logs",
+          "content": "C-003 Audit Trace and Agent Logs\n\nEvery review workflow should retain agent execution logs, policy references, model signal details, decision reasons, and audit logs for traceability.\n每次审查应保留 Agent 执行日志、制度引用、模型信号、决策原因和审计记录。",
+          "score": 0.0172
+        },
+        {
+          "policy_code": "R-003",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-003 Medium and High Risk Manual Review",
+          "content": "R-003 Medium and High Risk Manual Review\n\nMedium-risk applications should request additional review of repayment capacity and materials. High-risk customers must be reviewed by a human reviewer before any final approval, rejection, or supplementary-material conclusion.\n中风险申请应补充核验收入、负债、用途和资产材料；高风险申请必须人工复核后才能形成最终业务结论。",
+          "score": 0.0162
+        }
+      ]
+    },
+    {
+      "id": "rag-009",
+      "question": "AI 或机器学习模型能不能自动批准个人贷款？",
+      "expected_policy_codes": [
+        "C-001",
+        "P-004"
+      ],
+      "retrieved_policy_codes": [
+        "C-001",
+        "R-004",
+        "P-004",
+        "P-001",
+        "C-003"
+      ],
+      "references": [
+        {
+          "policy_code": "C-001",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-001 AI Assistance Only",
+          "content": "C-001 AI Assistance Only\n\nAI output can only be used as approval assistance and cannot be treated as an automatic decision. AI must not automatically approve, reject, or bypass manual review for personal credit applications.\nAI 输出仅可作为审批辅助，不能自动审批、自动拒绝或绕过人工复核。",
+          "score": 0.1745
+        },
+        {
+          "policy_code": "R-004",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-004 Rule and ML Model Fusion Guardrail",
+          "content": "R-004 Rule and ML Model Fusion Guardrail\n\nRule reasons and ML model signals are auxiliary risk indicators. If rule and model levels differ, the workflow should consider the higher risk level and keep the model probability, version, and explanation in the report.\n规则评分和机器学习模型均为辅助信号；当模型提示中高风险时，应在报告中保留模型概率、版本、解释和融合策略。",
+          "score": 0.108
+        },
+        {
+          "policy_code": "P-004",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-004 Personal Credit Decision Boundary",
+          "content": "P-004 Personal Credit Decision Boundary\n\nAI and ML model output must not automatically approve or reject a personal credit application. Final approval, rejection, or supplementary material handling must be confirmed by a human reviewer and retained in audit records.\nAI 结果只能作为审批辅助；最终通过、拒绝或补件结论必须由人工审批确认，并保留审查依据。",
+          "score": 0.0658
+        },
+        {
+          "policy_code": "P-001",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-001 Adult Borrower and Basic Eligibility",
+          "content": "P-001 Adult Borrower and Basic Eligibility\n\nPersonal credit applicants should be adult borrowers. If applicant age is below 18, the application must not enter a direct approval path and should request supplementary handling or manual review.\n个人信贷申请人应为成年人；年龄不足 18 岁时，应补充核验基础身份与申请资格，不能由 AI 自动给出通过结论。",
+          "score": 0.0567
+        },
+        {
+          "policy_code": "C-003",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-003 Audit Trace and Agent Logs",
+          "content": "C-003 Audit Trace and Agent Logs\n\nEvery review workflow should retain agent execution logs, policy references, model signal details, decision reasons, and audit logs for traceability.\n每次审查应保留 Agent 执行日志、制度引用、模型信号、决策原因和审计记录。",
+          "score": 0.0171
+        }
+      ]
+    },
+    {
+      "id": "rag-010",
+      "question": "最终通过、拒绝或补件责任应由谁承担？",
+      "expected_policy_codes": [
+        "C-002"
+      ],
+      "retrieved_policy_codes": [
+        "C-002",
+        "P-004",
+        "C-001"
+      ],
+      "references": [
+        {
+          "policy_code": "C-002",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-002 Final Manual Approval Responsibility",
+          "content": "C-002 Final Manual Approval Responsibility\n\nFinal approval, rejection, or supplementary-material handling must be completed by manual review APIs or reviewer operations. The report may cite policy references, but the reviewer remains responsible for the final decision.\n最终通过、拒绝或补件处理必须由人工审批动作完成；系统报告只能提供依据和建议。",
+          "score": 0.1944
+        },
+        {
+          "policy_code": "P-004",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-004 Personal Credit Decision Boundary",
+          "content": "P-004 Personal Credit Decision Boundary\n\nAI and ML model output must not automatically approve or reject a personal credit application. Final approval, rejection, or supplementary material handling must be confirmed by a human reviewer and retained in audit records.\nAI 结果只能作为审批辅助；最终通过、拒绝或补件结论必须由人工审批确认，并保留审查依据。",
+          "score": 0.172
+        },
+        {
+          "policy_code": "C-001",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-001 AI Assistance Only",
+          "content": "C-001 AI Assistance Only\n\nAI output can only be used as approval assistance and cannot be treated as an automatic decision. AI must not automatically approve, reject, or bypass manual review for personal credit applications.\nAI 输出仅可作为审批辅助，不能自动审批、自动拒绝或绕过人工复核。",
+          "score": 0.0181
+        }
+      ]
+    },
+    {
+      "id": "rag-011",
+      "question": "规则评分和 ML 模型风险等级不一致时，报告需要保留哪些模型信息？",
+      "expected_policy_codes": [
+        "R-004"
+      ],
+      "retrieved_policy_codes": [
+        "R-004",
+        "P-004",
+        "C-003",
+        "R-002",
+        "R-003"
+      ],
+      "references": [
+        {
+          "policy_code": "R-004",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-004 Rule and ML Model Fusion Guardrail",
+          "content": "R-004 Rule and ML Model Fusion Guardrail\n\nRule reasons and ML model signals are auxiliary risk indicators. If rule and model levels differ, the workflow should consider the higher risk level and keep the model probability, version, and explanation in the report.\n规则评分和机器学习模型均为辅助信号；当模型提示中高风险时，应在报告中保留模型概率、版本、解释和融合策略。",
+          "score": 0.1956
+        },
+        {
+          "policy_code": "P-004",
+          "document_name": "personal_credit_policy.md",
+          "section_title": "P-004 Personal Credit Decision Boundary",
+          "content": "P-004 Personal Credit Decision Boundary\n\nAI and ML model output must not automatically approve or reject a personal credit application. Final approval, rejection, or supplementary material handling must be confirmed by a human reviewer and retained in audit records.\nAI 结果只能作为审批辅助；最终通过、拒绝或补件结论必须由人工审批确认，并保留审查依据。",
+          "score": 0.0472
+        },
+        {
+          "policy_code": "C-003",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-003 Audit Trace and Agent Logs",
+          "content": "C-003 Audit Trace and Agent Logs\n\nEvery review workflow should retain agent execution logs, policy references, model signal details, decision reasons, and audit logs for traceability.\n每次审查应保留 Agent 执行日志、制度引用、模型信号、决策原因和审计记录。",
+          "score": 0.0397
+        },
+        {
+          "policy_code": "R-002",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-002 Overdue Records and Credit History",
+          "content": "R-002 Overdue Records and Credit History\n\nOverdue records should reduce the mock risk score. Multiple overdue records, recent overdue behavior, or severe overdue history should trigger high-risk manual review before any final business decision.\n存在多次逾期记录时，应降低风险评分并进入高风险人工复核；逾期风险不能被资产证明或模型低风险结果直接抵消。",
+          "score": 0.0351
+        },
+        {
+          "policy_code": "R-003",
+          "document_name": "risk_control_policy.md",
+          "section_title": "R-003 Medium and High Risk Manual Review",
+          "content": "R-003 Medium and High Risk Manual Review\n\nMedium-risk applications should request additional review of repayment capacity and materials. High-risk customers must be reviewed by a human reviewer before any final approval, rejection, or supplementary-material conclusion.\n中风险申请应补充核验收入、负债、用途和资产材料；高风险申请必须人工复核后才能形成最终业务结论。",
+          "score": 0.0189
+        }
+      ]
+    },
+    {
+      "id": "rag-012",
+      "question": "项目是否可以保存真实证件号、手机号或银行内部制度？",
+      "expected_policy_codes": [
+        "C-004"
+      ],
+      "retrieved_policy_codes": [
+        "C-004",
+        "C-003"
+      ],
+      "references": [
+        {
+          "policy_code": "C-004",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-004 Data Privacy and Demonstration Boundary",
+          "content": "C-004 Data Privacy and Demonstration Boundary\n\nPersonal sensitive data should be masked; real identity card numbers, phone numbers, bank internal policies, and production customer data must not be stored in this repository.\n项目仅使用公开数据映射和模拟样例，不保存真实银行客户资料、真实证件号、真实手机号或内部制度。",
+          "score": 0.2516
+        },
+        {
+          "policy_code": "C-003",
+          "document_name": "compliance_review_policy.md",
+          "section_title": "C-003 Audit Trace and Agent Logs",
+          "content": "C-003 Audit Trace and Agent Logs\n\nEvery review workflow should retain agent execution logs, policy references, model signal details, decision reasons, and audit logs for traceability.\n每次审查应保留 Agent 执行日志、制度引用、模型信号、决策原因和审计记录。",
+          "score": 0.0123
+        }
+      ]
+    }
+  ]
+}
