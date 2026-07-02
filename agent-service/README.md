@@ -80,3 +80,22 @@ python scripts/evaluate_policy_retrieval.py
 ```
 
 The retriever returns structured policy references for `/api/v1/reviews`. It does not call a real LLM, external embedding API, Chroma, FAISS, or real bank policy source.
+
+## 第 4 轮第一段：LLM Provider 抽象
+
+The service now has a replaceable LLM provider layer under `app/services/llm/`. The default provider is `MockLLMClient`, so local development and unit tests do not require an API key. `OpenAICompatibleLLMClient` can be enabled locally for DashScope/Bailian through environment variables.
+
+Run ordinary tests:
+
+```bash
+cd agent-service
+pytest tests -q
+```
+
+The live smoke test is opt-in and skipped by default:
+
+```bash
+LLM_ENABLE_REAL_API=true pytest tests/test_dashscope_live_smoke.py -q
+```
+
+Do not commit `.env` or a real API key. Use `.env.example` as the placeholder template and keep the LLM as report text generation only; `DecisionAgent` still preserves the deterministic final decision and manual approval boundary.

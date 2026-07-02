@@ -20,3 +20,7 @@
 - 第 3 轮第一段已加入本地制度 RAG baseline：`PolicyDocumentLoader`、`PolicyRetrievalService`、结构化 `PolicyReference`、增强版 `PolicyAgent`、条款化模拟制度文档、RAG 评估集/结果和 `docs/RAG_DESIGN.md`。
 - `/api/v1/reviews` 现在返回结构化 `policy_references`；Java 后端可继续按 JSON 字符串保存 AI report，不需要改数据库表结构。
 - 当前 RAG 仅使用本地 `scikit-learn` TF-IDF + cosine similarity，不使用真实 LLM API、外部 Embedding、Chroma、FAISS、真实银行制度或敏感数据。
+- 设计可替换 LLM Provider 抽象，支持 Mock 与 OpenAI-compatible 模型服务。
+- 通过 RAG 制度引用、规则评分和模型信号生成审批辅助报告。
+- 实现 LLM 调用失败 fallback，保障 Agent 工作流稳定。
+- API Key 通过环境变量配置，避免密钥泄露；普通测试不依赖真实百炼 API，真实 smoke test 默认 skip。

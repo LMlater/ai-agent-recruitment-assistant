@@ -220,3 +220,22 @@ pytest tests -q
 ```
 
 设计边界见 `docs/RAG_DESIGN.md`。AI、ML 和 RAG 均只作为审批辅助依据，最终审批仍必须走人工审批链路。
+
+## 第 4 轮第一段：LLM Provider 抽象
+
+本轮在 `agent-service` 中新增可替换的 LLM Provider 抽象，默认使用 `MockLLMClient`，并预留 OpenAI-compatible 客户端用于本地按需接入阿里云百炼。LLM 只负责基于规则评分、ML 模型信号和 RAG 制度引用组织审批辅助报告文本，不改变 `final_decision`、`risk_score` 或 `risk_level`，也不绕过人工审批。
+
+普通测试不需要 API Key：
+
+```bash
+cd agent-service
+pytest tests -q
+```
+
+真实百炼 smoke test 仅在本地配置 `.env` 或环境变量后手动运行，默认会跳过：
+
+```bash
+LLM_ENABLE_REAL_API=true pytest tests/test_dashscope_live_smoke.py -q
+```
+
+配置方式和安全边界见 `docs/LLM_INTEGRATION.md`。仓库只提交 `.env.example` 占位符，不提交真实 API Key。

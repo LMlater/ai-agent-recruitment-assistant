@@ -1,12 +1,39 @@
 from typing import Any
 
 from app.agents.base import BaseAgent
+from app.services.report_generation_service import ReportGenerationService
 
 
 class DecisionAgent(BaseAgent):
     agent_name = "DecisionAgent"
 
+    def __init__(self, report_generation_service: ReportGenerationService | None = None) -> None:
+        self.report_generation_service = report_generation_service or ReportGenerationService()
+
     def process(self, state: dict[str, Any]) -> tuple[dict[str, Any], str, str]:
+        final_decision, summary, reasons = self._build_deterministic_decision(state)
+        report_generation = self._generate_report_with_fallback(
+            state,
+            final_decision,
+            summary,
+            reasons,
+        )
+        return (
+            {
+                "final_decision": final_decision,
+                "summary": report_generation["summary"],
+                "decision_reasons": report_generation["decision_reasons"],
+                "decision_report_generation": {
+                    "llm_used": report_generation["llm_used"],
+                    "llm_provider": report_generation["llm_provider"],
+                    "llm_error": report_generation["llm_error"],
+                },
+            },
+            "Summarize upstream agent outputs",
+            self._output_summary(final_decision, report_generation),
+        )
+
+    def _build_deterministic_decision(self, state: dict[str, Any]) -> tuple[str, str, list[str]]:
         risk_level = state["risk_level"]
         required_materials = state.get("required_materials", [])
         risk_assessment = state["risk_assessment"]
@@ -43,12 +70,39 @@ class DecisionAgent(BaseAgent):
             summary = "申请人存在较高逾期、负债或额度风险，AI 建议人工复核时重点考虑拒绝。"
             reasons.append("High mock risk score indicates rejection recommendation.")
 
-        return (
-            {
-                "final_decision": final_decision,
+        return final_decision, summary, reasons
+
+    def _generate_report_with_fallback(
+        self,
+        state: dict[str, Any],
+        final_decision: str,
+        summary: str,
+        reasons: list[str],
+    ) -> dict[str, Any]:
+        context = {
+            "final_decision": final_decision,
+            "risk_level": state.get("risk_level"),
+            "risk_score": state.get("risk_score"),
+            "suggested_amount": state.get("suggested_amount"),
+            "summary": summary,
+            "decision_reasons": reasons,
+            "risk_assessment": state.get("risk_assessment", {}),
+            "policy_references": state.get("policy_references", []),
+            "compliance_warnings": state.get("compliance_warnings", []),
+            "required_materials": state.get("required_materials", []),
+        }
+        try:
+            return self.report_generation_service.generate(context)
+        except Exception as exc:
+            return {
                 "summary": summary,
                 "decision_reasons": reasons,
-            },
-            "Summarize upstream agent outputs",
-            f"Generated {final_decision} recommendation",
-        )
+                "llm_used": False,
+                "llm_provider": "fallback",
+                "llm_error": str(exc),
+            }
+
+    def _output_summary(self, final_decision: str, report_generation: dict[str, Any]) -> str:
+        if report_generation.get("llm_used"):
+            return f"Generated {final_decision} recommendation using LLM report generation"
+        return f"Generated {final_decision} recommendation using deterministic fallback"

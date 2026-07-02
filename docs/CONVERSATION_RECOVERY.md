@@ -26,5 +26,8 @@
 22. 仍无真实 LLM、外部 Embedding API、Chroma/FAISS、真实银行制度、敏感数据、Java 数据库表结构修改或自动审批。
 23. 第 3.1 轮修复 Java 后端 DTO 兼容：新增 `backend-service/src/main/java/com/smartcredit/agent/dto/PolicyReference.java`，`ReviewReport.policyReferences` 改为结构化引用列表，并新增 Jackson 反序列化测试。
 24. RAG 评估结果 metadata 已改为相对路径；`rag_questions.jsonl` 和 `rag_eval_results.json` case 均保留 `expected_documents`。
+25. 第 4 轮第一段新增 LLM Provider 抽象：`agent-service/app/services/llm/` 下包含 `LLMClient`、`MockLLMClient`、OpenAI-compatible 客户端、factory 和 prompt 模板。
+26. `DecisionAgent` 现在先保留确定性规则结果，再用 `ReportGenerationService` 尝试生成自然语言审批辅助报告；LLM 失败时 fallback，不改变最终审批状态或风险分数。
+27. 百炼接入仅通过环境变量启用，默认 `LLM_PROVIDER=mock`、`LLM_ENABLE_REAL_API=false`；真实 smoke test 默认 skip，仓库不得提交真实 API Key。
 
 不要写入真实密钥、真实身份证、真实手机号或其他敏感信息。
