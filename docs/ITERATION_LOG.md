@@ -1,5 +1,15 @@
 # Iteration Log
 
+## 第 6 轮：演示包装与面试交付版完善
+
+- 新增 `docs/DEMO_GUIDE.md`，整理项目一句话介绍、本地演示顺序、E2E 输出字段解释和常见问题。
+- 完善 `docs/ARCHITECTURE.md`，加入 Mermaid 总体架构图、Java/Python 职责边界、双服务原因、LangGraph 选型原因和审批边界。
+- 新增 `docs/API_WALKTHROUGH.md`，提供 admin 初始化、客户创建、贷款申请、AI review、报告/日志查询和人工审批 API 演示流程。
+- 新增 `docs/INTERVIEW_SCRIPT.md`，提供 30 秒介绍、2 分钟介绍和围绕本项目的 Agent/RAG/ML/LLM/审计边界 Q&A。
+- 新增 `scripts/check_demo_readiness.py` 和 `agent-service/tests/test_check_demo_readiness.py`，用标准库检查关键文件、服务可达性和 `.env` 是否被 git 跟踪。
+- 更新 README、子服务 README、简历材料和恢复文档，明确本项目是公开数据 + 模拟制度 + 工程验证，不是真实银行生产风控系统。
+- 本轮未提交 `.env` 或真实 API Key，未调用真实百炼，未修改数据库表结构，未让 AI 自动审批最终状态。
+
 ## 第 5 轮：端到端演示闭环
 
 - 新增 `scripts/run_e2e_credit_review_demo.py`，通过 Java 后端 HTTP API 串起创建或复用贷款申请、触发 Python Agent 审核、查询 AI 报告、查询 Agent 执行日志，以及可选人工最终审批。

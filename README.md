@@ -1,5 +1,36 @@
 # SmartCreditMultiAgent
 
+## 快速演示入口
+
+本项目为公开数据 + 模拟制度 + 工程验证的信贷审批辅助系统，不是真实银行生产风控系统。AI/ML/RAG/LLM 只生成审批辅助建议，最终审批必须由人工接口确认。
+
+- 演示总指南：[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md)
+- 架构图与职责边界：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- API walkthrough：[docs/API_WALKTHROUGH.md](docs/API_WALKTHROUGH.md)
+- 面试讲解稿：[docs/INTERVIEW_SCRIPT.md](docs/INTERVIEW_SCRIPT.md)
+- 简历 bullet：[docs/RESUME_NOTES.md](docs/RESUME_NOTES.md)
+- 验证日志：[docs/VALIDATION_LOG.md](docs/VALIDATION_LOG.md)
+
+常用命令：
+
+```bash
+cd agent-service
+python -m pytest tests -q
+python scripts/run_llm_review_demo.py --mock
+```
+
+```bash
+cd backend-service
+mvn test
+```
+
+```bash
+python scripts/check_demo_readiness.py
+python scripts/run_e2e_credit_review_demo.py --application-id 1
+```
+
+安全说明：不要提交 `.env` 或真实 API Key；demo admin 默认账号密码只用于本地演示。
+
 ## 第 5 轮：端到端演示闭环
 
 本轮新增项目级脚本 `scripts/run_e2e_credit_review_demo.py`，用于通过 Java 后端 HTTP API 串起创建或复用贷款申请、触发 Python Agent 审核、查询 AI 报告、查询 Agent 执行日志，以及可选执行人工最终审批。

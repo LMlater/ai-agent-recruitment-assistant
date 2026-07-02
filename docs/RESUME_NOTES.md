@@ -1,5 +1,44 @@
 # Resume Notes
 
+## 第 6 轮后简历描述
+
+### 项目名称
+
+基于 Spring Boot 与 LangGraph 的多 Agent 智能信贷审批辅助系统
+
+### 一句话项目描述
+
+基于 Spring Boot + FastAPI + LangGraph 构建信贷审批辅助系统，融合规则评分、ML baseline、制度 RAG 检索和 LLM 报告生成，实现 AI 审批建议、报告入库、Agent 日志、审计留痕和人工最终审批闭环。
+
+### Java 后端方向 bullet
+
+- 基于 Spring Boot + MyBatis 设计客户、贷款申请、AI 审批报告、Agent 执行日志、人工审批记录和审计日志等核心模块，提供 REST API 支撑本地演示闭环。
+- 实现贷款申请状态机边界：AI review 仅能将申请推进到 `AI_REVIEWED`，最终 `APPROVED` / `REJECTED` / `NEED_MORE_INFO` 必须由人工审批接口确认。
+- 对接 Python FastAPI Agent 服务，反序列化结构化 `policy_references` 和 `decision_report_generation`，并将 AI report 与 Agent execution logs 持久化。
+- 编写 Java 单元测试覆盖 AI review 状态边界、结构化 DTO 合约、报告 JSON 保存和 Agent 日志保存，提升 Java/Python 双服务接口稳定性。
+
+### AI Agent 方向 bullet
+
+- 基于 FastAPI + LangGraph 编排 IntakeAgent、RiskAgent、PolicyAgent、ComplianceAgent、DecisionAgent，形成可观测、可测试的多 Agent 审批辅助工作流。
+- RiskAgent 融合规则评分与 Logistic Regression baseline，模型不可用时 fallback 到规则评分，并保留 `model_used`、风险概率和解释字段。
+- PolicyAgent 基于本地 Markdown 制度库实现 TF-IDF RAG 检索，返回结构化制度引用并提供评估集验证检索命中情况。
+- DecisionAgent 通过 LLM Provider 抽象支持 MockLLM 和 DashScope OpenAI-compatible 客户端，真实调用失败时 fallback，且不允许 LLM 改最终审批状态。
+
+### 银行科技岗位方向 bullet
+
+- 围绕信贷审批辅助场景设计“AI 建议 + 人工复核”闭环，强调风险评分、制度引用、合规提示和审批留痕。
+- 将 RAG 检索到的制度条款编号、风险评分原因、模型辅助信号写入审批报告，提升审批建议可解释性。
+- 通过 AI report、Agent execution logs、approval record 和 audit log 保留关键链路证据，便于事后追踪和面试演示。
+- 明确系统边界：公开数据 + 模拟制度 + 工程验证，不接入真实银行生产数据，不让 AI 自动完成贷款审批。
+
+### 不建议写的夸大表述
+
+- 不要写“真实银行风控模型”。
+- 不要写“接入银行生产数据”。
+- 不要写“自动完成贷款审批”。
+- 不要写“达到生产级准确率”。
+- 不要写“替代人工审批员”。
+
 - 第 5 轮新增根目录 `scripts/run_e2e_credit_review_demo.py`，用于面试演示 Java backend-service + Python agent-service 的端到端闭环。
 - 端到端脚本输出 `application_id`、`workflow_id`、AI 建议、风险结果、`ai_report_id`、Agent 日志数量、DecisionAgent LLM provider、policy codes 和 `manual_approval_required=true`。
 - 脚本默认不执行最终审批；如需演示人工最终确认，使用 `--manual-decision approve|reject|need-more-info`，最终状态仍由 Java 人工审批接口写入。

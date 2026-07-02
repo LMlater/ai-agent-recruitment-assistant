@@ -2,6 +2,25 @@
 
 FastAPI + LangGraph service for the SmartCreditMultiAgent first-round mock credit review workflow.
 
+## Interview Demo Package
+
+For the full interview delivery package, start from the repository root docs:
+
+- `../docs/DEMO_GUIDE.md`
+- `../docs/ARCHITECTURE.md`
+- `../docs/API_WALKTHROUGH.md`
+- `../docs/INTERVIEW_SCRIPT.md`
+- `../docs/RESUME_NOTES.md`
+
+Safe local Agent demo:
+
+```bash
+python -m pytest tests -q
+python scripts/run_llm_review_demo.py --mock
+```
+
+Ordinary tests force Mock LLM and do not call DashScope/Bailian. Real provider usage is opt-in through local environment configuration only, and `.env` must not be committed.
+
 ## Run
 
 ```bash

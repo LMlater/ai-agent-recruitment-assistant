@@ -2,6 +2,24 @@
 
 Spring Boot service for SmartCreditMultiAgent. It owns login/JWT, customer management, loan applications, Java-to-Python AI review calls, AI report persistence, agent execution logs, manual approval, and audit logs.
 
+## Interview Demo Package
+
+Start from the repository-level delivery docs when preparing an interview demo:
+
+- `../docs/DEMO_GUIDE.md`
+- `../docs/ARCHITECTURE.md`
+- `../docs/API_WALKTHROUGH.md`
+- `../docs/INTERVIEW_SCRIPT.md`
+- `../docs/VALIDATION_LOG.md`
+
+Readiness check from the repository root:
+
+```bash
+python scripts/check_demo_readiness.py
+```
+
+This backend remains the system of record for final manual approval. AI review can save reports and logs, but final `APPROVED`, `REJECTED`, or `NEED_MORE_INFO` states must go through `/api/approvals/{applicationId}/...`.
+
 ## Run
 
 1. Start MySQL and Redis from the repository root:

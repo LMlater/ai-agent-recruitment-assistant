@@ -1,5 +1,63 @@
 # Validation Log
 
+## 第 6 轮演示包装与面试交付版验证
+
+日期：2026-07-02
+
+### readiness script
+
+```powershell
+python scripts\check_demo_readiness.py
+```
+
+结果：脚本正常输出 JSON，没有 Python stack trace。当前未启动 backend-service 和 agent-service，因此返回退出码 `1`，`ok=false`，文件检查全部为 `true`，安全检查显示 `env_file_tracked=false`、`prints_api_key=false`，服务检查显示：
+
+```json
+{
+  "backend": {"reachable": false},
+  "agent": {"reachable": false}
+}
+```
+
+这是真实环境状态记录，未伪造双服务联调成功。
+
+```powershell
+python scripts\check_demo_readiness.py --skip-services
+```
+
+结果：通过，退出码 `0`。输出摘要：`ok=true`，关键文件齐全，`.env` 未被 git 跟踪，readiness 输出不包含真实 API Key。
+
+### agent-service
+
+```powershell
+cd agent-service
+$env:PYTHONDONTWRITEBYTECODE='1'; python -m pytest tests -q -p no:cacheprovider
+```
+
+结果：通过。输出摘要：`57 passed, 1 skipped, 1 warning in 3.67s`。跳过项为真实 DashScope/Bailian smoke test，普通测试仍强制 Mock，不调用真实百炼。
+
+### backend-service
+
+```powershell
+cd backend-service
+mvn -q "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" test
+```
+
+结果：通过，退出码 `0`。继续使用仓库内 `.m2` 作为 Maven 本地仓库路径，以避免当前沙箱默认外部 Maven 仓库路径访问拒绝问题。
+
+### 第 6 轮安全检查
+
+- `.env` 未提交，`.gitignore` 仍包含 `.env`。
+- 文档只包含本地 demo admin 示例和 API Key 占位说明，不包含真实 API Key。
+- `scripts/check_demo_readiness.py` 不读取、不打印真实 LLM 密钥。
+- 本轮未调用真实百炼，未修改 Java 数据库表结构，未让 AI 自动审批最终状态。
+
+### 下一步建议
+
+- 面试前先运行 `python scripts\check_demo_readiness.py --skip-services` 检查文件和安全状态。
+- 启动 agent-service 和 backend-service 后，再运行 `python scripts\check_demo_readiness.py` 验证服务可达。
+- 真正演示 E2E 前按 `docs/DEMO_GUIDE.md` 的顺序执行，不要把服务未启动状态说成联调成功。
+
 ## 第 5 轮端到端演示闭环验证
 
 日期：2026-07-02

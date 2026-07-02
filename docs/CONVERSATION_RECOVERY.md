@@ -1,5 +1,14 @@
 # Conversation Recovery
 
+## 第 6 轮最新恢复要点
+
+1. 面试交付版入口已经整理到 `README.md` 的“快速演示入口”，核心文档包括 `docs/DEMO_GUIDE.md`、`docs/ARCHITECTURE.md`、`docs/API_WALKTHROUGH.md`、`docs/INTERVIEW_SCRIPT.md`、`docs/RESUME_NOTES.md` 和 `docs/VALIDATION_LOG.md`。
+2. readiness 检查脚本为 `scripts/check_demo_readiness.py`，只使用 Python 标准库，不读取或打印真实 API Key。
+3. readiness 默认检查关键文件、后端 `http://localhost:8080` 和 Agent `http://localhost:8001` 服务可达性，以及 `.env` 是否被 git 跟踪。
+4. 服务未启动时 readiness 会输出 JSON，`services.*.reachable=false`，不抛 Python stack trace，不伪造联调成功。
+5. 面试讲解要强调：本项目是公开数据 + 模拟制度 + 工程验证，不是真实银行生产风控系统；AI 只给建议，人工接口最终确认。
+6. 下一步建议：如需现场演示，先运行 `python scripts/check_demo_readiness.py`，再按 `docs/DEMO_GUIDE.md` 启动 agent-service 和 backend-service。
+
 ## 第 5 轮最新恢复要点
 
 1. 项目级端到端演示入口为 `scripts/run_e2e_credit_review_demo.py`，默认通过 `BACKEND_BASE_URL=http://localhost:8080` 调用 Java 后端，再由后端调用 Python `agent-service`。
