@@ -23,6 +23,7 @@ class WorkflowState(TypedDict, total=False):
     final_decision: str
     summary: str
     decision_reasons: list[str]
+    decision_report_generation: dict[str, Any]
 
 
 class ReviewWorkflow:

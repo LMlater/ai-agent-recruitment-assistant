@@ -70,3 +70,11 @@
 - LLM 返回非 JSON、引用未知制度编号或调用异常时，会 fallback 到确定性报告文本，Agent 工作流保持稳定。
 - 单元测试不依赖真实 API；真实 DashScope smoke test 默认 skip，只有本地显式配置 `DASHSCOPE_API_KEY` 和 `LLM_ENABLE_REAL_API=true` 才运行。
 - 未提交真实 API Key，未要求用户在提示词中提供 API Key，未修改 Java 数据库表结构。
+
+## 第 4 轮第二段：LLM 端到端演示、测试隔离与真实百炼调用保护
+
+- 新增 `tests/conftest.py`，普通 pytest 默认强制 `LLM_PROVIDER=mock`、`LLM_ENABLE_REAL_API=false`，避免本地 `.env` 让普通测试误调用真实百炼。
+- 保留 `test_dashscope_live_smoke.py` 作为单独运行的真实 API smoke test，并增强 key/base URL/enable flag skip 条件和异常脱敏检查。
+- 新增 `scripts/run_llm_review_demo.py`，可用 Mock 或真实百炼跑端到端 review demo，输出 workflow、风险、制度编号和 `decision_report_generation` 元信息。
+- 新增 demo 与测试隔离相关单元测试；FastAPI review 测试确认 DecisionAgent 的 `result` 中可见 `decision_report_generation`。
+- 本轮未提交 `.env` 或真实 API Key，未修改 Java 数据库表结构，未允许 LLM 改最终审批状态。

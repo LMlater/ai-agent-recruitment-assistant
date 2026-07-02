@@ -89,13 +89,29 @@ Run ordinary tests:
 
 ```bash
 cd agent-service
-pytest tests -q
+python -m pytest tests -q
 ```
 
-The live smoke test is opt-in and skipped by default:
+Ordinary tests force Mock LLM settings through `tests/conftest.py`, so they do not call DashScope/Bailian even if local `.env` enables real API access.
+
+The live smoke test is opt-in and should be run directly after configuring local `.env`:
+
+```env
+LLM_PROVIDER=dashscope
+LLM_ENABLE_REAL_API=true
+DASHSCOPE_API_KEY=your-key
+DASHSCOPE_BASE_URL=your-base-url
+DASHSCOPE_MODEL=qwen3.7-plus
+```
 
 ```bash
-LLM_ENABLE_REAL_API=true pytest tests/test_dashscope_live_smoke.py -q
+python -m pytest tests/test_dashscope_live_smoke.py -q
+```
+
+Run the optional LLM review demo:
+
+```bash
+python scripts/run_llm_review_demo.py
 ```
 
 Do not commit `.env` or a real API key. Use `.env.example` as the placeholder template and keep the LLM as report text generation only; `DecisionAgent` still preserves the deterministic final decision and manual approval boundary.

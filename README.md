@@ -229,13 +229,31 @@ pytest tests -q
 
 ```bash
 cd agent-service
-pytest tests -q
+python -m pytest tests -q
 ```
 
-真实百炼 smoke test 仅在本地配置 `agent-service/.env` 或环境变量后手动运行，默认会跳过；如果系统环境变量和 `.env` 同时存在，系统环境变量优先：
+普通测试会通过 `tests/conftest.py` 强制使用 Mock LLM，不会调用百炼，即使本地 `.env` 开启了真实 API。
+
+真实百炼 smoke test 仅在本地配置 `agent-service/.env` 或环境变量后，直接指定 smoke 文件手动运行；如果系统环境变量和 `.env` 同时存在，系统环境变量优先：
 
 ```bash
-LLM_ENABLE_REAL_API=true pytest tests/test_dashscope_live_smoke.py -q
+python -m pytest tests/test_dashscope_live_smoke.py -q
+```
+
+本地 `.env` 示例：
+
+```env
+LLM_PROVIDER=dashscope
+LLM_ENABLE_REAL_API=true
+DASHSCOPE_API_KEY=your-key
+DASHSCOPE_BASE_URL=your-base-url
+DASHSCOPE_MODEL=qwen3.7-plus
+```
+
+LLM review demo：
+
+```bash
+python scripts/run_llm_review_demo.py
 ```
 
 配置方式和安全边界见 `docs/LLM_INTEGRATION.md`。仓库只提交 `.env.example` 占位符，不提交真实 API Key。

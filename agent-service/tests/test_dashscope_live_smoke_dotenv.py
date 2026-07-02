@@ -28,6 +28,7 @@ def test_dashscope_smoke_module_loads_dotenv_before_skipif(monkeypatch):
             monkeypatch.setenv("LLM_ENABLE_REAL_API", "true")
 
     monkeypatch.setitem(sys.modules, "dotenv", SimpleNamespace(load_dotenv=fake_load_dotenv))
+    monkeypatch.delenv("SMARTCREDIT_FORCE_MOCK_LLM_TESTS", raising=False)
     monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
     monkeypatch.delenv("DASHSCOPE_BASE_URL", raising=False)
     monkeypatch.delenv("LLM_ENABLE_REAL_API", raising=False)
@@ -51,6 +52,7 @@ def test_dashscope_smoke_remains_disabled_without_required_env(monkeypatch):
             raise AssertionError("Live client should not be constructed when smoke test is disabled.")
 
     monkeypatch.setitem(sys.modules, "dotenv", SimpleNamespace(load_dotenv=fake_load_dotenv))
+    monkeypatch.delenv("SMARTCREDIT_FORCE_MOCK_LLM_TESTS", raising=False)
     monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
     monkeypatch.delenv("DASHSCOPE_BASE_URL", raising=False)
     monkeypatch.setenv("LLM_ENABLE_REAL_API", "false")

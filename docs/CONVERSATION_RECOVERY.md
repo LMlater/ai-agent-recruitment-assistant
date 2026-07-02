@@ -29,5 +29,7 @@
 25. 第 4 轮第一段新增 LLM Provider 抽象：`agent-service/app/services/llm/` 下包含 `LLMClient`、`MockLLMClient`、OpenAI-compatible 客户端、factory 和 prompt 模板。
 26. `DecisionAgent` 现在先保留确定性规则结果，再用 `ReportGenerationService` 尝试生成自然语言审批辅助报告；LLM 失败时 fallback，不改变最终审批状态或风险分数。
 27. 百炼接入仅通过环境变量启用，默认 `LLM_PROVIDER=mock`、`LLM_ENABLE_REAL_API=false`；真实 smoke test 默认 skip，仓库不得提交真实 API Key。
+28. 第 4 轮第二段新增 pytest LLM 测试隔离：普通 `python -m pytest tests -q` 强制 Mock，不读取或调用真实百炼；直接运行 `tests/test_dashscope_live_smoke.py` 才允许加载本地 `.env` 做真实 smoke。
+29. 新增 `agent-service/scripts/run_llm_review_demo.py`，用于输出端到端 review demo 的 workflow id、风险结果、制度编号和 `decision_report_generation`，不输出 API Key。
 
 不要写入真实密钥、真实身份证、真实手机号或其他敏感信息。

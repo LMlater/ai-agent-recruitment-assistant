@@ -7,6 +7,8 @@ from app.services.llm.openai_compatible_client import OpenAICompatibleLLMClient
 
 
 def _load_local_env():
+    if os.getenv("SMARTCREDIT_FORCE_MOCK_LLM_TESTS") == "true":
+        return
     try:
         from dotenv import load_dotenv
     except ImportError:
@@ -33,13 +35,19 @@ _load_local_env()
     reason="DashScope live smoke test requires local API key, base URL, and explicit enable flag",
 )
 def test_dashscope_live_smoke():
+    api_key = os.getenv("DASHSCOPE_API_KEY")
     client = OpenAICompatibleLLMClient(
-        api_key=os.getenv("DASHSCOPE_API_KEY"),
+        api_key=api_key,
         base_url=os.getenv("DASHSCOPE_BASE_URL"),
         model=os.getenv("DASHSCOPE_MODEL", "qwen-plus"),
         timeout_seconds=10,
     )
 
-    result = client.generate([{"role": "user", "content": "Reply with OK."}], max_tokens=8)
+    try:
+        result = client.generate([{"role": "user", "content": "OK?"}], max_tokens=4)
+    except Exception as exc:
+        if api_key and api_key in str(exc):
+            raise AssertionError("DashScope smoke test error leaked API key.") from None
+        raise
 
     assert result

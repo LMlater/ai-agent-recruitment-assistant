@@ -64,21 +64,44 @@ The base URL must come from environment configuration. The checked-in `.env.exam
 
 ## Tests
 
-Run ordinary tests:
+Run ordinary development tests:
 
 ```bash
 cd agent-service
-pytest tests -q
+python -m pytest tests -q
 ```
 
-The real API smoke test is opt-in and skipped by default:
+Ordinary tests are isolated by `tests/conftest.py`; they force `LLM_PROVIDER=mock` and `LLM_ENABLE_REAL_API=false`, so they do not call DashScope/Bailian even when a local `.env` enables real API access.
+
+The real API smoke test is opt-in and should be run by targeting the smoke file directly:
 
 ```bash
 cd agent-service
-LLM_ENABLE_REAL_API=true pytest tests/test_dashscope_live_smoke.py -q
+python -m pytest tests/test_dashscope_live_smoke.py -q
 ```
 
-Only run the smoke test after setting `DASHSCOPE_API_KEY` locally. The test sends a short request and does not print the key.
+Use local configuration such as:
+
+```env
+LLM_PROVIDER=dashscope
+LLM_ENABLE_REAL_API=true
+DASHSCOPE_API_KEY=your-key
+DASHSCOPE_BASE_URL=your-base-url
+DASHSCOPE_MODEL=qwen3.7-plus
+```
+
+Only run the smoke test after setting `DASHSCOPE_API_KEY` and `DASHSCOPE_BASE_URL` locally. The test sends a short request, checks only that the result is non-empty, and does not print the key or full response.
+
+## Review Demo
+
+Run the optional end-to-end review demo:
+
+```bash
+cd agent-service
+python scripts/run_llm_review_demo.py
+```
+
+When `LLM_ENABLE_REAL_API=false`, the demo uses `MockLLMClient`. When `LLM_ENABLE_REAL_API=true` and local DashScope/Bailian key/base URL settings are valid, the demo uses the OpenAI-compatible client. The output includes workflow id, final decision, risk score, policy codes, summary, decision reasons, and `decision_report_generation` metadata, but never prints an API key.
 
 ## Fallback
 

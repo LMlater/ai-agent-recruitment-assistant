@@ -68,6 +68,10 @@ def _post_review(payload):
         assert item["started_at"]
         assert item["ended_at"]
         assert item["duration_ms"] >= 0
+    decision_result = next(item for item in body["agent_results"] if item["agent_name"] == "DecisionAgent")
+    assert "decision_report_generation" in decision_result["result"]
+    assert "llm_used" in decision_result["result"]["decision_report_generation"]
+    assert "llm_provider" in decision_result["result"]["decision_report_generation"]
     return body
 
 
