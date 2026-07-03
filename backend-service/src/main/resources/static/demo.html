@@ -726,6 +726,7 @@
         state.nextSuccessMessage = null;
         return result;
       } catch (error) {
+        setRawJson({ action: label, error: error.message }, true);
         setMessage(label + "失败：" + error.message, "error");
         return null;
       } finally {
@@ -887,7 +888,7 @@
       state.aiReport = null;
       state.agentLogs = [];
       state.approvalHistory = [];
-      state.llmInfo = { provider: "mock", used: "-", error: null };
+      state.llmInfo = { provider: state.llmInfo.provider || "mock", used: "-", error: null };
       setManualApprovalLocked(false);
       renderManualApprovalReset();
       renderApprovalHistory();

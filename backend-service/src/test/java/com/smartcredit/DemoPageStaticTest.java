@@ -32,6 +32,9 @@ class DemoPageStaticTest {
         assertTrue(html.contains("LLM Provider"));
         assertTrue(html.contains("LLM Used"));
         assertTrue(html.contains("LLM Error"));
+        assertTrue(html.contains("state.llmInfo.provider || \"mock\""));
+        assertTrue(html.contains("action: label"));
+        assertTrue(html.contains("error: error.message"));
         assertTrue(html.contains("人工审批边界提示"));
         assertTrue(html.contains("explainAiReviewError"));
         assertTrue(html.contains("data-manual-approval"));
