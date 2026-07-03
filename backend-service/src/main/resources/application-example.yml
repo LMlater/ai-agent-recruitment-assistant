@@ -17,3 +17,5 @@ jwt:
 
 agent-service:
   base-url: http://localhost:8001
+  connect-timeout-seconds: 5
+  read-timeout-seconds: 120

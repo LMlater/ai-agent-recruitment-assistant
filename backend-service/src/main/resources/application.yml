@@ -24,6 +24,8 @@ jwt:
 
 agent-service:
   base-url: ${AGENT_SERVICE_BASE_URL:http://localhost:8001}
+  connect-timeout-seconds: ${AGENT_SERVICE_CONNECT_TIMEOUT_SECONDS:5}
+  read-timeout-seconds: ${AGENT_SERVICE_READ_TIMEOUT_SECONDS:120}
 
 springdoc:
   swagger-ui:
