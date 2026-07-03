@@ -22,6 +22,7 @@ class DemoPageStaticTest {
         assertTrue(html.contains("/api/loan-applications"));
         assertTrue(html.contains("/api/agent-workflows/"));
         assertTrue(html.contains("/api/approvals/"));
+        assertTrue(html.contains("/api/v1/debug/llm-config"));
         assertTrue(html.contains("客户申请端"));
         assertTrue(html.contains("银行审批工作台"));
         assertTrue(html.contains("一键准备演示数据"));
@@ -29,7 +30,10 @@ class DemoPageStaticTest {
         assertTrue(html.contains("translateSummary"));
         assertTrue(html.contains("Raw JSON 折叠面板"));
         assertTrue(html.contains("LLM Provider"));
+        assertTrue(html.contains("LLM Used"));
+        assertTrue(html.contains("LLM Error"));
         assertTrue(html.contains("人工审批边界提示"));
+        assertTrue(html.contains("explainAiReviewError"));
         assertTrue(html.contains("data-manual-approval"));
         assertTrue(html.contains("setManualApprovalLocked"));
         assertTrue(html.contains("最终审批已完成，如需重新演示请准备新的演示申请。"));

@@ -793,14 +793,42 @@
       const timeout = setTimeout(() => controller.abort(), 3000);
       try {
         await fetch(AGENT_BASE_URL + "/health", { mode: "no-cors", signal: controller.signal });
-        setBadge("agentStatus", true, "可达");
-        setRawJson({ agent: { reachable: true, url: AGENT_BASE_URL + "/health" } }, false);
+        const config = await fetchAgentLlmConfig();
+        applyLlmConfig(config);
+        setBadge("agentStatus", true, "可达 / " + (config.llm_provider || "mock"));
+        setRawJson({
+          agent: { reachable: true, url: AGENT_BASE_URL + "/health" },
+          llm_config: config
+        }, false);
       } catch (error) {
         setBadge("agentStatus", false, "未启动");
-        throw new Error("agent-service 未启动");
+        throw new Error("agent-service 未启动或无法读取 LLM 配置：" + error.message);
       } finally {
         clearTimeout(timeout);
       }
+    }
+
+    async function fetchAgentLlmConfig() {
+      let response;
+      try {
+        response = await fetch(AGENT_BASE_URL + "/api/v1/debug/llm-config", {
+          headers: { "Accept": "application/json" }
+        });
+      } catch (error) {
+        throw new Error("无法访问 /api/v1/debug/llm-config，可能是 agent-service 未启动或 CORS 未生效");
+      }
+      const json = await response.json().catch(() => null);
+      if (!response.ok || !json) {
+        throw new Error("LLM 配置接口返回异常，HTTP " + response.status);
+      }
+      return json;
+    }
+
+    function applyLlmConfig(config) {
+      state.llmInfo = Object.assign({}, state.llmInfo, {
+        provider: config.llm_provider || "mock"
+      });
+      renderLlmInfo();
     }
 
     async function initAdmin() {
@@ -881,7 +909,12 @@
 
     async function runAiReview() {
       requireApplication();
-      const data = await apiRequest("/api/loan-applications/" + state.applicationId + "/ai-review", { method: "POST" });
+      let data;
+      try {
+        data = await apiRequest("/api/loan-applications/" + state.applicationId + "/ai-review", { method: "POST" });
+      } catch (error) {
+        throw new Error(explainAiReviewError(error.message));
+      }
       state.aiReview = data;
       state.workflowId = getValue(data, "workflow_id", "workflowId");
       state.applicationStatus = "AI_REVIEWED";
@@ -1106,6 +1139,20 @@
         row("LLM Used", String(info.used ?? "-")),
         row("LLM Error", info.error || "无")
       ].join("");
+    }
+
+    function explainAiReviewError(message) {
+      const raw = message || "未知错误";
+      if (raw.includes("Failed to call agent") || raw.includes("agent-service") || raw.includes("Connection")) {
+        return "backend 调 agent-service 失败或 agent-service 未启动。原始错误：" + raw;
+      }
+      if (raw.includes("AI review can only run")) {
+        return "申请状态不允许 AI Review，请准备新的已提交申请或使用 AI_REVIEWED 申请。原始错误：" + raw;
+      }
+      if (raw.includes("Internal server error")) {
+        return "后端返回 Internal server error，可能是 backend 调 agent-service 失败、agent-service 未启动或申请状态不允许 AI Review。原始错误：" + raw;
+      }
+      return raw;
     }
 
     function translateSummary(text) {
