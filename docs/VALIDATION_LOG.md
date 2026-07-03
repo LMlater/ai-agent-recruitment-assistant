@@ -1,5 +1,69 @@
 # Validation Log
 
+## 可视化 Demo 页面验证
+
+日期：2026-07-03
+
+### 页面入口
+
+```text
+http://localhost:8080/demo.html
+```
+
+验证方式：在本地两个服务均启动后，打开页面并按页面按钮顺序完整手动点击一遍。
+
+### readiness
+
+```powershell
+python scripts\check_demo_readiness.py
+```
+
+结果：通过，`ok=true`，`backend.reachable=true`，`agent.reachable=true`，`env_file_tracked=false`，`prints_api_key=false`。
+
+### 页面点击流程
+
+- 页面可打开。
+- backend 状态检查成功。
+- agent-service 状态检查成功。
+- demo admin 初始化步骤可继续执行；admin 已存在时页面不会崩溃。
+- demo admin 登录成功。
+- demo customer 创建成功。
+- loan application 创建成功。
+- submit 成功。
+- AI Review 成功。
+- AI Review Summary 展示成功，`risk_level=LOW`，`risk_score=100`，`ai_report_id=8`。
+- Policy References 展示成功，制度编号为 `R-004`、`M-003`、`P-002`、`P-003`、`P-004`。
+- Agent Logs 展示成功，共 `5` 个 Agent 且均为 `SUCCESS`：IntakeAgent、RiskAgent、PolicyAgent、ComplianceAgent、DecisionAgent。
+- DecisionAgent 的 `outputSummary` 显示 `llm_provider=mock`，`llm_error=null`。
+- Approve 人工审批成功，审批历史显示 `AI_REVIEWED -> APPROVED`，comment 为 `visual demo manual decision: approve`。
+- Raw JSON Panel 正常显示最近一次接口响应，统一返回格式为 `code/message/data`。
+- 前端收尾优化已生效：AI Review 成功后 Loan Application Card 状态显示 `AI_REVIEWED`；人工审批成功后显示最终状态、刷新审批历史、禁用 Approve/Reject/Need More Info，并提示重新演示需创建新的 loan application。
+
+### 边界说明
+
+- 本次页面验证使用 `mock` LLM，没有调用真实百炼。
+- AI Review 只给出审批辅助建议，最终 `APPROVED` 由人工审批接口写入。
+- Java 后端保存了 AI report，并能查询到 5 条 Agent logs。
+- 未记录 MySQL 密码，未记录 API Key。
+- 未提交 `.env`、`application-local.yml`、`*.local` 或任何本地配置文件。
+- 未改数据库表结构，未让 AI 自动审批最终状态。
+
+### 测试结果
+
+```powershell
+cd backend-service
+mvn -q "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" test
+```
+
+结果：通过，退出码 `0`。
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：通过，`57 passed, 1 skipped, 2 warnings in 7.51s`。跳过项为真实 DashScope/Bailian smoke test；普通测试继续使用 Mock，不调用真实百炼。
+
 ## 真实双服务 E2E 联调验证
 
 日期：2026-07-03

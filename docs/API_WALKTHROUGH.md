@@ -2,6 +2,16 @@
 
 本文档用于面试演示 Java 后端 API 流程。示例使用 PowerShell `curl.exe`，demo admin 账号只用于本地演示，不可用于生产环境。所有最终审批都通过 `/api/approvals/...` 人工接口完成，AI review 不会直接把申请状态改成 `APPROVED` 或 `REJECTED`。
 
+## 可视化页面入口
+
+如果不想手敲下面的 `curl.exe` 命令，可以在两个服务启动后打开：
+
+```text
+http://localhost:8080/demo.html
+```
+
+这个页面按同样的 API 顺序执行：初始化/登录、创建客户、创建贷款申请、提交申请、触发 AI Review、查询 AI Reports、查询 Agent Logs、人工审批和查询审批历史。页面右下角 Raw JSON Panel 会展示最近一次接口响应，方便面试官直接看数据结构。
+
 ## 1. 初始化并登录 admin
 
 ```powershell

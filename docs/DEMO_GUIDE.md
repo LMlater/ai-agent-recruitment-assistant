@@ -33,6 +33,31 @@ cd backend-service
 mvn spring-boot:run
 ```
 
+## 可视化 Demo 页面
+
+启动两个服务后，浏览器打开：
+
+```text
+http://localhost:8080/demo.html
+```
+
+页面是原生 HTML + CSS + JavaScript，只用于本地面试演示，不是生产前端。推荐点击顺序：
+
+1. 检查 backend 状态。
+2. 检查 agent-service 状态。
+3. 初始化 demo admin；如果 admin 已存在，可以继续登录。
+4. 登录 demo admin。
+5. 创建 demo customer。
+6. 创建 loan application。
+7. 提交申请。
+8. 触发 AI Review。
+9. 查询 AI Reports。
+10. 查询 Agent Logs。
+11. 执行 Approve、Reject 或 Need More Info 中的一种人工审批。
+12. 查询审批历史。
+
+页面会展示 Loan Application、AI Review Summary、Policy References、Agent Logs、Manual Approval 和 Raw JSON。AI Review 只展示辅助建议，最终 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须由人工审批按钮写入。
+
 从仓库根目录运行端到端 demo：
 
 ```bash
@@ -78,5 +103,6 @@ python scripts/check_demo_readiness.py
 2. 展示 `docs/ARCHITECTURE.md` 的 Mermaid 图，说明 Java/Python 双服务边界。
 3. 运行 `python scripts/check_demo_readiness.py`，展示文件、服务和安全检查。
 4. 运行 `agent-service` 的 Mock demo，展示单服务 Agent + ML + RAG + LLM fallback 链路。
-5. 运行根目录 E2E demo，展示 Java 调 Python、AI report 入库、Agent logs 查询和人工审批边界。
-6. 最后打开 `docs/INTERVIEW_SCRIPT.md`，按常见 Q&A 准备追问。
+5. 打开 `http://localhost:8080/demo.html`，用页面完整点击 Java + Python 双服务 E2E 流程。
+6. 也可以运行根目录 E2E demo 脚本，展示同一链路的命令行版本。
+7. 最后打开 `docs/INTERVIEW_SCRIPT.md`，按常见 Q&A 准备追问。

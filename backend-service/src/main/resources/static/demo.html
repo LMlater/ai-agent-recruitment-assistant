@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SmartCreditMultiAgent Demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f8;
+      --panel: #ffffff;
+      --panel-soft: #f9fafb;
+      --line: #d8dee6;
+      --text: #1f2937;
+      --muted: #667085;
+      --accent: #0f766e;
+      --accent-dark: #115e59;
+      --danger: #b42318;
+      --warning: #b54708;
+      --ok: #067647;
+      --shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    header {
+      background: #102a43;
+      color: #fff;
+      padding: 24px clamp(16px, 4vw, 40px);
+      border-bottom: 4px solid var(--accent);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    header p {
+      max-width: 1080px;
+      margin: 0;
+      color: #dbe7f3;
+      font-size: 15px;
+    }
+
+    main {
+      padding: 20px clamp(12px, 3vw, 28px) 32px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2 {
+      margin: 0;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    .panel-body {
+      padding: 14px 16px 16px;
+    }
+
+    .status-grid,
+    .card-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .card-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card {
+      min-height: 160px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card h2 {
+      margin: 0;
+      padding: 13px 15px;
+      border-bottom: 1px solid var(--line);
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .card-content {
+      padding: 14px 15px;
+    }
+
+    .raw-json {
+      grid-column: 1 / -1;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 138px minmax(0, 1fr);
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px solid #edf0f3;
+      font-size: 14px;
+    }
+
+    .kv:last-child {
+      border-bottom: 0;
+    }
+
+    .label {
+      color: var(--muted);
+    }
+
+    .value {
+      overflow-wrap: anywhere;
+      font-weight: 600;
+    }
+
+    .button-stack {
+      display: grid;
+      gap: 9px;
+    }
+
+    button {
+      min-height: 38px;
+      width: 100%;
+      border: 1px solid #9db4c0;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background: #eef7f6;
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+
+    button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    button.primary:hover:not(:disabled) {
+      background: var(--accent-dark);
+      color: #fff;
+    }
+
+    button.danger {
+      border-color: #d92d20;
+      color: #b42318;
+    }
+
+    button.warning {
+      border-color: #dc6803;
+      color: #b54708;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.62;
+    }
+
+    .manual-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .notice {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: #eef4ff;
+      color: #1849a9;
+      font-size: 14px;
+    }
+
+    .message {
+      min-height: 42px;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .message.ok {
+      border-color: #abefc6;
+      background: #ecfdf3;
+      color: var(--ok);
+    }
+
+    .message.error {
+      border-color: #fecdca;
+      background: #fef3f2;
+      color: var(--danger);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eef2f6;
+      color: #344054;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .badge.ok {
+      background: #dcfae6;
+      color: var(--ok);
+    }
+
+    .badge.warn {
+      background: #fef0c7;
+      color: var(--warning);
+    }
+
+    .badge.error {
+      background: #fee4e2;
+      color: var(--danger);
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .list-item {
+      padding: 10px;
+      border: 1px solid #e5eaf0;
+      border-radius: 6px;
+      background: var(--panel-soft);
+    }
+
+    .list-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    pre {
+      min-height: 220px;
+      max-height: 440px;
+      margin: 0;
+      overflow: auto;
+      padding: 12px;
+      border-radius: 6px;
+      background: #0b1020;
+      color: #d7e4ff;
+      font-size: 13px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 980px) {
+      .layout,
+      .card-grid,
+      .manual-buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .kv {
+        grid-template-columns: 112px minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>基于 Spring Boot + FastAPI + LangGraph 的多 Agent 智能信贷审批辅助系统</h1>
+    <p>AI/ML/RAG/LLM 只生成审批辅助建议，最终 APPROVED / REJECTED / NEED_MORE_INFO 必须由人工审批接口确认。</p>
+  </header>
+
+  <main>
+    <div class="layout">
+      <section class="panel">
+        <h2>服务状态与 Demo 操作</h2>
+        <div class="panel-body">
+          <div class="status-grid">
+            <div class="kv">
+              <span class="label">backend-service</span>
+              <span class="value">http://localhost:8080 <span id="backendStatus" class="badge warn">未检查</span></span>
+            </div>
+            <div class="kv">
+              <span class="label">agent-service</span>
+              <span class="value">http://localhost:8001 <span id="agentStatus" class="badge warn">未检查</span></span>
+            </div>
+            <div class="kv">
+              <span class="label">当前登录状态</span>
+              <span id="loginStatus" class="value">未登录</span>
+            </div>
+            <div class="kv">
+              <span class="label">当前 application_id</span>
+              <span id="currentApplicationId" class="value">-</span>
+            </div>
+            <div class="kv">
+              <span class="label">当前 workflow_id</span>
+              <span id="currentWorkflowId" class="value">-</span>
+            </div>
+          </div>
+
+          <div class="button-stack" style="margin-top: 14px;">
+            <button type="button" onclick="runAction(event, '检查 backend 状态', checkBackendStatus)">检查 backend 状态</button>
+            <button type="button" onclick="runAction(event, '检查 agent-service 状态', checkAgentStatus)">检查 agent-service 状态</button>
+            <button type="button" onclick="runAction(event, '初始化 demo admin', initAdmin)">1. 初始化 demo admin</button>
+            <button type="button" class="primary" onclick="runAction(event, '登录 demo admin', loginAdmin)">2. 登录 demo admin</button>
+            <button type="button" onclick="runAction(event, '创建 demo customer', createCustomer)">3. 创建 demo customer</button>
+            <button type="button" onclick="runAction(event, '创建 loan application', createLoanApplication)">4. 创建 loan application</button>
+            <button type="button" onclick="runAction(event, '提交申请', submitApplication)">5. 提交申请</button>
+            <button type="button" class="primary" onclick="runAction(event, '触发 AI Review', runAiReview)">6. 触发 AI Review</button>
+            <button type="button" onclick="runAction(event, '查询 AI Reports', fetchAiReports)">7. 查询 AI Reports</button>
+            <button type="button" onclick="runAction(event, '查询 Agent Logs', fetchAgentLogs)">8. 查询 Agent Logs</button>
+            <button type="button" onclick="runAction(event, '查询审批历史', fetchApprovalHistory)">10. 查询审批历史</button>
+          </div>
+
+          <div class="notice">页面只用于本地面试演示。默认 demo admin 账号只适合本地环境，不用于生产。</div>
+          <div id="message" class="message">等待操作。</div>
+        </div>
+      </section>
+
+      <section class="card-grid">
+        <article class="card">
+          <h2>Loan Application Card</h2>
+          <div id="loanCard" class="card-content">
+            <div class="muted">创建客户和贷款申请后展示。</div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>AI Review Summary Card</h2>
+          <div id="aiSummaryCard" class="card-content">
+            <div class="muted">触发 AI Review 后展示。</div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Policy References Card</h2>
+          <div id="policyCard" class="card-content">
+            <div class="muted">展示 RAG 检索到的制度条款。</div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Agent Logs Card</h2>
+          <div id="agentLogsCard" class="card-content">
+            <div class="muted">查询 Agent Logs 后展示。</div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Manual Approval Card</h2>
+          <div class="card-content">
+            <div class="manual-buttons">
+              <button type="button" data-manual-approval class="primary" onclick="runAction(event, 'Approve 人工审批', manualApproval, 'approve')">Approve</button>
+              <button type="button" data-manual-approval class="danger" onclick="runAction(event, 'Reject 人工审批', manualApproval, 'reject')">Reject</button>
+              <button type="button" data-manual-approval class="warning" onclick="runAction(event, 'Need More Info 人工审批', manualApproval, 'need-more-info')">Need More Info</button>
+            </div>
+            <div class="notice">这里写入最终审批状态。AI Review 只给 `final_decision_from_ai` 辅助建议。</div>
+            <div id="manualApprovalCard" style="margin-top: 12px;">
+              <div class="muted">人工审批后展示最终状态。</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card raw-json">
+          <h2>Raw JSON Panel</h2>
+          <div class="card-content">
+            <pre id="rawJson">{}</pre>
+          </div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const BACKEND_BASE_URL = "http://localhost:8080";
+    const AGENT_BASE_URL = "http://localhost:8001";
+    const DEMO_ADMIN = {
+      username: "admin",
+      password: "Admin@123456",
+      displayName: "Demo Admin"
+    };
+
+    const state = {
+      token: localStorage.getItem("smartcredit_demo_token") || "",
+      customerId: null,
+      applicationId: null,
+      applicationStatus: null,
+      currentCustomer: null,
+      currentApplication: null,
+      workflowId: null,
+      aiReview: null,
+      aiReport: null,
+      agentLogs: [],
+      approvalHistory: [],
+      finalApprovalCompleted: false,
+      nextSuccessMessage: null
+    };
+
+    function unwrapResult(json) {
+      if (json && typeof json === "object" && Object.prototype.hasOwnProperty.call(json, "code")) {
+        if (json.code === 0) {
+          return json.data;
+        }
+        throw new Error(json.message || "后端返回业务错误");
+      }
+      return json;
+    }
+
+    async function apiRequest(path, options = {}) {
+      const headers = Object.assign({ "Accept": "application/json" }, options.headers || {});
+      if (options.body !== undefined) {
+        headers["Content-Type"] = "application/json";
+      }
+      if (state.token) {
+        headers["Authorization"] = "Bearer " + state.token;
+      }
+
+      let response;
+      try {
+        response = await fetch(path, Object.assign({}, options, { headers }));
+      } catch (error) {
+        throw new Error("backend-service 未启动或网络不可达");
+      }
+
+      const text = await response.text();
+      let json = null;
+      if (text) {
+        try {
+          json = JSON.parse(text);
+        } catch (error) {
+          throw new Error("接口返回非 JSON 内容");
+        }
+      }
+      setRawJson(json ?? { status: response.status });
+      if (!response.ok && (!json || !Object.prototype.hasOwnProperty.call(json, "code"))) {
+        throw new Error("HTTP " + response.status + " 请求失败");
+      }
+      return unwrapResult(json);
+    }
+
+    async function rawApiRequest(path, options = {}) {
+      const headers = Object.assign({ "Accept": "application/json" }, options.headers || {});
+      if (options.body !== undefined) {
+        headers["Content-Type"] = "application/json";
+      }
+      if (state.token) {
+        headers["Authorization"] = "Bearer " + state.token;
+      }
+
+      let response;
+      try {
+        response = await fetch(path, Object.assign({}, options, { headers }));
+      } catch (error) {
+        throw new Error("backend-service 未启动或网络不可达");
+      }
+      const json = await response.json().catch(() => ({ status: response.status }));
+      setRawJson(json);
+      return json;
+    }
+
+    async function runAction(event, label, action, ...args) {
+      const button = event && event.currentTarget;
+      const oldText = button ? button.textContent : "";
+      try {
+        if (button) {
+          button.disabled = true;
+          button.textContent = label + "中...";
+        }
+        setMessage(label + "中...", "info");
+        const result = await action(...args);
+        updateStatusPanel();
+        setMessage(state.nextSuccessMessage || label + "成功。", "ok");
+        state.nextSuccessMessage = null;
+        return result;
+      } catch (error) {
+        setMessage(label + "失败：" + error.message, "error");
+        return null;
+      } finally {
+        if (button) {
+          button.textContent = oldText;
+          if (button.dataset.locked !== "true") {
+            button.disabled = false;
+          }
+        }
+      }
+    }
+
+    async function checkBackendStatus() {
+      try {
+        const response = await fetch("/api/auth/me", { headers: state.token ? { "Authorization": "Bearer " + state.token } : {} });
+        setBadge("backendStatus", true, "可达 " + response.status);
+        setRawJson({ backend: { reachable: true, status: response.status } });
+      } catch (error) {
+        setBadge("backendStatus", false, "未启动");
+        throw new Error("backend-service 未启动");
+      }
+    }
+
+    async function checkAgentStatus() {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+      try {
+        await fetch(AGENT_BASE_URL + "/health", { mode: "no-cors", signal: controller.signal });
+        setBadge("agentStatus", true, "可达");
+        setRawJson({ agent: { reachable: true, url: AGENT_BASE_URL + "/health" } });
+      } catch (error) {
+        setBadge("agentStatus", false, "未启动");
+        throw new Error("agent-service 未启动");
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    async function initAdmin() {
+      const json = await rawApiRequest("/api/auth/init-admin", {
+        method: "POST",
+        body: JSON.stringify(DEMO_ADMIN)
+      });
+      if (json.code === 0) {
+        return json.data;
+      }
+      if ((json.message || "").includes("Admin initialization is only allowed")) {
+        setMessage("demo admin 已存在，可以继续登录。", "ok");
+        return json;
+      }
+      throw new Error(json.message || "初始化 admin 失败");
+    }
+
+    async function loginAdmin() {
+      const data = await apiRequest("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ username: DEMO_ADMIN.username, password: DEMO_ADMIN.password })
+      });
+      state.token = data.token;
+      localStorage.setItem("smartcredit_demo_token", state.token);
+      updateStatusPanel();
+      return data;
+    }
+
+    async function createCustomer() {
+      requireLogin();
+      const data = await apiRequest("/api/customers", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "Demo Customer",
+          idCardMasked: "4401********2099",
+          phoneMasked: "138****2099",
+          age: 32,
+          monthlyIncome: 12000,
+          workYears: 5,
+          existingDebt: 30000,
+          overdueCount: 0,
+          assetProofCount: 2
+        })
+      });
+      state.customerId = data.id;
+      state.currentCustomer = data;
+      renderLoanCard();
+      return data;
+    }
+
+    async function createLoanApplication() {
+      requireLogin();
+      if (!state.customerId) {
+        throw new Error("请先创建 demo customer");
+      }
+      const data = await apiRequest("/api/loan-applications", {
+        method: "POST",
+        body: JSON.stringify({
+          customerId: state.customerId,
+          amount: 80000,
+          termMonths: 24,
+          purpose: "interview demo loan"
+        })
+      });
+      state.applicationId = data.id;
+      state.applicationStatus = data.status || "DRAFT";
+      state.currentApplication = data;
+      state.finalApprovalCompleted = false;
+      setManualApprovalLocked(false);
+      renderManualApprovalReset();
+      renderLoanCard();
+      return data;
+    }
+
+    async function submitApplication() {
+      requireApplication();
+      const data = await apiRequest("/api/loan-applications/" + state.applicationId + "/submit", {
+        method: "POST"
+      });
+      state.applicationStatus = data.status || "SUBMITTED";
+      state.currentApplication = data;
+      renderLoanCard();
+      return data;
+    }
+
+    async function runAiReview() {
+      requireApplication();
+      const data = await apiRequest("/api/loan-applications/" + state.applicationId + "/ai-review", {
+        method: "POST"
+      });
+      state.aiReview = data;
+      state.workflowId = getValue(data, "workflow_id", "workflowId");
+      state.applicationStatus = "AI_REVIEWED";
+      state.currentApplication = Object.assign({}, state.currentApplication || {}, { status: state.applicationStatus });
+      renderLoanCard();
+      renderAiSummary(data);
+      renderPolicyReferences(getPolicyReferences(data));
+      renderAgentLogs(getValue(data, "agent_results", "agentResults") || []);
+      return data;
+    }
+
+    async function fetchAiReports() {
+      requireApplication();
+      const reports = await apiRequest("/api/loan-applications/" + state.applicationId + "/ai-reports");
+      state.aiReport = Array.isArray(reports) && reports.length ? reports[0] : null;
+      renderAiReport(state.aiReport, reports);
+      return reports;
+    }
+
+    async function fetchAgentLogs() {
+      requireApplication();
+      let logs;
+      if (state.workflowId) {
+        logs = await apiRequest("/api/agent-workflows/" + encodeURIComponent(state.workflowId) + "/logs");
+      } else {
+        logs = await apiRequest("/api/loan-applications/" + state.applicationId + "/agent-logs");
+      }
+      state.agentLogs = Array.isArray(logs) ? logs : [];
+      renderAgentLogs(state.agentLogs);
+      return logs;
+    }
+
+    async function manualApproval(decision) {
+      requireApplication();
+      const data = await apiRequest("/api/approvals/" + state.applicationId + "/" + decision, {
+        method: "POST",
+        body: JSON.stringify({ comment: "visual demo manual decision: " + decision })
+      });
+      const finalStatus = getValue(data, "to_status", "toStatus") || decisionToStatus(decision);
+      state.applicationStatus = finalStatus;
+      state.currentApplication = Object.assign({}, state.currentApplication || {}, { status: finalStatus });
+      state.finalApprovalCompleted = true;
+      state.nextSuccessMessage = "最终审批已完成，如需重新演示请创建新的 loan application。";
+      setManualApprovalLocked(true);
+      renderLoanCard();
+      renderManualApproval(data);
+      await fetchApprovalHistory();
+      return data;
+    }
+
+    async function fetchApprovalHistory() {
+      requireApplication();
+      const data = await apiRequest("/api/approvals/" + state.applicationId + "/history");
+      state.approvalHistory = Array.isArray(data) ? data : [];
+      renderManualApprovalHistory(state.approvalHistory);
+      return data;
+    }
+
+    function renderLoanCard(payload = {}) {
+      const target = document.getElementById("loanCard");
+      const customer = payload.customer || state.currentCustomer || {};
+      const application = payload.application || state.currentApplication || {};
+      target.innerHTML = [
+        row("customerId", customer.id || state.customerId || "-"),
+        row("applicationId", application.id || state.applicationId || "-"),
+        row("amount", application.amount || "80000"),
+        row("termMonths", application.termMonths || "24"),
+        row("purpose", application.purpose || "interview demo loan"),
+        row("status", state.applicationStatus || application.status || "-")
+      ].join("");
+    }
+
+    function renderAiSummary(data) {
+      const target = document.getElementById("aiSummaryCard");
+      target.innerHTML = [
+        row("workflow_id", getValue(data, "workflow_id", "workflowId") || "-"),
+        row("final_decision", getValue(data, "final_decision", "finalDecision") || "-"),
+        row("risk_level", getValue(data, "risk_level", "riskLevel") || "-"),
+        row("risk_score", getValue(data, "risk_score", "riskScore") ?? "-"),
+        row("suggested_amount", getValue(data, "suggested_amount", "suggestedAmount") ?? "-"),
+        row("summary", data.summary || "-")
+      ].join("");
+    }
+
+    function renderAiReport(report, allReports) {
+      const target = document.getElementById("aiSummaryCard");
+      if (!report) {
+        target.innerHTML = '<div class="muted">暂无 AI report。</div>';
+        return;
+      }
+      target.innerHTML = [
+        row("ai_report_id", report.id || "-"),
+        row("summary", report.summary || "-"),
+        row("risk_level", report.riskLevel || "-"),
+        row("risk_score", report.riskScore ?? "-"),
+        row("report_count", Array.isArray(allReports) ? allReports.length : 1),
+        row("report_json", "<span class=\"muted\">详见 Raw JSON Panel</span>", true)
+      ].join("");
+    }
+
+    function renderPolicyReferences(references) {
+      const target = document.getElementById("policyCard");
+      if (!references.length) {
+        target.innerHTML = '<div class="muted">暂无制度引用。</div>';
+        return;
+      }
+      target.innerHTML = '<ul class="list">' + references.map((item) => {
+        const code = getValue(item, "policy_code", "policyCode") || "-";
+        const title = getValue(item, "section_title", "sectionTitle") || "";
+        const doc = getValue(item, "document_name", "documentName") || "";
+        const score = item.score !== undefined ? "score=" + item.score : "";
+        const content = item.content || "";
+        return '<li class="list-item">' +
+          '<div class="list-title"><span>' + escapeHtml(code) + '</span><span class="muted">' + escapeHtml(score) + '</span></div>' +
+          '<div>' + escapeHtml(title || doc || "制度条款") + '</div>' +
+          '<div class="muted">' + escapeHtml(doc) + '</div>' +
+          '<div class="muted">' + escapeHtml(content) + '</div>' +
+        '</li>';
+      }).join("") + '</ul>';
+    }
+
+    function renderAgentLogs(logs) {
+      const target = document.getElementById("agentLogsCard");
+      if (!Array.isArray(logs) || !logs.length) {
+        target.innerHTML = '<div class="muted">暂无 Agent logs。</div>';
+        return;
+      }
+      target.innerHTML = '<ul class="list">' + logs.map((item) => {
+        const name = getValue(item, "agent_name", "agentName") || "-";
+        const status = item.status || "-";
+        const duration = getValue(item, "duration_ms", "durationMs");
+        const input = getValue(item, "input_summary", "inputSummary") || "-";
+        const output = getValue(item, "output_summary", "outputSummary") || "-";
+        return '<li class="list-item">' +
+          '<div class="list-title"><span>' + escapeHtml(name) + '</span><span class="badge ok">' + escapeHtml(status) + '</span></div>' +
+          '<div class="muted">durationMs: ' + escapeHtml(duration ?? "-") + '</div>' +
+          '<div>inputSummary: ' + escapeHtml(input) + '</div>' +
+          '<div>outputSummary: ' + escapeHtml(output) + '</div>' +
+        '</li>';
+      }).join("") + '</ul>';
+    }
+
+    function renderManualApproval(data) {
+      const target = document.getElementById("manualApprovalCard");
+      target.innerHTML = [
+        row("approval_id", data.id || "-"),
+        row("from_status", data.fromStatus || "-"),
+        row("to_status", data.toStatus || "-"),
+        row("comment", data.comment || "-"),
+        row("说明", "这是最终审批状态，由人工审批接口写入。")
+      ].join("");
+    }
+
+    function renderManualApprovalHistory(history) {
+      const target = document.getElementById("manualApprovalCard");
+      if (!history.length) {
+        target.innerHTML = '<div class="muted">暂无审批历史。</div>';
+        return;
+      }
+      target.innerHTML = '<ul class="list">' + history.map((item) => {
+        return '<li class="list-item">' +
+          '<div class="list-title"><span>' + escapeHtml(item.fromStatus || "-") + ' -> ' + escapeHtml(item.toStatus || "-") + '</span><span class="muted">#' + escapeHtml(item.id || "-") + '</span></div>' +
+          '<div>' + escapeHtml(item.comment || "-") + '</div>' +
+        '</li>';
+      }).join("") + '</ul>';
+    }
+
+    function renderManualApprovalReset() {
+      document.getElementById("manualApprovalCard").innerHTML = '<div class="muted">人工审批后展示最终状态。</div>';
+    }
+
+    function getPolicyReferences(data) {
+      const report = data.report || {};
+      return getValue(report, "policy_references", "policyReferences") || [];
+    }
+
+    function updateStatusPanel() {
+      document.getElementById("loginStatus").textContent = state.token ? "已登录" : "未登录";
+      document.getElementById("currentApplicationId").textContent = state.applicationId || "-";
+      document.getElementById("currentWorkflowId").textContent = state.workflowId || "-";
+    }
+
+    function setManualApprovalLocked(locked) {
+      document.querySelectorAll("[data-manual-approval]").forEach((button) => {
+        button.disabled = locked;
+        button.dataset.locked = locked ? "true" : "false";
+      });
+    }
+
+    function decisionToStatus(decision) {
+      if (decision === "approve") {
+        return "APPROVED";
+      }
+      if (decision === "reject") {
+        return "REJECTED";
+      }
+      return "NEED_MORE_INFO";
+    }
+
+    function setBadge(id, ok, text) {
+      const target = document.getElementById(id);
+      target.className = "badge " + (ok ? "ok" : "error");
+      target.textContent = text;
+    }
+
+    function setMessage(text, type) {
+      const target = document.getElementById("message");
+      target.className = "message " + (type === "ok" ? "ok" : type === "error" ? "error" : "");
+      target.textContent = text;
+    }
+
+    function setRawJson(value) {
+      document.getElementById("rawJson").textContent = JSON.stringify(value ?? {}, null, 2);
+    }
+
+    function row(label, value, rawValue = false) {
+      const displayValue = rawValue ? value : escapeHtml(value);
+      return '<div class="kv"><span class="label">' + escapeHtml(label) + '</span><span class="value">' + displayValue + '</span></div>';
+    }
+
+    function getValue(obj, ...keys) {
+      if (!obj || typeof obj !== "object") {
+        return undefined;
+      }
+      for (const key of keys) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          return obj[key];
+        }
+      }
+      return undefined;
+    }
+
+    function requireLogin() {
+      if (!state.token) {
+        throw new Error("请先登录 demo admin");
+      }
+    }
+
+    function requireApplication() {
+      requireLogin();
+      if (!state.applicationId) {
+        throw new Error("请先创建 loan application");
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    updateStatusPanel();
+  </script>
+</body>
+</html>
