@@ -25,6 +25,7 @@ class DemoPageStaticTest {
         assertTrue(html.contains("客户申请端"));
         assertTrue(html.contains("银行审批工作台"));
         assertTrue(html.contains("一键准备演示数据"));
+        assertTrue(html.contains("继续尝试登录"));
         assertTrue(html.contains("translateSummary"));
         assertTrue(html.contains("Raw JSON 折叠面板"));
         assertTrue(html.contains("LLM Provider"));

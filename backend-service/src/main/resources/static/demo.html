@@ -747,11 +747,31 @@
     }
 
     async function prepareDemoData() {
-      await initAdmin();
-      await loginAdmin();
-      await createCustomer();
-      await createLoanApplication();
-      await submitApplication();
+      try {
+        await initAdmin();
+      } catch (error) {
+        setMessage("初始化 admin 失败，demo admin 可能已存在，继续尝试登录。", "info");
+      }
+      try {
+        await loginAdmin();
+      } catch (error) {
+        throw new Error("登录 demo admin 失败：" + error.message);
+      }
+      try {
+        await createCustomer();
+      } catch (error) {
+        throw new Error("创建 demo customer 失败：" + error.message);
+      }
+      try {
+        await createLoanApplication();
+      } catch (error) {
+        throw new Error("创建 loan application 失败：" + error.message);
+      }
+      try {
+        await submitApplication();
+      } catch (error) {
+        throw new Error("提交申请失败：" + error.message);
+      }
       state.nextSuccessMessage = "演示申请已准备好，可以触发 AI Review。";
       switchTab("bank");
       return { applicationId: state.applicationId, status: state.applicationStatus };
