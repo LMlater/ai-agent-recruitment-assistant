@@ -1,5 +1,13 @@
 # Iteration Log
 
+## 真实双服务 E2E 联调验证
+
+- 本地 `agent-service` 与 `backend-service` 均已启动并通过 readiness 检查，`ok=true`，backend/agent 均 reachable。
+- `python scripts/run_e2e_credit_review_demo.py` 已跑通真实 Java + Python 双服务链路，`application_id=5`，`ai_report_id=3`，`agent_log_count=5`，`decision_agent_llm_provider=mock`。
+- `python scripts/run_e2e_credit_review_demo.py --application-id 5 --manual-decision approve` 已跑通人工审批演示，`manual_decision_status=APPROVED`。
+- 本次联调使用 mock LLM，未调用真实百炼；AI review 只产生 `final_decision_from_ai` 辅助建议，最终 `APPROVED` 由人工审批接口完成。
+- 本次只更新文档记录，未提交 MySQL 密码、API Key、`.env` 或本地配置文件，未修改业务代码或数据库表结构。
+
 ## 第 6 轮：演示包装与面试交付版完善
 
 - 新增 `docs/DEMO_GUIDE.md`，整理项目一句话介绍、本地演示顺序、E2E 输出字段解释和常见问题。

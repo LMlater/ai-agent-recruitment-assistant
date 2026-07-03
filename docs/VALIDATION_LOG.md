@@ -1,5 +1,93 @@
 # Validation Log
 
+## 真实双服务 E2E 联调验证
+
+日期：2026-07-03
+
+### readiness
+
+```powershell
+python scripts\check_demo_readiness.py
+```
+
+结果：通过，`ok=true`。输出摘要：
+
+```json
+{
+  "backend": {"reachable": true},
+  "agent": {"reachable": true},
+  "security": {
+    "env_file_tracked": false,
+    "prints_api_key": false
+  }
+}
+```
+
+本次 readiness 只记录服务可达性和安全检查结果，不记录 MySQL 密码或任何 API Key。
+
+### E2E demo
+
+```powershell
+python scripts\run_e2e_credit_review_demo.py
+```
+
+结果：通过。输出摘要：
+
+```json
+{
+  "application_id": 5,
+  "ai_review_triggered": true,
+  "workflow_id": "36a3af22-51b3-443c-8713-3e6ba9657586",
+  "final_decision_from_ai": "APPROVE",
+  "risk_level": "LOW",
+  "risk_score": 100,
+  "suggested_amount": 80000.0,
+  "ai_report_id": 3,
+  "agent_log_count": 5,
+  "decision_agent_llm_provider": "mock",
+  "policy_codes": ["R-004", "M-003", "P-002", "P-003", "P-004"],
+  "manual_approval_required": true
+}
+```
+
+说明：Java 后端已保存 AI report，Agent logs 数量为 `5`。`final_decision_from_ai` 是 AI 审批辅助建议，不是最终数据库审批状态。
+
+### 人工审批 demo
+
+```powershell
+python scripts\run_e2e_credit_review_demo.py --application-id 5 --manual-decision approve
+```
+
+结果：通过。输出摘要：
+
+```json
+{
+  "application_id": 5,
+  "ai_review_triggered": true,
+  "workflow_id": "65aa00cd-2326-4e58-ad76-175932341d25",
+  "final_decision_from_ai": "APPROVE",
+  "risk_level": "LOW",
+  "risk_score": 100,
+  "suggested_amount": 80000.0,
+  "ai_report_id": 4,
+  "agent_log_count": 5,
+  "decision_agent_llm_provider": "mock",
+  "policy_codes": ["R-004", "M-003", "P-002", "P-003", "P-004"],
+  "manual_approval_required": true,
+  "manual_decision_applied": true,
+  "manual_decision_status": "APPROVED"
+}
+```
+
+说明：最终 `APPROVED` 由人工审批接口完成，AI review 没有自动写入最终审批状态。
+
+### 安全与边界
+
+- 本次使用 `mock` LLM，未调用真实百炼。
+- 未记录 MySQL 密码，未记录 API Key。
+- 未提交 `.env`、`application-local.yml`、`*.local` 或任何本地配置文件。
+- 未改业务代码，未改数据库表结构。
+
 ## 本地真实双服务 E2E 联调验证
 
 日期：2026-07-03

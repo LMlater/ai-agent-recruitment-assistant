@@ -1,5 +1,13 @@
 # Conversation Recovery
 
+## 真实双服务 E2E 联调验证记录
+
+1. 2026-07-03 本地真实双服务联调已通过：`agent-service` 运行在 `http://localhost:8001`，`backend-service` 运行在 `http://localhost:8080`。
+2. `python scripts/check_demo_readiness.py` 返回 `ok=true`，backend 和 agent 均 `reachable=true`，`env_file_tracked=false`，`prints_api_key=false`。
+3. `python scripts/run_e2e_credit_review_demo.py` 成功，`application_id=5`，`workflow_id=36a3af22-51b3-443c-8713-3e6ba9657586`，`risk_level=LOW`，`risk_score=100`，`ai_report_id=3`，`agent_log_count=5`，`decision_agent_llm_provider=mock`。
+4. `python scripts/run_e2e_credit_review_demo.py --application-id 5 --manual-decision approve` 成功，`manual_decision_status=APPROVED`，最终审批由人工审批接口完成。
+5. 本次联调使用 mock LLM，没有调用真实百炼；不得在文档或提交中记录 MySQL 密码、API Key、`.env` 或本地配置文件。
+
 ## 第 6 轮最新恢复要点
 
 1. 面试交付版入口已经整理到 `README.md` 的“快速演示入口”，核心文档包括 `docs/DEMO_GUIDE.md`、`docs/ARCHITECTURE.md`、`docs/API_WALKTHROUGH.md`、`docs/INTERVIEW_SCRIPT.md`、`docs/RESUME_NOTES.md` 和 `docs/VALIDATION_LOG.md`。
