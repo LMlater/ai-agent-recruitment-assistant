@@ -1,24 +1,24 @@
-# Mock Material Review Policy
+# 模拟材料审核制度 / Mock Material Review Policy
 
-This document is simulated for learning and project demonstration. It is not a real bank policy.
-本项目制度文档是模拟制度，只用于学习和工程演示，不代表真实银行内部制度。
+本项目制度文档是模拟制度，只用于学习和工程演示，不代表真实银行内部制度、授信政策或审批规则。
+保留少量英文术语仅用于说明 AI、RAG、workflow 等工程模块含义。
 
-## M-001 Required Application Materials
+## M-001 申请材料完整性要求
 
-The application package should include borrower identity eligibility, valid income proof, loan purpose information, and available asset proof. Material completeness must be checked before risk and compliance conclusions are used by staff.
-申请材料至少应覆盖基础资格、收入证明、贷款用途和可选资产证明；材料完整性结论应早于风险和合规结论输出。
+申请材料至少应覆盖借款人基础资格、可核验收入证明、贷款用途说明和可选资产证明。
+材料完整性结论应先于风险评分和合规提示输出；材料不完整时，系统应提示人工补件，不得直接形成最终审批结论。
 
-## M-002 Missing Income Proof or Purpose Information
+## M-002 收入证明或贷款用途缺失处理
 
-Missing income proof, missing loan purpose, invalid term, or amount errors should trigger supplementary material review. A reviewer should request follow-up material instead of approving directly.
-收入证明缺失、贷款用途不清、期限或金额异常时，应触发补件，不得直接进入自动审批。
+收入证明缺失、贷款用途不清、期限异常或金额填写异常时，应触发补充材料复核。
+审批人员应要求客户补充说明或补齐材料，不得因模型分数较高而跳过材料审查。
 
-## M-003 Asset Proof Review
+## M-003 资产证明复核要求
 
-Asset proof may improve confidence in repayment capacity, but it cannot replace income proof, debt review, overdue review, or compliance guardrails. No asset proof should be recorded as a material warning.
-资产证明可作为偿付能力辅助依据，但不能替代收入、负债、逾期和合规审查；缺少资产证明时应提示人工材料复核。
+资产证明可作为偿付能力的辅助依据，可用于解释还款来源和风险缓释情况。
+资产证明不能替代收入证明、负债审查、逾期审查或合规边界校验；缺少资产证明时，应在材料提示中记录并交由人工复核。
 
-## M-004 Material Review Traceability
+## M-004 材料复核留痕与可追溯
 
-Material review actions, supplementary requests, and material changes must be traceable in the approval record and audit log. High-risk or incomplete applications should enter manual review.
-材料补充、修改和复核动作应记录在审批链路与审计日志中，方便后续追溯。
+材料补充、修改、复核和审批动作应记录在审批链路与审计日志中，方便后续追溯。
+高风险或材料不完整的申请应进入人工审查流程，AI 仅提供材料完整性和风险辅助提示。

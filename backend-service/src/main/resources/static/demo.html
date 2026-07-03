@@ -1064,7 +1064,7 @@
         target.innerHTML = '<div class="muted">暂无制度引用。</div>';
         return;
       }
-      target.innerHTML = '<ul class="list">' + references.map((item) => {
+      target.innerHTML = '<ul class="list">' + uniquePolicyReferences(references).map((item) => {
         const code = getValue(item, "policy_code", "policyCode") || "-";
         const title = getValue(item, "section_title", "sectionTitle") || "";
         const doc = getValue(item, "document_name", "documentName") || "";
@@ -1077,6 +1077,21 @@
           '<div class="muted">' + escapeHtml(content) + '</div>' +
         '</li>';
       }).join("") + '</ul>';
+    }
+
+    function uniquePolicyReferences(references) {
+      const seenPolicyCodes = new Set();
+      return references.filter((item) => {
+        const code = getValue(item, "policy_code", "policyCode");
+        if (!code) {
+          return true;
+        }
+        if (seenPolicyCodes.has(code)) {
+          return false;
+        }
+        seenPolicyCodes.add(code);
+        return true;
+      });
     }
 
     function renderAgentLogs(logs) {

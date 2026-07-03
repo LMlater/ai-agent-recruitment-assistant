@@ -1,24 +1,24 @@
-# Mock Risk Control Policy
+# 模拟风险控制制度 / Mock Risk Control Policy
 
-This document is simulated for learning and project demonstration. It is not a real bank policy.
-本项目制度文档是模拟制度，只用于学习和工程演示，不代表真实银行内部制度。
+本项目制度文档是模拟制度，只用于学习和工程演示，不代表真实银行内部制度、授信政策或审批规则。
+保留少量英文术语仅用于说明 AI、ML、RAG 等工程模块含义。
 
-## R-001 Debt-to-Income Ratio Control
+## R-001 债务收入比控制
 
-Debt-to-income ratio is a key repayment-capacity indicator. Debt-to-income ratio above 40% should receive attention, above 60% should trigger medium-risk manual review, and above 80% should be treated as high repayment pressure.
-债务收入比是偿债能力核心指标；债务收入比较高时，应结合贷款金额、收入证明和人工复核判断，不得单靠模型通过。
+债务收入比是偿债能力审查的核心指标。债务收入比超过 40% 时应提示关注，超过 60% 时应进入中风险人工复核，超过 80% 时应视为较高还款压力。
+系统可结合收入证明、贷款金额、既有负债和逾期记录形成风险提示，但不得仅凭模型低风险结果直接放行。
 
-## R-002 Overdue Records and Credit History
+## R-002 逾期记录与信用历史审查
 
-Overdue records should reduce the mock risk score. Multiple overdue records, recent overdue behavior, or severe overdue history should trigger high-risk manual review before any final business decision.
-存在多次逾期记录时，应降低风险评分并进入高风险人工复核；逾期风险不能被资产证明或模型低风险结果直接抵消。
+逾期记录应降低模拟风险评分。存在多次逾期、近期逾期或严重逾期历史时，应触发高风险人工复核。
+逾期风险不能被资产证明、收入证明或 ML 模型低风险信号直接抵消，最终结论必须由人工审批确认。
 
-## R-003 Medium and High Risk Manual Review
+## R-003 中高风险人工复核要求
 
-Medium-risk applications should request additional review of repayment capacity and materials. High-risk customers must be reviewed by a human reviewer before any final approval, rejection, or supplementary-material conclusion.
-中风险申请应补充核验收入、负债、用途和资产材料；高风险申请必须人工复核后才能形成最终业务结论。
+中风险申请应补充核验收入、负债、贷款用途和资产材料。高风险申请必须由人工复核后才能形成最终通过、拒绝或补件结论。
+AI Review 只能给出辅助建议，不得自动把申请推进到 APPROVED、REJECTED 或 NEED_MORE_INFO。
 
-## R-004 Rule and ML Model Fusion Guardrail
+## R-004 规则与机器学习模型融合边界
 
-Rule reasons and ML model signals are auxiliary risk indicators. If rule and model levels differ, the workflow should consider the higher risk level and keep the model probability, version, and explanation in the report.
-规则评分和机器学习模型均为辅助信号；当模型提示中高风险时，应在报告中保留模型概率、版本、解释和融合策略。
+规则评分和机器学习模型均为辅助风险信号。规则结果与模型结果不一致时，应参考较高风险侧，并在报告中保留模型概率、模型版本、融合策略和主要解释。
+模型输出不得覆盖明确的人工复核要求；审批系统应展示依据，最终审批状态仍由人工接口确认。

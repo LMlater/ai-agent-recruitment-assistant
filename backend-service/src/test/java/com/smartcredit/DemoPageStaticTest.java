@@ -32,6 +32,8 @@ class DemoPageStaticTest {
         assertTrue(html.contains("LLM Provider"));
         assertTrue(html.contains("LLM Used"));
         assertTrue(html.contains("LLM Error"));
+        assertTrue(html.contains("function uniquePolicyReferences"));
+        assertTrue(html.contains("seenPolicyCodes"));
         assertTrue(html.contains("state.llmInfo.provider || \"mock\""));
         assertTrue(html.contains("action: label"));
         assertTrue(html.contains("error: error.message"));

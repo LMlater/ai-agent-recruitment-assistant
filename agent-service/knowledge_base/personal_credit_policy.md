@@ -1,24 +1,24 @@
-# Mock Personal Credit Policy
+# 模拟个人信贷制度 / Mock Personal Credit Policy
 
-This document is simulated for learning and project demonstration. It is not a real bank policy.
-本项目制度文档是模拟制度，只用于学习和工程演示，不代表真实银行内部制度。
+本项目制度文档是模拟制度，只用于学习和工程演示，不代表真实银行内部制度、授信政策或审批规则。
+保留少量英文术语仅用于说明 AI、ML、RAG 等工程模块含义。
 
-## P-001 Adult Borrower and Basic Eligibility
+## P-001 成年借款人与基础准入
 
-Personal credit applicants should be adult borrowers. If applicant age is below 18, the application must not enter a direct approval path and should request supplementary handling or manual review.
-个人信贷申请人应为成年人；年龄不足 18 岁时，应补充核验基础身份与申请资格，不能由 AI 自动给出通过结论。
+个人信贷申请人应为成年人，并具备基础申请资格。
+年龄不足 18 岁或基础身份信息无法核验时，应进入补件或人工复核流程，不能由 AI 自动给出通过结论。
 
-## P-002 Income Proof and Stable Work History
+## P-002 收入证明与稳定工作年限
 
-Applicants should provide valid income proof and stable work history information. Monthly income, work years, and income source should be reviewed together before a final manual approval decision.
-申请人应提交可核验收入证明；工作年限不足一年、收入证明缺失或收入明显不稳定时，应进入补充材料或人工复核。
+申请人应提交可核验收入证明，并提供相对稳定的工作年限信息。
+审批辅助系统应结合月收入、工作年限、收入来源稳定性和现有负债进行判断；工作年限不足一年、收入证明缺失或收入明显不稳定时，应进入补充材料或人工复核。
 
-## P-003 Amount-to-Income and Repayment Capacity
+## P-003 贷款金额、收入比例与还款能力
 
-The requested amount should remain proportionate to monthly income and repayment capacity. Amount greater than 12 months of income requires stricter review; amount greater than 24 months of income should be treated as high repayment pressure.
-贷款金额与收入比例是还款能力审查重点；申请金额超过年收入或明显高于收入承受能力时，应结合债务收入比、逾期记录和人工复核意见处理。
+贷款金额与收入比例是还款能力审查重点。申请金额超过 12 个月收入时应提高审查强度，超过 24 个月收入时应视为较高还款压力。
+系统应结合债务收入比、逾期记录、资产证明和人工复核意见综合判断，不得只依据单一评分通过。
 
-## P-004 Personal Credit Decision Boundary
+## P-004 个人信贷审批边界
 
-AI and ML model output must not automatically approve or reject a personal credit application. Final approval, rejection, or supplementary material handling must be confirmed by a human reviewer and retained in audit records.
-AI 结果只能作为审批辅助；最终通过、拒绝或补件结论必须由人工审批确认，并保留审查依据。
+AI 和 ML 模型输出只能作为个人信贷审批辅助建议，不得自动通过或拒绝申请。
+最终 APPROVED、REJECTED 或 NEED_MORE_INFO 必须由人工审批接口确认，并在审批历史和审计记录中保留依据。

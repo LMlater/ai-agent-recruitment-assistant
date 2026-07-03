@@ -1,24 +1,24 @@
-# Mock Compliance Review Policy
+# 模拟合规复核制度 / Mock Compliance Review Policy
 
-This document is simulated for learning and project demonstration. It is not a real bank policy.
-本项目制度文档是模拟制度，只用于学习和工程演示，不代表真实银行内部制度。
+本项目制度文档是模拟制度，只用于学习和工程演示，不代表真实银行内部制度、授信政策或审批规则。
+保留少量英文术语仅用于说明 AI、Agent logs、audit trace 等工程模块含义。
 
-## C-001 AI Assistance Only
+## C-001 AI 辅助定位
 
-AI output can only be used as approval assistance and cannot be treated as an automatic decision. AI must not automatically approve, reject, or bypass manual review for personal credit applications.
-AI 输出仅可作为审批辅助，不能自动审批、自动拒绝或绕过人工复核。
+AI 输出仅可作为审批辅助建议，不能被视为自动审批结论。
+个人信贷申请不得由 AI 自动通过、自动拒绝或绕过人工复核；系统应清晰展示风险依据和制度引用。
 
-## C-002 Final Manual Approval Responsibility
+## C-002 最终人工审批责任
 
-Final approval, rejection, or supplementary-material handling must be completed by manual review APIs or reviewer operations. The report may cite policy references, but the reviewer remains responsible for the final decision.
-最终通过、拒绝或补件处理必须由人工审批动作完成；系统报告只能提供依据和建议。
+最终通过、拒绝或补件处理必须由人工审批接口或审批人员操作完成。
+AI Review 报告可以引用制度条款和模型信号，但最终责任仍由人工审批环节确认并留痕。
 
-## C-003 Audit Trace and Agent Logs
+## C-003 审计留痕与 Agent 执行日志
 
-Every review workflow should retain agent execution logs, policy references, model signal details, decision reasons, and audit logs for traceability.
 每次审查应保留 Agent 执行日志、制度引用、模型信号、决策原因和审计记录。
+日志应能展示 IntakeAgent、RiskAgent、PolicyAgent、ComplianceAgent、DecisionAgent 的执行状态和输出摘要，方便面试演示和工程排查。
 
-## C-004 Data Privacy and Demonstration Boundary
+## C-004 数据脱敏与演示边界
 
-Personal sensitive data should be masked; real identity card numbers, phone numbers, bank internal policies, and production customer data must not be stored in this repository.
-项目仅使用公开数据映射和模拟样例，不保存真实银行客户资料、真实证件号、真实手机号或内部制度。
+个人敏感信息应进行脱敏处理；仓库中不得保存真实身份证号、手机号、真实银行内部制度或生产客户数据。
+项目仅使用公开数据映射、模拟制度和 mock customer，用于学习、工程演示和面试讲解。
