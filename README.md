@@ -6,9 +6,9 @@
 
 - 演示总指南：[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md)
 - 架构图与职责边界：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- API walkthrough：[docs/API_WALKTHROUGH.md](docs/API_WALKTHROUGH.md)
+- API 演示流程：[docs/API_WALKTHROUGH.md](docs/API_WALKTHROUGH.md)
 - 面试讲解稿：[docs/INTERVIEW_SCRIPT.md](docs/INTERVIEW_SCRIPT.md)
-- 简历 bullet：[docs/RESUME_NOTES.md](docs/RESUME_NOTES.md)
+- 简历要点：[docs/RESUME_NOTES.md](docs/RESUME_NOTES.md)
 - 验证日志：[docs/VALIDATION_LOG.md](docs/VALIDATION_LOG.md)
 
 常用命令：
@@ -85,8 +85,8 @@ python scripts/run_e2e_credit_review_demo.py --application-id 1 --manual-decisio
 
 ```text
 backend-service  -> Spring Boot 3 + MyBatis + MySQL + Redis + JWT
-agent-service    -> FastAPI + LangGraph + Mock RAG/LLM extension points
-MySQL/Redis      -> docker-compose local infrastructure
+agent-service    -> FastAPI + LangGraph + Mock RAG/LLM 扩展点
+MySQL/Redis      -> docker-compose 本地基础设施
 ```
 
 核心原则：AI 只生成审批辅助建议，不自动做最终通过或拒绝。最终状态 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须通过人工审批接口写入，并保留审批记录和审计日志。
@@ -168,7 +168,7 @@ curl -X POST http://localhost:8001/api/v1/reviews \
 
 ## Mock 说明
 
-- RiskAgent 使用规则评分 + Logistic Regression baseline 模型概率融合，模型只作为辅助信号。
+- RiskAgent 使用规则评分 + Logistic Regression 基线模型概率融合，模型只作为辅助信号。
 - PolicyAgent 使用本地 Markdown 关键词检索，不是向量库 RAG。
 - DecisionAgent 输出审批建议，不代表自动审批。
 - 当前 seed 数据是模拟数据，不包含真实身份证、手机号或银行客户信息。
@@ -251,9 +251,9 @@ curl.exe -s -X POST "$base/api/approvals/$applicationId/need-more-info" `
   -d '{"comment":"please provide additional income proof"}'
 ```
 
-## 第 2 轮数据与模型 baseline
+## 第 2 轮数据与模型基线
 
-本轮引入 UCI German Credit / Statlog German Credit 公开数据集，完成下载、清洗映射、Logistic Regression baseline 训练、模型评估、模型 artifact 保存和模拟 seed SQL 生成。第 2 轮第二段已将模型接入 `RiskAgent`，形成“规则评分 + ML 模型概率”的融合评估；模型仍只作为审批辅助信号，不自动审批。
+本轮引入 UCI German Credit / Statlog German Credit 公开数据集，完成下载、清洗映射、Logistic Regression 基线模型训练、模型评估、模型文件保存和模拟 seed SQL 生成。第 2 轮第二段已将模型接入 `RiskAgent`，形成“规则评分 + ML 模型概率”的融合评估；模型仍只作为审批辅助信号，不自动审批。
 
 运行命令：
 
@@ -275,11 +275,11 @@ pytest tests -q
 - 评估案例：`data/eval/model_eval_cases.jsonl`
 - 模拟 seed SQL：`data/seed/generated_customers_seed.sql`、`data/seed/generated_loan_applications_seed.sql`
 
-当前 baseline 指标：accuracy 0.6000、precision 0.3936、recall 0.6167、F1 0.4805、ROC-AUC 0.6787。详见 `docs/MODEL_BASELINE.md`。
+当前基线模型指标：accuracy 0.6000、precision 0.3936、recall 0.6167、F1 0.4805、ROC-AUC 0.6787。详见 `docs/MODEL_BASELINE.md`。
 
-第 2 轮第二段输出的 `risk_assessment` 同时包含 `rule_score`、`rule_level`、`rule_reasons`、`model_risk_probability`、`model_risk_level`、`model_explanation`、`model_used`、`model_error`、融合后的 `risk_score` 和 `risk_level`。如果模型 artifact 不可用，Agent 会降级为纯规则评分并保持 AgentResult 为 `SUCCESS`。
+第 2 轮第二段输出的 `risk_assessment` 同时包含 `rule_score`、`rule_level`、`rule_reasons`、`model_risk_probability`、`model_risk_level`、`model_explanation`、`model_used`、`model_error`、融合后的 `risk_score` 和 `risk_level`。如果模型文件不可用，Agent 会降级为纯规则评分并保持 AgentResult 为 `SUCCESS`。
 
-## 第 3 轮第一段：制度 RAG baseline
+## 第 3 轮第一段：制度 RAG 基线
 
 本轮将 `PolicyAgent` 从本地 Markdown 关键词检索升级为可测试、可解释、可引用来源的本地制度检索：
 
@@ -335,6 +335,6 @@ python scripts/run_llm_review_demo.py --real
 python scripts/run_llm_review_demo.py --compact
 ```
 
-`--mock` 用于稳定展示，不调用百炼；`--real` 使用本地百炼配置，可能受网络和模型响应影响；`--compact` 使用更短上下文和较小生成参数，更适合真实模型演示。真实 LLM 超时时 fallback 是预期保护机制，不是系统崩溃。
+`--mock` 用于稳定展示，不调用百炼；`--real` 使用本地百炼配置，可能受网络和模型响应影响；`--compact` 使用更短上下文和较小生成参数，更适合真实模型演示。真实 LLM 超时时会触发 fallback，这是预期保护机制，不是系统崩溃。
 
 配置方式和安全边界见 `docs/LLM_INTEGRATION.md`。仓库只提交 `.env.example` 占位符，不提交真实 API Key。

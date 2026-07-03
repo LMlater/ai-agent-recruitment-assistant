@@ -1,10 +1,10 @@
 # backend-service
 
-Spring Boot service for SmartCreditMultiAgent. It owns login/JWT, customer management, loan applications, Java-to-Python AI review calls, AI report persistence, agent execution logs, manual approval, and audit logs.
+这是 SmartCreditMultiAgent 的 Spring Boot 后端服务，负责登录/JWT、客户管理、贷款申请、Java 调 Python AI review、AI report 入库、Agent execution logs、人工审批和审计日志。
 
-## Interview Demo Package
+## 面试演示材料入口
 
-Start from the repository-level delivery docs when preparing an interview demo:
+准备面试演示时，优先从仓库根目录的交付文档开始看：
 
 - `../docs/DEMO_GUIDE.md`
 - `../docs/ARCHITECTURE.md`
@@ -12,35 +12,35 @@ Start from the repository-level delivery docs when preparing an interview demo:
 - `../docs/INTERVIEW_SCRIPT.md`
 - `../docs/VALIDATION_LOG.md`
 
-Readiness check from the repository root:
+从仓库根目录运行 readiness 检查：
 
 ```bash
 python scripts/check_demo_readiness.py
 ```
 
-This backend remains the system of record for final manual approval. AI review can save reports and logs, but final `APPROVED`, `REJECTED`, or `NEED_MORE_INFO` states must go through `/api/approvals/{applicationId}/...`.
+这个后端服务仍然是最终人工审批状态的写入入口。AI review 可以保存报告和日志，但最终 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须通过 `/api/approvals/{applicationId}/...` 人工审批接口写入。
 
-## Run
+## 启动服务
 
-1. Start MySQL and Redis from the repository root:
+1. 从仓库根目录启动 MySQL 和 Redis：
 
 ```bash
 docker compose up -d mysql redis
 ```
 
-2. Start the Python agent service on port 8001.
+2. 启动 Python agent-service，端口为 8001。
 
-3. Start this service:
+3. 启动当前 Java 后端服务：
 
 ```bash
 mvn spring-boot:run
 ```
 
-Swagger UI is available at `http://localhost:8080/swagger-ui.html`.
+Swagger UI 地址为 `http://localhost:8080/swagger-ui.html`。
 
-## First Requests
+## 首次请求
 
-Initialize an administrator when the user table is empty:
+当用户表为空时，初始化管理员账号：
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/init-admin \
@@ -48,7 +48,7 @@ curl -X POST http://localhost:8080/api/auth/init-admin \
   -d "{\"username\":\"admin\",\"password\":\"Admin@123456\",\"displayName\":\"Admin\"}"
 ```
 
-Login:
+登录：
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
@@ -56,19 +56,19 @@ curl -X POST http://localhost:8080/api/auth/login \
   -d "{\"username\":\"admin\",\"password\":\"Admin@123456\"}"
 ```
 
-Use the returned JWT as `Authorization: Bearer <token>` for protected APIs.
+后续受保护接口使用返回的 JWT，格式为 `Authorization: Bearer <token>`。
 
-## Core Flow
+## 核心流程
 
-1. Create a masked customer under `/api/customers`.
-2. Create a loan application under `/api/loan-applications`.
-3. Submit it with `/api/loan-applications/{id}/submit`.
-4. Run AI assistance with `/api/loan-applications/{id}/ai-review`.
-5. Use `/api/approvals/{applicationId}/approve`, `/reject`, or `/need-more-info` for the final human decision.
+1. 通过 `/api/customers` 创建脱敏客户。
+2. 通过 `/api/loan-applications` 创建贷款申请。
+3. 通过 `/api/loan-applications/{id}/submit` 提交申请。
+4. 通过 `/api/loan-applications/{id}/ai-review` 执行 AI 审批辅助。
+5. 通过 `/api/approvals/{applicationId}/approve`、`/reject` 或 `/need-more-info` 执行最终人工审批。
 
-## Local Demo Flow
+## 本地演示流程
 
-PowerShell examples below use `curl.exe`. AI review is available for `SUBMITTED` applications, and can be re-run from `AI_REVIEWED` only for demo or reassessment. Final statuses must go through manual approval APIs instead of `PATCH /api/loan-applications/{id}/status`.
+下面示例使用 PowerShell + `curl.exe`。AI review 可以在 `SUBMITTED` 状态执行；为了演示复评，也允许在 `AI_REVIEWED` 状态再次执行。最终审批状态必须走人工审批 API，不能通过 `PATCH /api/loan-applications/{id}/status` 直接设置。
 
 ```powershell
 $base = "http://localhost:8080"
@@ -123,7 +123,7 @@ curl.exe -s "$base/api/approvals/$applicationId/history" `
   -H "Authorization: Bearer $token"
 ```
 
-Alternative final human decisions:
+其它人工最终决策示例：
 
 ```powershell
 curl.exe -s -X POST "$base/api/approvals/$applicationId/reject" `
@@ -137,11 +137,11 @@ curl.exe -s -X POST "$base/api/approvals/$applicationId/need-more-info" `
   -d '{"comment":"please provide additional repayment capacity proof"}'
 ```
 
-## Round 5 End-to-End Demo
+## 第 5 轮：端到端 demo
 
-The project-level script `../scripts/run_e2e_credit_review_demo.py` calls this backend over HTTP. The backend then calls `agent-service`, saves the AI decision report, saves agent execution logs, and keeps the loan application at `AI_REVIEWED` until a human approval API is called.
+项目级脚本 `../scripts/run_e2e_credit_review_demo.py` 会通过 HTTP 调用当前后端服务。后端再调用 `agent-service`，保存 AI decision report 和 Agent execution logs，并把贷款申请保持在 `AI_REVIEWED`，直到人工审批 API 被调用。
 
-Start services first:
+先启动两个服务：
 
 ```bash
 cd agent-service
@@ -153,7 +153,7 @@ cd backend-service
 mvn spring-boot:run
 ```
 
-Run the E2E demo from the repository root:
+从仓库根目录运行 E2E demo：
 
 ```bash
 python scripts/run_e2e_credit_review_demo.py
@@ -161,4 +161,4 @@ python scripts/run_e2e_credit_review_demo.py --application-id 1
 python scripts/run_e2e_credit_review_demo.py --application-id 1 --manual-decision approve
 ```
 
-The script reads `BACKEND_BASE_URL` when a non-default backend address is needed. It never reads or prints DashScope/Bailian keys; real LLM usage is controlled only by the already-running `agent-service` configuration. `DecisionAgent.result.decision_report_generation` is preserved in the Java response contract and summarized into `agent_execution_log.output_summary` without changing database schema.
+如果后端地址不是默认值，可以通过 `BACKEND_BASE_URL` 覆盖。脚本不会读取或打印 DashScope/百炼密钥；是否使用真实 LLM 只由已经启动的 `agent-service` 配置决定。`DecisionAgent.result.decision_report_generation` 会保留在 Java 响应合约中，并摘要写入 `agent_execution_log.output_summary`，不需要修改数据库表结构。
