@@ -41,22 +41,21 @@ mvn spring-boot:run
 http://localhost:8080/demo.html
 ```
 
-页面是原生 HTML + CSS + JavaScript，只用于本地面试演示，不是生产前端。推荐点击顺序：
+页面是原生 HTML + CSS + JavaScript，只用于本地面试演示，不是生产前端。新版页面分为两个 Tab：
 
-1. 检查 backend 状态。
-2. 检查 agent-service 状态。
-3. 初始化 demo admin；如果 admin 已存在，可以继续登录。
-4. 登录 demo admin。
-5. 创建 demo customer。
-6. 创建 loan application。
-7. 提交申请。
-8. 触发 AI Review。
-9. 查询 AI Reports。
-10. 查询 Agent Logs。
-11. 执行 Approve、Reject 或 Need More Info 中的一种人工审批。
-12. 查询审批历史。
+1. 客户申请端：展示脱敏客户信息、贷款金额、期限、用途和提交状态。
+2. 银行审批工作台：展示申请详情、AI Review、风险评分、制度引用、Agent 日志时间线、LLM 信息、人工审批和审批历史。
 
-页面会展示 Loan Application、AI Review Summary、Policy References、Agent Logs、Manual Approval 和 Raw JSON。AI Review 只展示辅助建议，最终 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须由人工审批按钮写入。
+推荐点击顺序：
+
+1. 在客户申请端点击“一键准备演示数据”，自动执行 init admin、login、create customer、create loan application 和 submit application；admin 已存在时页面不会中断。
+2. 切换到银行审批工作台，点击“触发 AI Review”。
+3. 查看 AI Review Summary、风险评分、Policy References、Agent 日志时间线和 LLM Provider/Used/Error。
+4. 如需展示接口结构，展开 Raw JSON 折叠面板，查看最近一次接口响应或完整 AI Report JSON。
+5. 点击 Approve、Reject 或 Need More Info 中的一种人工审批。
+6. 页面自动刷新审批历史并禁用三个人工审批按钮，避免重复审批。
+
+AI Review 只展示辅助建议，最终 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须由人工审批按钮写入。
 
 从仓库根目录运行端到端 demo：
 

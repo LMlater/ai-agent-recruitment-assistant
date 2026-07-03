@@ -4,6 +4,16 @@
 
 日期：2026-07-03
 
+### 面试展示版优化
+
+- 页面已从调试式按钮面板优化为两个 Tab：`客户申请端` 和 `银行审批工作台`。
+- 客户申请端新增“一键准备演示数据”，自动执行 init admin、login、create customer、create loan application 和 submit application；admin 已存在时不会中断。
+- 银行审批工作台用卡片展示申请详情、AI Review Summary、LLM 信息、制度引用、Agent 日志时间线、人工审批和审批历史。
+- Agent Logs 已改为时间线样式，并通过 `translateSummary(text)` 将常见英文摘要翻译为中文。
+- Raw JSON Panel 默认折叠，提供“查看最近一次接口响应 JSON”“查看完整 AI Report JSON”“复制 JSON”。
+- 页面展示 `LLM Provider`、`LLM Used`、`LLM Error`，默认仍为 `mock`，不会默认调用真实百炼。
+- 本轮只优化 `demo.html` 展示层和文档，未修改后端业务逻辑、数据库表结构或 AI review 审批边界。
+
 ### 页面入口
 
 ```text
@@ -37,7 +47,7 @@ python scripts\check_demo_readiness.py
 - DecisionAgent 的 `outputSummary` 显示 `llm_provider=mock`，`llm_error=null`。
 - Approve 人工审批成功，审批历史显示 `AI_REVIEWED -> APPROVED`，comment 为 `visual demo manual decision: approve`。
 - Raw JSON Panel 正常显示最近一次接口响应，统一返回格式为 `code/message/data`。
-- 前端收尾优化已生效：AI Review 成功后 Loan Application Card 状态显示 `AI_REVIEWED`；人工审批成功后显示最终状态、刷新审批历史、禁用 Approve/Reject/Need More Info，并提示重新演示需创建新的 loan application。
+- 前端收尾优化已生效：AI Review 成功后 Loan Application Card 状态显示 `AI_REVIEWED`；人工审批成功后显示最终状态、刷新审批历史、禁用 Approve/Reject/Need More Info，并提示重新演示需准备新的演示申请。
 
 ### 边界说明
 
@@ -62,7 +72,7 @@ cd agent-service
 python -m pytest tests -q
 ```
 
-结果：通过，`57 passed, 1 skipped, 2 warnings in 7.51s`。跳过项为真实 DashScope/Bailian smoke test；普通测试继续使用 Mock，不调用真实百炼。
+结果：通过，`57 passed, 1 skipped, 2 warnings in 8.11s`。跳过项为真实 DashScope/Bailian smoke test；普通测试继续使用 Mock，不调用真实百炼。
 
 ## 真实双服务 E2E 联调验证
 

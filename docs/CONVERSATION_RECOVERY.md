@@ -4,13 +4,14 @@
 
 1. 新增本地面试演示页：`backend-service/src/main/resources/static/demo.html`，访问地址为 `http://localhost:8080/demo.html`。
 2. 页面使用原生 HTML + CSS + JavaScript，没有引入 Vue、React、npm 或前端构建工具。
-3. 页面调用现有 Java 后端 API 完成初始化/登录、创建客户、创建贷款申请、提交申请、触发 AI Review、查询 AI Reports、查询 Agent Logs、人工审批和审批历史查询。
-4. 页面展示 Loan Application、AI Review Summary、Policy References、Agent Logs、Manual Approval 和 Raw JSON；Raw JSON 用于面试时查看最近一次接口响应结构。
-5. 最新手动验证已跑通完整闭环：服务状态检查、登录、创建客户、创建申请、提交、AI Review、AI Report、Agent Logs、人工 Approve 和审批历史查询。
-6. 验证结果：AI Summary 展示 `risk_level=LOW`、`risk_score=100`、`ai_report_id=8`；Policy References 展示 `R-004`、`M-003`、`P-002`、`P-003`、`P-004`；5 个 Agent 均为 `SUCCESS`，DecisionAgent 使用 `mock` LLM，`llm_error=null`。
-7. 人工 Approve 后审批历史显示 `AI_REVIEWED -> APPROVED`，comment 为 `visual demo manual decision: approve`；AI 仍只提供辅助建议，最终状态由人工审批接口确认。
-8. 页面只用于本地演示，没有修改数据库表结构，没有修改 AI review 主业务逻辑，也没有让 AI 自动审批最终状态；未记录 MySQL 密码或 API Key。
-9. 文档入口已更新到 README、`docs/DEMO_GUIDE.md`、`docs/API_WALKTHROUGH.md` 和 `docs/INTERVIEW_SCRIPT.md`。
+3. 页面已从调试式按钮面板优化为“客户申请端”和“银行审批工作台”两个 Tab：客户申请端准备脱敏客户和已提交申请，银行审批工作台展示 AI Review、风险评分、制度引用、Agent 日志时间线、LLM 信息、人工审批和审批历史。
+4. 新增“一键准备演示数据”按钮，自动执行 init admin、login、create customer、create loan application 和 submit application；admin 已存在时不会中断。
+5. Raw JSON Panel 默认折叠，支持查看最近一次接口响应、完整 AI Report JSON 和复制 JSON；`reportJson` 为字符串时前端会尝试解析格式化。
+6. 最新手动验证已跑通完整闭环：服务状态检查、登录、创建客户、创建申请、提交、AI Review、AI Report、Agent Logs、人工 Approve 和审批历史查询。
+7. 验证结果：AI Summary 展示 `risk_level=LOW`、`risk_score=100`、`ai_report_id=8`；Policy References 展示 `R-004`、`M-003`、`P-002`、`P-003`、`P-004`；5 个 Agent 均为 `SUCCESS`，DecisionAgent 使用 `mock` LLM，`llm_error=null`。
+8. 人工 Approve 后审批历史显示 `AI_REVIEWED -> APPROVED`，comment 为 `visual demo manual decision: approve`；AI 仍只提供辅助建议，最终状态由人工审批接口确认。
+9. 页面只用于本地演示，没有修改数据库表结构，没有修改 AI review 主业务逻辑，也没有让 AI 自动审批最终状态；未记录 MySQL 密码或 API Key。
+10. 文档入口已更新到 README、`docs/DEMO_GUIDE.md`、`docs/API_WALKTHROUGH.md` 和 `docs/INTERVIEW_SCRIPT.md`。
 
 ## 真实双服务 E2E 联调验证记录
 

@@ -35,7 +35,7 @@ python scripts/run_e2e_credit_review_demo.py --application-id 1
 http://localhost:8080/demo.html
 ```
 
-面试演示顺序：先启动 `agent-service`，再启动 `backend-service`，打开 `demo.html`，依次完成初始化/登录、创建客户、创建贷款申请、提交申请、触发 AI Review、查看 AI Report、查看 Agent Logs，最后通过人工审批接口确认最终状态。
+面试演示顺序：先启动 `agent-service`，再启动 `backend-service`，打开 `demo.html`。页面分为“客户申请端”和“银行审批工作台”：先点击“一键准备演示数据”生成脱敏客户与已提交申请，再到银行审批工作台触发 AI Review、查看风险评分、制度引用、Agent 时间线和 LLM 信息，最后通过人工审批接口确认最终状态。
 
 安全说明：不要提交 `.env` 或真实 API Key；demo admin 默认账号密码只用于本地演示。
 
@@ -88,6 +88,8 @@ python scripts/run_e2e_credit_review_demo.py --application-id 1 --manual-decisio
 ```text
 http://localhost:8080/demo.html
 ```
+
+新版页面面向面试展示做了业务化整理：顶部展示 backend/agent/LLM 状态，客户申请端负责准备演示申请，银行审批工作台负责 AI Review、AI Report、Agent Logs、人工审批和审批历史。Raw JSON 面板默认折叠，只在需要向面试官展示接口结构时展开。
 
 `BACKEND_BASE_URL` 可用于覆盖默认后端地址 `http://localhost:8080`。默认演示建议使用 Mock LLM；真实百炼只在本地显式配置并由 agent-service 启用时才会被调用。AI/ML/RAG/LLM 只生成审批辅助建议，最终 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须由人工审批接口确认，系统会保存 AI 报告、Agent 执行日志和审计记录。不要提交 `.env` 或真实 API Key。
 

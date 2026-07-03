@@ -6,8 +6,10 @@
 - 页面使用原生 HTML + CSS + JavaScript，不引入 Vue、React、npm 或前端构建工具。
 - 页面提供服务状态检查、demo admin 初始化/登录、脱敏客户创建、贷款申请创建、提交、AI Review、AI Reports、Agent Logs、人工审批和审批历史查询。
 - 页面展示 Loan Application、AI Review Summary、Policy References、Agent Logs、Manual Approval 和 Raw JSON，方便面试官直接看结构化返回。
+- 面试展示版将页面拆成 `客户申请端` 与 `银行审批工作台` 两个 Tab，并新增“一键准备演示数据”按钮，自动完成 init admin、login、create customer、create loan application 和 submit application。
+- 银行审批工作台新增顶部 LLM Provider 状态、LLM Used/Error 卡片、Agent 日志时间线、中文摘要翻译 `translateSummary(text)`，以及默认折叠的 Raw JSON Panel。
 - 页面手动验证已跑通完整闭环：AI Summary 展示 `risk_level=LOW`、`risk_score=100`、`ai_report_id=8`；Policy References 展示 `R-004`、`M-003`、`P-002`、`P-003`、`P-004`；5 个 Agent 均为 `SUCCESS`，DecisionAgent 使用 `mock` LLM 且 `llm_error=null`；人工 Approve 后审批历史显示 `AI_REVIEWED -> APPROVED`。
-- 轻量优化 `demo.html`：AI Review 成功后 Loan Application Card 显示 `AI_REVIEWED`；人工 Approve/Reject/Need More Info 成功后显示最终状态、自动刷新审批历史、禁用三个人工审批按钮，并提示重新演示需创建新的 loan application。
+- 轻量优化 `demo.html`：AI Review 成功后 Loan Application Card 显示 `AI_REVIEWED`；人工 Approve/Reject/Need More Info 成功后显示最终状态、自动刷新审批历史、禁用三个人工审批按钮，并提示重新演示需准备新的演示申请。
 - 新增轻量静态页面测试，确认 demo 页面存在并保留关键接口钩子。
 - 本轮不修改数据库表结构，不改 AI review 主业务逻辑，不让 AI 自动审批最终状态，不提交 `.env`、MySQL 密码或 API Key。
 
