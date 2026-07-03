@@ -1,5 +1,117 @@
 # Validation Log
 
+## 本地真实双服务 E2E 联调验证
+
+日期：2026-07-03
+
+### MySQL 与后端启动方式
+
+使用 PowerShell 当前终端环境变量启动 `backend-service`，没有修改 `application.yml`，没有提交任何本地配置文件：
+
+```powershell
+$env:MYSQL_URL="jdbc:mysql://localhost:3306/smart_credit_multi_agent?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+$env:MYSQL_USER="root"
+$env:MYSQL_PASSWORD="[REDACTED]"
+$env:AGENT_SERVICE_BASE_URL="http://localhost:8001"
+mvn spring-boot:run
+```
+
+本地 MySQL 数据库 `smart_credit_multi_agent` 已存在；本次联调前使用项目自带 `backend-service/src/main/resources/db/schema.sql` 和 `data.sql` 初始化，初始化后表数量为 `9`。
+
+### readiness
+
+```powershell
+python scripts\check_demo_readiness.py
+```
+
+结果：通过，退出码 `0`，`ok=true`。输出摘要：
+
+```json
+{
+  "backend": {"reachable": true, "status": 400},
+  "agent": {"reachable": true, "status": 200},
+  "security": {
+    "env_file_tracked": false,
+    "prints_api_key": false
+  },
+  "issues": []
+}
+```
+
+### E2E demo
+
+```powershell
+python scripts\run_e2e_credit_review_demo.py
+```
+
+结果：通过。输出摘要：
+
+```json
+{
+  "application_id": 4,
+  "workflow_id": "4163fdf5-944f-4444-a4a3-64ff2a673372",
+  "final_decision_from_ai": "APPROVE",
+  "risk_level": "LOW",
+  "risk_score": 100,
+  "suggested_amount": 80000.0,
+  "ai_report_id": 1,
+  "agent_log_count": 5,
+  "decision_agent_llm_provider": "mock",
+  "policy_codes": ["R-004", "M-003", "P-002", "P-003", "P-004"],
+  "manual_approval_required": true
+}
+```
+
+### 人工审批演示
+
+```powershell
+python scripts\run_e2e_credit_review_demo.py --application-id 4 --manual-decision approve
+```
+
+结果：通过。输出摘要：
+
+```json
+{
+  "application_id": 4,
+  "workflow_id": "5ff812b6-8ff5-4ed6-b131-236a1f1693e6",
+  "final_decision_from_ai": "APPROVE",
+  "risk_level": "LOW",
+  "risk_score": 100,
+  "suggested_amount": 80000.0,
+  "ai_report_id": 2,
+  "agent_log_count": 5,
+  "decision_agent_llm_provider": "mock",
+  "policy_codes": ["R-004", "M-003", "P-002", "P-003", "P-004"],
+  "manual_approval_required": true,
+  "manual_decision_applied": true,
+  "manual_decision_status": "APPROVED"
+}
+```
+
+### 测试结果
+
+```powershell
+cd agent-service
+$env:PYTHONDONTWRITEBYTECODE='1'; python -m pytest tests -q -p no:cacheprovider
+```
+
+结果：通过。输出摘要：`57 passed, 1 skipped, 1 warning in 15.07s`。
+
+```powershell
+cd backend-service
+mvn -q "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" test
+```
+
+结果：通过，退出码 `0`。
+
+### 安全记录
+
+- 本轮使用环境变量修复本地 MySQL 连接，没有修改 `application.yml` 默认密码。
+- 真实 MySQL 密码未写入 README、docs、脚本、测试或 git 跟踪文件。
+- 未提交 `.env`、`*.local`、`application-local.yml` 或 API Key。
+- 本轮未调用真实百炼，`decision_agent_llm_provider=mock`。
+- 未修改数据库表结构，未让 AI 自动审批最终状态；最终状态通过人工审批接口写入。
+
 ## 第 6 轮演示包装与面试交付版验证
 
 日期：2026-07-02
