@@ -1,5 +1,29 @@
 # Architecture
 
+## 第 9 轮：Tool Trace E2E 与高风险复核分支
+
+本轮在第 8 轮 tool system 基础上补齐“Python 结构化工具调用 -> Java 日志摘要 -> Demo UI 展示”的端到端可观测链路，同时将高风险申请显式路由到高级人工复核要求分支。
+
+```text
+START -> intake -> route_after_intake
+  missing_materials -> policy -> compliance -> decision -> END
+  ready_for_risk -> risk -> route_after_risk
+    high_risk -> senior_review -> policy -> compliance -> decision -> END
+    normal_risk -> policy -> compliance -> decision -> END
+```
+
+`SeniorReviewAgent` 调用 `SeniorReviewChecklistTool`，只输出 `senior_review_required=true` 和 `senior_review_reasons`。它不修改风险评分、不写最终审批状态、不替代人工 senior reviewer；DecisionAgent 和 ComplianceAgent 只把 senior review 要求纳入辅助理由与合规提示。
+
+Tool trace 流转如下：
+
+```text
+agent-service AgentResult.result.tool_calls
+        -> backend-service AgentReviewService output_summary short tools=...
+        -> demo.html Agent Logs timeline structured tool cards
+```
+
+Java 侧不新增表字段，只在 `agent_execution_log.output_summary` 中追加短摘要，例如 `tools=RiskRuleTool:SUCCESS(3ms), RiskModelTool:FAILED(5ms,error=...)`，避免保存完整工具输出。Demo 页面优先读取最近一次 AI Review 响应里的结构化 `tool_calls`；查询 Java logs 时，如果日志本身只有摘要，也会用 workflow 中同名 Agent 的最新结构化结果补充展示。
+
 ## 第 8 轮：Tool System 与条件路由
 
 本轮将 Python Agent 服务从“线性 Agent 类调用”升级为“Agent 编排 + 显式 Tool 能力 + Tool trace”。每个 Agent 仍代表一个审批角色，但具体能力由工具承载：

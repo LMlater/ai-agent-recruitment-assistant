@@ -54,6 +54,9 @@ class DecisionAgent(BaseAgent):
                 "ML model unavailable; rule scoring fallback was used. "
                 f"Reason: {risk_assessment.get('model_error')}"
             )
+        if state.get("senior_review_required"):
+            reasons.append("Senior manual review is required before any final business decision.")
+            reasons.extend(state.get("senior_review_reasons", []))
         reasons.append("AI and ML outputs are approval assistance only; final approval must remain manual.")
 
         if required_materials:
@@ -93,6 +96,8 @@ class DecisionAgent(BaseAgent):
             "policy_references": state.get("policy_references", []),
             "compliance_warnings": state.get("compliance_warnings", []),
             "required_materials": state.get("required_materials", []),
+            "senior_review_required": state.get("senior_review_required", False),
+            "senior_review_reasons": state.get("senior_review_reasons", []),
         }
         report_generation, tool_call = run_tool(
             tool_name=self.report_generation_tool.tool_name,

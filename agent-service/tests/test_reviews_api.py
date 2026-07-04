@@ -40,7 +40,7 @@ def _assert_tool_calls(agent_result):
         assert tool_call["duration_ms"] >= 0
 
 
-def _post_review(payload, *, expect_risk_agent=True):
+def _post_review(payload, *, expect_risk_agent=True, expect_senior_review_agent=False):
     response = client.post("/api/v1/reviews", json=payload)
     assert response.status_code == 200
     body = response.json()
@@ -78,6 +78,8 @@ def _post_review(payload, *, expect_risk_agent=True):
     }
     if expect_risk_agent:
         expected_agents.add("RiskAgent")
+    if expect_senior_review_agent:
+        expected_agents.add("SeniorReviewAgent")
     assert {item["agent_name"] for item in body["agent_results"]} == expected_agents
     for item in body["agent_results"]:
         assert item["status"] == "SUCCESS"
@@ -100,6 +102,7 @@ def test_low_risk_review():
     assert body["final_decision"] == "APPROVE"
     assert body["suggested_amount"] == 80000
     assert body["report"]["risk_assessment"]["risk_level"] == "LOW"
+    assert "SeniorReviewAgent" not in [item["agent_name"] for item in body["agent_results"]]
 
 
 def test_medium_risk_review():
@@ -132,13 +135,29 @@ def test_high_risk_review():
                 "asset_proof_count": 0,
             },
             loan_application={"amount": 160000},
-        )
+        ),
+        expect_senior_review_agent=True,
     )
 
     assert body["risk_level"] == "HIGH"
     assert body["risk_score"] < 60
     assert body["final_decision"] == "REJECT"
     assert body["suggested_amount"] < 160000
+    agent_names = [item["agent_name"] for item in body["agent_results"]]
+    assert agent_names == [
+        "IntakeAgent",
+        "RiskAgent",
+        "SeniorReviewAgent",
+        "PolicyAgent",
+        "ComplianceAgent",
+        "DecisionAgent",
+    ]
+    senior_review_result = next(item for item in body["agent_results"] if item["agent_name"] == "SeniorReviewAgent")
+    assert senior_review_result["result"]["senior_review_required"] is True
+    assert "High risk level requires senior manual review." in senior_review_result["result"]["senior_review_reasons"]
+    _assert_tool_calls(senior_review_result)
+    assert any("senior manual review" in warning.lower() for warning in body["report"]["compliance_warnings"])
+    assert any("senior manual review" in reason.lower() for reason in body["report"]["decision_reasons"])
     assert any("manual" in warning.lower() or "人工" in warning for warning in body["report"]["compliance_warnings"])
 
 
@@ -161,6 +180,7 @@ def test_missing_material_review():
     assert body["risk_score"] == 0
     assert body["suggested_amount"] == 0
     assert "RiskAgent" not in [item["agent_name"] for item in body["agent_results"]]
+    assert "SeniorReviewAgent" not in [item["agent_name"] for item in body["agent_results"]]
 
 
 def test_agent_results_contains_all_agents():

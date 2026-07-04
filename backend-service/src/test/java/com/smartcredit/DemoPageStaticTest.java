@@ -45,5 +45,19 @@ class DemoPageStaticTest {
         assertTrue(html.contains("setManualApprovalLocked"));
         assertTrue(html.contains("最终审批已完成，如需重新演示请准备新的演示申请。"));
         assertTrue(html.contains("Raw JSON"));
+        assertTrue(html.contains("function renderToolCalls"));
+        assertTrue(html.contains("function toolNameDescription"));
+        assertTrue(html.contains("function toolCallsForAgent"));
+        assertTrue(html.contains("MaterialChecklistTool"));
+        assertTrue(html.contains("RiskRuleTool"));
+        assertTrue(html.contains("RiskModelTool"));
+        assertTrue(html.contains("PolicySearchTool"));
+        assertTrue(html.contains("ComplianceGuardrailTool"));
+        assertTrue(html.contains("ReportGenerationTool"));
+        assertTrue(html.contains("SeniorReviewChecklistTool"));
+        assertTrue(html.contains("材料完整性检查工具"));
+        assertTrue(html.contains("暂无工具调用记录"));
+        assertTrue(html.contains("read-only/auditable assistance"));
+        assertTrue(html.contains("Agent does not call final approval write tools"));
     }
 }

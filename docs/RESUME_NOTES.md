@@ -1,5 +1,24 @@
 # Resume Notes
 
+## 第 9 轮后简历补充
+
+### 可新增项目描述
+
+基于 Spring Boot + FastAPI + LangGraph 构建信贷审批辅助系统，支持显式 tool calling、端到端 tool trace、高风险 senior review 条件分支、RAG 制度检索、LLM 报告生成 fallback、AI 报告/Agent 日志/人工审批审计闭环。
+
+### 可新增技术亮点
+
+- 设计 `AgentResult.result.tool_calls` 到 Java `agent_execution_log.output_summary` 再到 Demo UI 的端到端工具调用追踪链路，支持工具状态、耗时、输入/输出摘要和失败错误审计。
+- 使用 LangGraph conditional edges 实现材料缺失跳过风控、高风险进入 `SeniorReviewAgent`、普通风险直达制度检索的差异化审批辅助流程。
+- 新增 `SeniorReviewChecklistTool`，将高风险 senior manual review 要求写入合规提示和决策理由，同时保证 AI 不修改最终审批状态。
+- 坚持 human-in-the-loop：AI/ML/RAG/LLM 只生成审批建议，`APPROVED`、`REJECTED`、`NEED_MORE_INFO` 只能由 Java 人工审批接口写入。
+
+### 面试表达边界
+
+- 可以说“实现了高风险高级人工复核分支”和“工具调用端到端可审计”。
+- 不要说“AI 自动拒绝贷款”或“LLM 自动审批”。
+- 高风险 `final_decision=REJECT` 是 AI 辅助建议，数据库最终状态仍需人工按钮确认。
+
 ## 第 8 轮后简历描述
 
 ### 项目名称

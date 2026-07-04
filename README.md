@@ -39,6 +39,14 @@ http://localhost:8080/demo.html
 
 安全说明：不要提交 `.env` 或真实 API Key；demo admin 默认账号密码只用于本地演示。
 
+## 第 9 轮：Tool Trace 端到端与高风险 Senior Review 分支
+
+- Python `agent-service` 在 RiskAgent 后新增高风险条件路由：`HIGH` 风险进入 `SeniorReviewAgent -> PolicyAgent -> ComplianceAgent -> DecisionAgent`，低/中风险仍走普通分支，材料缺失分支仍跳过 RiskAgent 和 SeniorReviewAgent。
+- `SeniorReviewAgent` 只生成高级人工复核要求，不修改 `risk_score`、`risk_level` 或最终数据库审批状态；AI/ML/RAG/LLM 仍只给审批辅助建议。
+- Java `AgentReviewService` 在不改表结构的前提下，把 `tool_calls` 短摘要追加到 `agent_execution_log.output_summary`，并保留 `decision_report_generation` 元信息。
+- Demo 页面在 Agent Logs 时间线中展示工具名、状态、耗时、输入/输出摘要和失败错误；优先使用最新 AI Review 返回的结构化 `agent_results[].result.tool_calls`。
+- 新增 `docs/REASSESSMENT_FLOW_DESIGN.md`，说明真实业务补件后应重新 AI review、保留旧报告、记录材料更新和重提审计日志，最终审批仍必须走人工接口。
+
 ## 第 8 轮：Tool System、条件分支与审批状态机强化
 
 - Python `agent-service` 新增显式 tool 层：材料校验、规则评分、模型信号、制度检索、合规护栏和报告生成都通过工具执行，并在 `AgentResult.result.tool_calls` 中保留 trace。

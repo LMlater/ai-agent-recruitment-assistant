@@ -88,7 +88,7 @@ public class AgentReviewService {
             log.setAgentName(result.getAgentName());
             log.setStatus(result.getStatus());
             log.setInputSummary(result.getInputSummary());
-            log.setOutputSummary(outputSummaryWithDecisionReportGeneration(result));
+            log.setOutputSummary(outputSummaryWithMetadata(result));
             log.setErrorMessage(result.getErrorMessage());
             log.setStartedAt(result.getStartedAt());
             log.setEndedAt(result.getEndedAt());
@@ -97,22 +97,90 @@ public class AgentReviewService {
         }
     }
 
-    private String outputSummaryWithDecisionReportGeneration(AgentResult result) {
+    private String outputSummaryWithMetadata(AgentResult result) {
+        String outputSummary = result.getOutputSummary();
+        String decisionReportSummary = decisionReportGenerationSummary(result);
+        String toolSummary = toolCallsSummary(result);
+        if (decisionReportSummary != null) {
+            outputSummary = appendSummary(outputSummary, decisionReportSummary);
+        }
+        if (toolSummary != null) {
+            outputSummary = appendSummary(outputSummary, toolSummary);
+        }
+        return outputSummary;
+    }
+
+    private String decisionReportGenerationSummary(AgentResult result) {
         Object metadata = result.getResult() == null ? null : result.getResult().get("decision_report_generation");
         if (!(metadata instanceof java.util.Map<?, ?> generation)) {
-            return result.getOutputSummary();
+            return null;
         }
 
-        String generationSummary = "decision_report_generation: llm_used=%s, llm_provider=%s, llm_error=%s".formatted(
+        return "decision_report_generation: llm_used=%s, llm_provider=%s, llm_error=%s".formatted(
                 generation.get("llm_used"),
                 generation.get("llm_provider"),
                 generation.get("llm_error")
         );
-        String outputSummary = result.getOutputSummary();
-        if (outputSummary == null || outputSummary.isBlank()) {
-            return generationSummary;
+    }
+
+    private String toolCallsSummary(AgentResult result) {
+        Object toolCalls = result.getResult() == null ? null : result.getResult().get("tool_calls");
+        if (!(toolCalls instanceof java.util.List<?> calls) || calls.isEmpty()) {
+            return null;
         }
-        return outputSummary + " | " + generationSummary;
+
+        String tools = calls.stream()
+                .filter(java.util.Map.class::isInstance)
+                .map(java.util.Map.class::cast)
+                .map(this::toolCallSummary)
+                .filter(summary -> !summary.isBlank())
+                .collect(java.util.stream.Collectors.joining(", "));
+        if (tools.isBlank()) {
+            return null;
+        }
+        return "tools=" + tools;
+    }
+
+    private String toolCallSummary(java.util.Map<?, ?> toolCall) {
+        String toolName = String.valueOf(firstPresent(toolCall, "tool_name", "toolName"));
+        String status = String.valueOf(firstPresent(toolCall, "status"));
+        Object duration = firstPresent(toolCall, "duration_ms", "durationMs");
+        if (toolName.isBlank() || "null".equals(toolName)) {
+            return "";
+        }
+        if (status.isBlank() || "null".equals(status)) {
+            status = "UNKNOWN";
+        }
+        String summary = "%s:%s(%sms".formatted(toolName, status, duration == null ? "-" : duration);
+        Object error = firstPresent(toolCall, "error_message", "errorMessage");
+        if (error != null && !String.valueOf(error).isBlank() && !"null".equals(String.valueOf(error))) {
+            summary += ",error=" + compact(String.valueOf(error), 80);
+        }
+        return summary + ")";
+    }
+
+    private Object firstPresent(java.util.Map<?, ?> map, String... keys) {
+        for (String key : keys) {
+            if (map.containsKey(key)) {
+                return map.get(key);
+            }
+        }
+        return null;
+    }
+
+    private String appendSummary(String base, String addition) {
+        if (base == null || base.isBlank()) {
+            return addition;
+        }
+        return base + " | " + addition;
+    }
+
+    private String compact(String value, int maxLength) {
+        String compacted = value.replaceAll("\\s+", " ").trim();
+        if (compacted.length() <= maxLength) {
+            return compacted;
+        }
+        return compacted.substring(0, maxLength - 3) + "...";
     }
 
     private String toJson(Object value) {

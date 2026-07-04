@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentCaptor.forClass;
@@ -76,6 +77,7 @@ class AgentReviewServiceTest {
         verify(agentExecutionLogMapper).insert(logCaptor.capture());
         assertTrue(logCaptor.getValue().getOutputSummary().contains("llm_provider=mock"));
         assertTrue(logCaptor.getValue().getOutputSummary().contains("llm_used=true"));
+        assertTrue(logCaptor.getValue().getOutputSummary().contains("tools=ReportGenerationTool:SUCCESS(12ms)"));
         verify(loanApplicationMapper).updateAiReviewResult(
                 eq(7L),
                 eq(LoanStatus.AI_REVIEWED.name()),
@@ -110,6 +112,40 @@ class AgentReviewServiceTest {
                 eq("APPROVE"),
                 eq("AI suggests manual approval review.")
         );
+    }
+
+    @Test
+    void executeAiReviewKeepsDecisionMetadataWhenToolCallsAreMissing() {
+        LoanApplication application = applicationWithStatus(LoanStatus.SUBMITTED);
+        AgentReviewResponse response = reviewResponseWithoutToolCalls();
+
+        when(loanApplicationMapper.selectById(7L)).thenReturn(application);
+        when(customerMapper.selectById(3L)).thenReturn(customer());
+        when(agentReviewClient.review(any())).thenReturn(response);
+
+        agentReviewService.executeAiReview(7L, 99L, "127.0.0.1");
+
+        var logCaptor = forClass(AgentExecutionLog.class);
+        verify(agentExecutionLogMapper).insert(logCaptor.capture());
+        assertTrue(logCaptor.getValue().getOutputSummary().contains("llm_provider=mock"));
+        assertFalse(logCaptor.getValue().getOutputSummary().contains("tools="));
+    }
+
+    @Test
+    void executeAiReviewStoresFailedToolCallSummaryWithoutFullToolOutput() {
+        LoanApplication application = applicationWithStatus(LoanStatus.SUBMITTED);
+        AgentReviewResponse response = reviewResponseWithFailedToolCall();
+
+        when(loanApplicationMapper.selectById(7L)).thenReturn(application);
+        when(customerMapper.selectById(3L)).thenReturn(customer());
+        when(agentReviewClient.review(any())).thenReturn(response);
+
+        agentReviewService.executeAiReview(7L, 99L, "127.0.0.1");
+
+        var logCaptor = forClass(AgentExecutionLog.class);
+        verify(agentExecutionLogMapper).insert(logCaptor.capture());
+        assertTrue(logCaptor.getValue().getOutputSummary().contains("tools=RiskModelTool:FAILED(5ms,error=model unavailable)"));
+        assertFalse(logCaptor.getValue().getOutputSummary().contains("raw_probability_vector"));
     }
 
     @Test
@@ -177,8 +213,26 @@ class AgentReviewServiceTest {
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 12L,
-                Map.of("decision_report_generation", decisionReportGeneration())
+                Map.of(
+                        "decision_report_generation", decisionReportGeneration(),
+                        "tool_calls", List.of(toolCall("ReportGenerationTool", "SUCCESS", 12L, null))
+                )
         )));
+        return response;
+    }
+
+    private AgentReviewResponse reviewResponseWithoutToolCalls() {
+        AgentReviewResponse response = reviewResponse();
+        response.getAgentResults().get(0).setResult(Map.of("decision_report_generation", decisionReportGeneration()));
+        return response;
+    }
+
+    private AgentReviewResponse reviewResponseWithFailedToolCall() {
+        AgentReviewResponse response = reviewResponse();
+        response.getAgentResults().get(0).setResult(Map.of(
+                "tool_calls",
+                List.of(toolCall("RiskModelTool", "FAILED", 5L, "model unavailable"))
+        ));
         return response;
     }
 
@@ -188,5 +242,17 @@ class AgentReviewServiceTest {
         generation.put("llm_provider", "mock");
         generation.put("llm_error", null);
         return generation;
+    }
+
+    private Map<String, Object> toolCall(String toolName, String status, Long durationMs, String errorMessage) {
+        Map<String, Object> toolCall = new HashMap<>();
+        toolCall.put("tool_name", toolName);
+        toolCall.put("status", status);
+        toolCall.put("duration_ms", durationMs);
+        toolCall.put("input_summary", "input fields only");
+        toolCall.put("output_summary", "short summary");
+        toolCall.put("error_message", errorMessage);
+        toolCall.put("raw_probability_vector", List.of(0.1, 0.9));
+        return toolCall;
     }
 }

@@ -1,5 +1,16 @@
 # Iteration Log
 
+## 第 9 轮：Tool Trace 端到端、高风险 Senior Review 与复评设计
+
+- Java `AgentReviewService` 在不修改数据库表结构的前提下，将 `AgentResult.result.tool_calls` 追加为 `agent_execution_log.output_summary` 短摘要，并继续保留 `decision_report_generation` 的 `llm_used`、`llm_provider`、`llm_error`。
+- Demo 页面在 Agent Logs 时间线展示每个 Agent 的工具调用明细：工具名、中文说明、状态、耗时、输入摘要、输出摘要和失败错误；无工具调用时展示空状态。
+- Python LangGraph 新增 `route_after_risk`：高风险进入 `SeniorReviewAgent`，低/中风险走普通分支；材料缺失分支继续跳过 RiskAgent 和 SeniorReviewAgent。
+- 新增 `SeniorReviewAgent` 和 `SeniorReviewChecklistTool`，只生成高级人工复核要求，不修改风险评分、不写最终审批状态、不允许 AI 自动 approve/reject/need-more-info。
+- ComplianceAgent 和 DecisionAgent 会把 senior manual review 要求写入合规提示与决策理由，便于面试解释“高风险需要更严格人工复核”。
+- 新增 `docs/REASSESSMENT_FLOW_DESIGN.md`，说明真实业务补件、重提、重评、材料快照、审计日志和旧 AI 报告保留方案。
+- 本轮继续使用 Mock LLM 普通测试，不接入真实银行数据，不提交 `.env` 或真实 API Key，不修改数据库 schema。
+- 验证：Python `tests/test_reviews_api.py` 通过；Java `AgentReviewServiceTest` 和 `DemoPageStaticTest` 通过。
+
 ## 第 8 轮：Tool System、条件分支与审批状态机强化
 
 - Python `agent-service` 新增 `app/tools/` 显式工具层：材料校验、规则评分、模型信号、制度检索、合规护栏和报告生成均通过工具执行。

@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from langgraph.graph import END, START, StateGraph
 
-from app.agents import ComplianceAgent, DecisionAgent, IntakeAgent, PolicyAgent, RiskAgent
+from app.agents import ComplianceAgent, DecisionAgent, IntakeAgent, PolicyAgent, RiskAgent, SeniorReviewAgent
 from app.schemas.review import AgentResult, ReviewReport, ReviewRequest, ReviewResponse
 
 
@@ -20,6 +20,8 @@ class WorkflowState(TypedDict, total=False):
     suggested_amount: float
     policy_references: list[dict[str, Any]]
     compliance_warnings: list[str]
+    senior_review_required: bool
+    senior_review_reasons: list[str]
     final_decision: str
     summary: str
     decision_reasons: list[str]
@@ -36,6 +38,7 @@ class ReviewWorkflow:
 
         graph.add_node("intake", IntakeAgent().run)
         graph.add_node("risk", RiskAgent().run)
+        graph.add_node("senior_review", SeniorReviewAgent().run)
         graph.add_node("policy", PolicyAgent().run)
         graph.add_node("compliance", ComplianceAgent().run)
         graph.add_node("decision", DecisionAgent().run)
@@ -49,17 +52,29 @@ class ReviewWorkflow:
                 "ready_for_risk": "risk",
             },
         )
-        graph.add_edge("risk", "policy")
+        graph.add_conditional_edges(
+            "risk",
+            self._route_after_risk,
+            {
+                "high_risk": "senior_review",
+                "normal_risk": "policy",
+            },
+        )
+        graph.add_edge("senior_review", "policy")
         graph.add_edge("policy", "compliance")
         graph.add_edge("compliance", "decision")
         graph.add_edge("decision", END)
         return graph.compile()
 
     def _route_after_intake(self, state: WorkflowState) -> str:
-        # Future extension point: add high-risk or compliance-specific branches after risk scoring.
         if state.get("required_materials"):
             return "missing_materials"
         return "ready_for_risk"
+
+    def _route_after_risk(self, state: WorkflowState) -> str:
+        if state.get("risk_level") == "HIGH":
+            return "high_risk"
+        return "normal_risk"
 
     def run(self, request: ReviewRequest) -> ReviewResponse:
         initial_state: WorkflowState = {

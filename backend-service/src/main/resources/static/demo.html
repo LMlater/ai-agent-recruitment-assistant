@@ -411,6 +411,45 @@
       background: var(--panel-soft);
     }
 
+    .tool-trace {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid #e5eaf0;
+    }
+
+    .tool-trace-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .tool-call {
+      display: grid;
+      gap: 6px;
+      padding: 9px;
+      border: 1px solid #d8dee6;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .tool-call.failed {
+      border-color: #fecdca;
+      background: #fff7f6;
+    }
+
+    .tool-kv {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 8px;
+      font-size: 13px;
+    }
+
     .raw-toolbar {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1094,6 +1133,71 @@
       });
     }
 
+    function toolCallsForAgent(item) {
+      const inlineResult = item.result || {};
+      const inlineToolCalls = getValue(inlineResult, "tool_calls", "toolCalls");
+      if (Array.isArray(inlineToolCalls)) {
+        return inlineToolCalls;
+      }
+      const agentName = getValue(item, "agent_name", "agentName") || "";
+      const latestResults = getValue(state.aiReview || {}, "agent_results", "agentResults") || [];
+      const matched = latestResults.find((agentResult) => {
+        return (getValue(agentResult, "agent_name", "agentName") || "") === agentName;
+      });
+      const matchedToolCalls = getValue((matched && matched.result) || {}, "tool_calls", "toolCalls");
+      return Array.isArray(matchedToolCalls) ? matchedToolCalls : [];
+    }
+
+    function renderToolCalls(toolCalls) {
+      const calls = Array.isArray(toolCalls) ? toolCalls : [];
+      if (!calls.length) {
+        return '<div class="tool-trace"><div class="muted">暂无工具调用记录</div></div>';
+      }
+      return '<div class="tool-trace">' +
+        '<div class="tool-trace-title"><span>Tool Calls</span><span>read-only/auditable assistance</span></div>' +
+        '<div class="muted">Agent does not call final approval write tools; final approval is confirmed by human buttons.</div>' +
+        calls.map((toolCall) => renderToolCall(toolCall)).join("") +
+      '</div>';
+    }
+
+    function renderToolCall(toolCall) {
+      const name = getValue(toolCall, "tool_name", "toolName") || "-";
+      const status = toolCall.status || "-";
+      const duration = getValue(toolCall, "duration_ms", "durationMs");
+      const input = getValue(toolCall, "input_summary", "inputSummary") || "-";
+      const output = getValue(toolCall, "output_summary", "outputSummary") || "-";
+      const error = getValue(toolCall, "error_message", "errorMessage");
+      const failed = String(status).toUpperCase() === "FAILED";
+      const rows = [
+        toolRow("Tool Name", name + " / " + toolNameDescription(name)),
+        toolRow("Status", status),
+        toolRow("Duration", (duration ?? "-") + " ms"),
+        toolRow("Input Summary", translateSummary(input)),
+        toolRow("Output Summary", translateSummary(output))
+      ];
+      if (failed && error) {
+        rows.push(toolRow("Error Message", error));
+      }
+      return '<div class="tool-call ' + (failed ? "failed" : "") + '">' + rows.join("") + '</div>';
+    }
+
+    function toolRow(label, value) {
+      return '<div class="tool-kv"><span class="label">' + escapeHtml(label) + '</span><span class="value">' + escapeHtml(value) + '</span></div>';
+    }
+
+    function toolNameDescription(name) {
+      const descriptions = {
+        MaterialChecklistTool: "材料完整性检查工具",
+        RiskRuleTool: "规则评分工具",
+        RiskModelTool: "模型风险信号工具",
+        PolicySearchTool: "制度检索工具",
+        ComplianceGuardrailTool: "合规护栏工具",
+        ReportGenerationTool: "报告生成工具",
+        SeniorReviewChecklistTool: "高级复核清单工具"
+      };
+      return descriptions[name] || "工具调用";
+    }
+
     function renderAgentLogs(logs) {
       const target = document.getElementById("agentLogsCard");
       if (!Array.isArray(logs) || !logs.length) {
@@ -1106,6 +1210,7 @@
         const duration = getValue(item, "duration_ms", "durationMs");
         const input = getValue(item, "input_summary", "inputSummary") || "-";
         const output = getValue(item, "output_summary", "outputSummary") || "-";
+        const toolCalls = toolCallsForAgent(item);
         return '<li class="timeline-item">' +
           '<span class="timeline-dot"></span>' +
           '<div class="timeline-card">' +
@@ -1113,6 +1218,7 @@
             '<div class="muted">耗时：' + escapeHtml(duration ?? "-") + ' ms</div>' +
             '<div>输入：' + escapeHtml(translateSummary(input)) + '</div>' +
             '<div>输出：' + escapeHtml(translateSummary(output)) + '</div>' +
+            renderToolCalls(toolCalls) +
           '</div>' +
         '</li>';
       }).join("") + '</ol>';

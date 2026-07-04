@@ -3,6 +3,7 @@ from app.agents.decision import DecisionAgent
 from app.agents.intake import IntakeAgent
 from app.agents.policy import PolicyAgent
 from app.agents.risk import RiskAgent
+from app.agents.senior_review import SeniorReviewAgent
 
 __all__ = [
     "ComplianceAgent",
@@ -10,4 +11,5 @@ __all__ = [
     "IntakeAgent",
     "PolicyAgent",
     "RiskAgent",
+    "SeniorReviewAgent",
 ]

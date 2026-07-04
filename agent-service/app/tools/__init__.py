@@ -1,4 +1,4 @@
-from app.tools.compliance_tools import ComplianceGuardrailTool
+from app.tools.compliance_tools import ComplianceGuardrailTool, SeniorReviewChecklistTool
 from app.tools.intake_tools import MaterialChecklistTool
 from app.tools.policy_tools import PolicySearchTool
 from app.tools.report_tools import ReportGenerationTool
@@ -12,6 +12,7 @@ __all__ = [
     "ReportGenerationTool",
     "RiskModelTool",
     "RiskRuleTool",
+    "SeniorReviewChecklistTool",
     "ToolCall",
     "run_tool",
 ]

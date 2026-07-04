@@ -1,5 +1,16 @@
 # Conversation Recovery
 
+## 第 9 轮恢复要点
+
+1. 本轮主题是 Tool Trace End-to-End + High Risk Senior Review Branch + Reassessment Flow Design。
+2. Java `AgentReviewService` 仍不改 DB schema；`agent_execution_log.output_summary` 现在同时保留 `decision_report_generation` 与短格式 `tools=ToolName:STATUS(ms,error=...)`。
+3. Demo 页面的 Agent Logs 时间线优先读取最新 AI Review 响应里的 `agent_results[].result.tool_calls`，用结构化卡片展示工具名、状态、耗时、输入/输出摘要和失败错误。
+4. Python workflow 当前路径为：材料缺失 `intake -> policy -> compliance -> decision`；正常风险 `intake -> risk -> policy -> compliance -> decision`；高风险 `intake -> risk -> senior_review -> policy -> compliance -> decision`。
+5. `SeniorReviewAgent` 只输出 `senior_review_required` 和 `senior_review_reasons`，不修改风险分数、不写最终审批状态、不调用任何 approve/reject/need-more-info 工具。
+6. ComplianceAgent 和 DecisionAgent 会把 senior manual review 要求纳入合规提示和决策理由；高风险的 `final_decision=REJECT` 仍是 AI 辅助建议，不是数据库最终拒绝状态。
+7. `docs/REASSESSMENT_FLOW_DESIGN.md` 记录真实业务补件后重提/重评方案：补件必须重新 AI review，旧 AI 报告不覆盖，所有材料更新和重提进入 audit log，最终审批仍由人工接口完成。
+8. 普通测试继续使用 Mock LLM；不得提交 `.env`、真实 API Key、真实银行数据或敏感客户信息。
+
 ## 第 7 轮上下文保存约定
 
 1. 从 2026-07-04 起，用户明确要求：后续项目中最重要的记忆、技术取舍、阶段进展、面试包装思路和下一步计划，都应及时整合进项目文档，防止 ChatGPT/Codex 对话丢失后无法恢复。
