@@ -1,5 +1,13 @@
 # Resume Notes
 
+## 面试项目最终表达
+
+- 基于 Spring Boot + FastAPI + LangGraph 构建信贷审批辅助系统，设计 Tool Calling 多 Agent 工作流，集成规则评分、ML baseline、制度 RAG、LLM 报告生成与 fallback，并通过 Agent logs/tool_calls 实现可追踪执行链路。
+- 设计信贷审批状态机与人工复核边界，支持 `AI_REVIEWED`、`NEED_MORE_INFO`、`MATERIAL_UPDATED`、`RESUBMITTED` 等状态流转，补件后重新 AI Review，保留多轮 AI report、approval record、material update record 和 audit log。
+- 使用 GitHub Actions、Dockerfile、Docker Compose 和 readiness script 完成 Java/Python 双服务工程化交付，支持本地一键演示和面试现场复现。
+
+不要夸大为真实银行生产系统；项目基于公开数据、模拟制度和本地 demo，AI/ML/RAG/LLM 只生成审批辅助建议，最终 approve/reject 仍由人工审批接口确认。
+
 ## 第 11 轮后简历补充
 
 ### 可新增项目描述

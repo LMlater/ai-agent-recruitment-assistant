@@ -1,5 +1,76 @@
 # SmartCreditMultiAgent
 
+[![CI](https://github.com/LMlater/ai-agent-recruitment-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/LMlater/ai-agent-recruitment-assistant/actions/workflows/ci.yml)
+
+SmartCreditMultiAgent 是一个面向 Java 后端/金融科技/AI Agent 工程面试的信贷审批辅助项目。
+
+它不是普通 CRUD，也不是简单 ChatBot，而是把 Spring Boot 业务后端、FastAPI + LangGraph 多 Agent、Tool Calling、风控规则 + ML baseline、制度 RAG、LLM 报告生成、补件复审、人工审批和审计留痕串成一个可演示闭环。
+
+## 最快启动
+
+Docker 模式：
+
+```bash
+python scripts/run_full_demo_stack.py --check-only
+docker compose up --build
+```
+
+访问：
+
+```text
+Demo page: http://localhost:8080/demo.html
+Agent health: http://localhost:8001/health
+```
+
+源码模式：
+
+```bash
+docker compose up -d mysql redis
+cd agent-service
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+```
+
+另开终端：
+
+```bash
+cd backend-service
+mvn spring-boot:run
+```
+
+访问：
+
+```text
+http://localhost:8080/demo.html
+```
+
+## 面试 Demo 流程 7 步
+
+1. 生成一笔脱敏演示申请。
+2. 触发 AI Review。
+3. 查看风险评分、制度引用、Agent Logs、Tool Calls。
+4. 高风险时观察 SeniorReviewAgent 分支。
+5. 人工选择 Need More Info。
+6. 提交补件摘要并重新提交，再次 AI Review。
+7. 人工 Approve / Reject，查看审批历史和审计留痕。
+
+## 不能夸大的边界
+
+- 不是真实银行生产系统。
+- 不接真实银行数据。
+- 不自动放贷。
+- ML 模型是 baseline，不是生产级风控模型。
+- RAG 使用模拟制度库。
+- Demo 补件只保存摘要，不上传真实敏感材料。
+- Docker 默认密码只用于本地 demo。
+- 默认 Mock LLM，不要求真实 DashScope/百炼/OpenAI API。
+
+## 最终交付文档
+
+- 故障排查手册：[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+- 最终演示脚本：[docs/FINAL_DEMO_SCRIPT.md](docs/FINAL_DEMO_SCRIPT.md)
+- 最终面试交付：[docs/FINAL_INTERVIEW_DELIVERY.md](docs/FINAL_INTERVIEW_DELIVERY.md)
+- 演示指南：[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md)
+
 ## 第 11 轮：面试演示最快启动方式
 
 本轮补齐 CI + Docker Compose + 一键演示栈交付。默认使用 Mock LLM，不需要真实 API Key；不要提交 `.env`。下面的 demo admin 密码和 MySQL/Redis 密码只用于本地演示，不代表生产配置。

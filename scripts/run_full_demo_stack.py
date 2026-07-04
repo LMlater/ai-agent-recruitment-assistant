@@ -28,6 +28,11 @@ COMMANDS = (
     "Agent health: http://localhost:8001/health",
     "Demo page: http://localhost:8080/demo.html",
 )
+SOURCE_MODE_COMMANDS = (
+    "docker compose up -d mysql redis",
+    "cd agent-service && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001",
+    "cd backend-service && mvn spring-boot:run",
+)
 
 
 def build_check_report(project_root: Path) -> dict[str, Any]:
@@ -47,6 +52,7 @@ def build_check_report(project_root: Path) -> dict[str, Any]:
         },
         "readiness": _run_readiness(root),
         "commands": list(COMMANDS),
+        "source_mode_commands": list(SOURCE_MODE_COMMANDS),
     }
 
 
@@ -101,17 +107,23 @@ def _run_readiness(project_root: Path) -> dict[str, Any]:
 
 def normalize_report(report: dict[str, Any]) -> dict[str, Any]:
     issues: list[str] = []
+    hints: list[str] = []
     if not all(report["files"].values()):
         issues.append("missing delivery files")
     if not all(report["compose_services"].values()):
         issues.append("docker compose services missing")
     if not report["readiness"].get("ok"):
         issues.append("readiness check failed")
+    static_ok = not issues
     if not report["docker"]["docker_cli"]:
         issues.append("docker cli not available")
+        hints.append("Docker is unavailable; use source mode commands instead.")
     if not report["docker"]["docker_compose"]:
         issues.append("docker compose plugin not available")
+        hints.append("Install Docker Desktop or continue with source mode for the interview demo.")
+    report["static_ok"] = static_ok
     report["issues"] = issues
+    report["hints"] = hints
     report["ok"] = not issues
     return report
 
@@ -119,6 +131,9 @@ def normalize_report(report: dict[str, Any]) -> dict[str, Any]:
 def print_next_steps() -> None:
     print("\nCommands and URLs:")
     for item in COMMANDS:
+        print(f"- {item}")
+    print("\nSource mode fallback:")
+    for item in SOURCE_MODE_COMMANDS:
         print(f"- {item}")
 
 

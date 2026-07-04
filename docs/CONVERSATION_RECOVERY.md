@@ -1,5 +1,15 @@
 # Conversation Recovery
 
+## 第 12 轮恢复要点
+
+1. 第 8 轮完成 Tool System、`tool_calls`、材料缺失条件分支和人工审批状态机收紧。
+2. 第 9 轮完成 Tool Trace E2E、Java log summary、Demo UI 展示和 `SeniorReviewAgent` 高风险分支。
+3. 第 10 轮完成补件复审状态机：`NEED_MORE_INFO -> MATERIAL_UPDATED -> RESUBMITTED -> AI_REVIEWED`，以及 `material_update_record`。
+4. 第 11 轮完成 CI、Dockerfile、Docker Compose 四服务编排、readiness 检查和一键栈脚本。
+5. 第 12 轮完成 README polish、`docs/TROUBLESHOOTING.md`、`docs/FINAL_DEMO_SCRIPT.md`、最终交付文档收口和 `run_full_demo_stack.py` 友好提示。
+6. 当前项目已经进入最终面试交付版；后续不建议继续堆业务功能，只建议小修 bug、修 CI 失败、根据真实投递反馈调整 README/简历表达。
+7. 必须继续保持：默认 Mock LLM、不提交 `.env` 或真实 Key、不接真实银行数据、不让 AI/LLM/Agent 自动写最终审批状态。
+
 ## 第 11 轮恢复要点
 
 1. 第 11 轮主题是 CI + Docker Compose 一键交付 + 最终工程包装，不新增业务功能。

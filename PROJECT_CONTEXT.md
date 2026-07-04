@@ -1,5 +1,12 @@
 # PROJECT_CONTEXT
 
+## 第 12 轮当前状态
+
+- 当前项目已进入最终面试交付版：README 顶部有 CI badge、项目定位、最快启动、7 步 Demo 和不能夸大的边界。
+- 新增 `docs/TROUBLESHOOTING.md` 和 `docs/FINAL_DEMO_SCRIPT.md`，用于现场排障和按时间演示。
+- 后续优先小修 bug、修复 CI 失败、调整 README/简历表达，不建议继续堆业务功能。
+- 第 8/9/10/11 轮成果保持不回退：Tool System、Tool Trace + SeniorReviewAgent、补件复审、CI/Docker Compose 都继续保留。
+
 ## 第 11 轮当前交付状态
 
 - 第 11 轮已补齐 CI + Docker Compose + Dockerfile + readiness 一键交付包装：默认 Mock LLM，不依赖真实 API Key，不提交 `.env`。

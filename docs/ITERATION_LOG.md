@@ -1,5 +1,14 @@
 # Iteration Log
 
+## 第 12 轮：最终交付 Polish、故障排查与演示脚本
+
+- README 顶部增加 CI badge、项目定位、Docker/源码最快启动方式、面试 Demo 7 步流程和不能夸大的边界说明。
+- 新增 `docs/TROUBLESHOOTING.md`，覆盖 Docker 未安装、端口占用、MySQL 初始化、Agent/Backend 不可达、GitHub Actions badge、Windows Maven AccessDenied、Mock/真实 LLM 和 Demo 操作失败。
+- 新增 `docs/FINAL_DEMO_SCRIPT.md`，提供 3 分钟和 5 分钟演示脚本，以及 Java/Python 拆分、Tool calling、RAG、ML baseline、人工审批边界、Docker/CI 等追问回答。
+- 更新 `docs/FINAL_INTERVIEW_DELIVERY.md` 和 `docs/DEMO_GUIDE.md`，将 troubleshooting、最终 demo script 和启动路径串起来。
+- `scripts/run_full_demo_stack.py` 增加 `static_ok`、Docker unavailable 友好提示和源码模式 fallback 命令。
+- 本轮不新增业务功能，不修改第 8/9/10/11 轮核心逻辑；重点是最终面试交付收口。
+
 ## 第 10 轮：补件复审轻量闭环与面试交付收口
 
 - Java `LoanStatus` 新增 `MATERIAL_UPDATED`、`RESUBMITTED`，实现 `NEED_MORE_INFO -> MATERIAL_UPDATED -> RESUBMITTED -> AI_REVIEWED` 复审状态流。

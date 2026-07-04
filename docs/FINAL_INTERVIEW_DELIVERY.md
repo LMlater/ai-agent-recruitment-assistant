@@ -1,5 +1,16 @@
 # Final Interview Delivery
 
+## 第 12 轮最终收口
+
+本轮将项目收口为“可打开 README 快速启动、可按脚本演示、可按手册排障”的最终面试交付版。
+
+- README 顶部已经加入 CI badge、项目定位、Docker/源码两种最快启动方式、7 步面试 demo 流程和不能夸大的边界。
+- Docker 模式优先使用 `python scripts/run_full_demo_stack.py --check-only` 做静态检查，再执行 `docker compose up --build`。
+- 源码模式先启动 MySQL/Redis，再分别启动 `agent-service` 和 `backend-service`。
+- 故障排查见 `docs/TROUBLESHOOTING.md`，覆盖 Docker 未安装、端口占用、MySQL 初始化、Agent/Backend 不可达、GitHub Actions badge、Windows Maven AccessDenied、Mock/真实 LLM 区分和 Demo 操作顺序。
+- 现场讲解脚本见 `docs/FINAL_DEMO_SCRIPT.md`，包含 3 分钟版、5 分钟版和面试官追问路线。
+- 演示时不要讲太满：这是公开数据 + 模拟制度 + 工程验证项目，不是真实银行生产系统；ML 是 baseline，RAG 是模拟制度库，LLM/Agent 不自动最终审批。
+
 ## 第 11 轮工程交付亮点
 
 本轮不是新增业务功能，而是把项目包装成可 CI 验证、可 Docker Compose 一键启动、可 readiness 自检的面试交付版本。

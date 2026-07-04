@@ -1,5 +1,39 @@
 # Demo Guide
 
+## 第 12 轮推荐演示路径
+
+最快静态检查：
+
+```bash
+python scripts/run_full_demo_stack.py --check-only
+python scripts/check_demo_readiness.py --skip-services
+```
+
+如果当前机器没有 Docker，可以只做上面的静态检查，然后按源码模式启动；Docker unavailable 的具体处理见 `docs/TROUBLESHOOTING.md`。
+
+Docker 模式：
+
+```bash
+docker compose up --build
+```
+
+源码模式：
+
+```bash
+docker compose up -d mysql redis
+cd agent-service
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+```
+
+另开终端：
+
+```bash
+cd backend-service
+mvn spring-boot:run
+```
+
+推荐现场顺序见 `docs/FINAL_DEMO_SCRIPT.md`。遇到端口、MySQL、Agent、Backend、Maven 或 Mock LLM 问题，优先查 `docs/TROUBLESHOOTING.md`。
+
 ## 第 11 轮：Docker Compose 一键演示栈
 
 默认演示模式使用 Mock LLM，不需要真实 API Key，也不会读取或提交 `.env`。
