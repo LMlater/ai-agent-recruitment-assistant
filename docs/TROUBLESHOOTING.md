@@ -12,23 +12,65 @@ docker: command not found
 
 处理：
 
-- 安装 Docker Desktop。
-- 或改用源码模式启动。
+- Docker 不是必须项，只是工程化交付加分项；有 Docker 的机器可选安装 Docker Desktop。
+- 没有 Docker 时，改用“无 Docker 本地源码启动方式”。
 - `python scripts/run_full_demo_stack.py --check-only` 会提示 Docker unavailable，并给出 source mode fallback。
 
-源码模式：
+## 1.1 无 Docker 本地源码启动方式
+
+前置依赖：
+
+- MySQL 8
+- Redis
+- Java 17
+- Maven
+- Python 3.11
+
+创建数据库和本地 demo 用户：
+
+```sql
+CREATE DATABASE IF NOT EXISTS smart_credit_multi_agent DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS 'smartcredit'@'localhost' IDENTIFIED BY 'smartcredit_dev_password';
+GRANT ALL PRIVILEGES ON smart_credit_multi_agent.* TO 'smartcredit'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+导入表结构：
 
 ```bash
-docker compose up -d mysql redis
+mysql -usmartcredit -psmartcredit_dev_password smart_credit_multi_agent < backend-service/src/main/resources/db/schema.sql
+```
+
+确认本地 Redis 已启动后，启动 agent-service：
+
+```bash
 cd agent-service
+pip install -r requirements.txt
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
 ```
 
-另开终端：
+另开终端启动 backend-service：
 
 ```bash
 cd backend-service
 mvn spring-boot:run
+```
+
+访问：
+
+```text
+http://localhost:8080/demo.html
+```
+
+如果本地 MySQL 用户、密码或端口不同，不要改仓库配置文件；用环境变量覆盖：
+
+```bash
+MYSQL_URL=jdbc:mysql://localhost:3306/smart_credit_multi_agent?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+MYSQL_USER=smartcredit
+MYSQL_PASSWORD=smartcredit_dev_password
+REDIS_HOST=localhost
+REDIS_PORT=6379
+AGENT_SERVICE_BASE_URL=http://localhost:8001
 ```
 
 ## 2. 端口占用
@@ -123,7 +165,7 @@ docker compose config
 - 检查 Docker CLI 是否安装：`docker --version`。
 - 检查 docker compose 版本：`docker compose version`。
 - 确认当前目录是仓库根目录，且存在 `docker-compose.yml`。
-- 如果当前机器没有 Docker，改用源码模式，并记录 Docker CLI unavailable。
+- 如果当前机器没有 Docker，改用无 Docker 本地源码启动方式，并记录 Docker CLI unavailable。
 - 有 Docker 的机器上先通过 `docker compose config`，再执行 `docker compose up --build`。
 
 ## 7. Windows 本地 Maven target AccessDenied

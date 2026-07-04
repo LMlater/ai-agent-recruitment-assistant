@@ -1,5 +1,12 @@
 # Iteration Log
 
+## 无 Docker 启动文档修正
+
+- README 和 `docs/TROUBLESHOOTING.md` 补充“无 Docker 本地源码启动方式”，明确 Docker 不是必须项，只是工程化交付加分项。
+- 无 Docker 模式要求本地安装 MySQL 8、Redis、Java 17、Maven、Python 3.11，创建 `smart_credit_multi_agent` 数据库和 `smartcredit` 用户，并导入 `backend-service/src/main/resources/db/schema.sql`。
+- 保留 Docker 模式，但标注为有 Docker 的机器可选；演示入口仍为 `http://localhost:8080/demo.html`。
+- 本轮只做启动文档修正，不新增业务功能，不改代码逻辑。
+
 ## 第 13 轮：发布前验收、CI 手动触发与最终验收清单
 
 - CI 增加 `workflow_dispatch`，GitHub Actions 页面可以手动 Run workflow；push/PR 触发逻辑继续保留。

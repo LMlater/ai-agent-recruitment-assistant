@@ -1,5 +1,12 @@
 # Conversation Recovery
 
+## 无 Docker 启动文档修正
+
+1. 本轮只修正文档，不新增业务功能，不修改代码逻辑、审批状态机、Agent 主流程或数据库业务表。
+2. README 和 Troubleshooting 已明确：Docker 不是必须项，只是工程化交付加分项；有 Docker 的机器可选使用 Docker Compose。
+3. 新增无 Docker 本地源码启动方式：本地安装 MySQL 8、Redis、Java 17、Maven、Python 3.11，创建 `smart_credit_multi_agent` 数据库和 `smartcredit` 用户，导入 `backend-service/src/main/resources/db/schema.sql`，再分别启动 `agent-service` 与 `backend-service`。
+4. 无 Docker 模式访问入口仍是 `http://localhost:8080/demo.html`，默认 Mock LLM 和人工最终审批边界不变。
+
 ## 第 13 轮恢复要点
 
 1. 第 13 轮是最终发布验收，不新增业务功能，不修改审批状态机、Agent 主流程或数据库业务表。
