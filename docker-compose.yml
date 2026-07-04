@@ -15,6 +15,12 @@ services:
       - smartcredit-mysql-data:/var/lib/mysql
       - ./backend-service/src/main/resources/db:/docker-entrypoint-initdb.d:ro
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -usmartcredit -psmartcredit_dev_password || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
   redis:
     image: redis:7
@@ -24,6 +30,60 @@ services:
       - "6379:6379"
     volumes:
       - smartcredit-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  agent-service:
+    build:
+      context: ./agent-service
+      dockerfile: Dockerfile
+    container_name: smartcredit-agent-service
+    restart: unless-stopped
+    environment:
+      LLM_PROVIDER: mock
+      LLM_ENABLE_REAL_API: "false"
+      REAL_API_ENABLED: "false"
+    ports:
+      - "8001:8001"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=3)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  backend-service:
+    build:
+      context: ./backend-service
+      dockerfile: Dockerfile
+    container_name: smartcredit-backend-service
+    restart: unless-stopped
+    environment:
+      MYSQL_URL: jdbc:mysql://mysql:3306/smart_credit_multi_agent?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      MYSQL_USER: smartcredit
+      MYSQL_PASSWORD: smartcredit_dev_password
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      AGENT_SERVICE_BASE_URL: http://agent-service:8001
+      JWT_SECRET: smart-credit-local-demo-secret-change-before-real-deployments-123456
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      agent-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/8080'"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 40s
 
 volumes:
   smartcredit-mysql-data:

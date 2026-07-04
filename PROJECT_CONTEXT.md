@@ -1,5 +1,12 @@
 # PROJECT_CONTEXT
 
+## 第 11 轮当前交付状态
+
+- 第 11 轮已补齐 CI + Docker Compose + Dockerfile + readiness 一键交付包装：默认 Mock LLM，不依赖真实 API Key，不提交 `.env`。
+- GitHub Actions 覆盖 Python Agent pytest、Java Maven test 和 `check_demo_readiness.py --skip-services`。
+- Docker Compose 可启动 `mysql`、`redis`、`agent-service`、`backend-service` 四服务，演示入口为 `http://localhost:8080/demo.html`。
+- 第 8/9/10 轮成果继续保留：Tool System/tool_calls、SeniorReviewAgent/tool trace、补件复审状态机和人工最终审批边界。
+
 ## 用户背景
 
 用户是华南理工大学数学本科、电气自动化方向研 0 学生，本科阶段做过 Java 全栈实习。

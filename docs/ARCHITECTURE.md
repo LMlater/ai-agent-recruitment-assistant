@@ -1,5 +1,26 @@
 # Architecture
 
+## 第 11 轮部署视图：Docker Compose
+
+```mermaid
+flowchart LR
+    Browser["Browser demo.html"] --> Backend["backend-service:8080"]
+    Backend --> MySQL[("mysql:3306")]
+    Backend --> Redis[("redis:6379")]
+    Backend --> Agent["agent-service:8001"]
+    Agent --> MockLLM["Mock LLM by default"]
+    Agent --> KB["knowledge_base / models"]
+```
+
+Compose 服务边界：
+
+- `mysql`：MySQL 8，本地 demo 数据库，保留 `backend-service/src/main/resources/db` 初始化挂载。
+- `redis`：Redis 7，本地缓存/基础设施服务。
+- `agent-service`：FastAPI + LangGraph，容器默认 `LLM_PROVIDER=mock` 和 `LLM_ENABLE_REAL_API=false`。
+- `backend-service`：Spring Boot 后端，通过 `MYSQL_URL`、`REDIS_HOST`、`AGENT_SERVICE_BASE_URL` 等环境变量连接容器内依赖。
+
+CI 部署前检查只做静态/单元验证，不启动 Compose 服务，避免 GitHub Actions 依赖本地数据库或真实 LLM API。
+
 ## 第 10 轮：补件复审状态机
 
 第 10 轮把 `NEED_MORE_INFO` 从简单终态扩展为可复审的业务状态流，落地完整轻量方案：

@@ -1,5 +1,39 @@
 # Demo Guide
 
+## 第 11 轮：Docker Compose 一键演示栈
+
+默认演示模式使用 Mock LLM，不需要真实 API Key，也不会读取或提交 `.env`。
+
+先做静态检查：
+
+```bash
+python scripts/run_full_demo_stack.py --check-only
+python scripts/check_demo_readiness.py --skip-services
+```
+
+启动完整演示栈：
+
+```bash
+docker compose up --build
+```
+
+启动后打开：
+
+```text
+Agent health: http://localhost:8001/health
+Demo page: http://localhost:8080/demo.html
+```
+
+Compose 服务包括 `mysql`、`redis`、`agent-service`、`backend-service`。MySQL 初始化 SQL 仍挂载自 `backend-service/src/main/resources/db`，后端通过容器内地址访问 `mysql`、`redis` 和 `http://agent-service:8001`。
+
+## 第 11 轮：Docker FAQ
+
+- 构建较慢：首次构建会拉取 Python、Maven、JDK/JRE、MySQL、Redis 镜像，并安装 Python/Maven 依赖，属于正常现象。
+- MySQL 首次启动等待：首次初始化数据库和执行 schema/data SQL 需要时间，`backend-service` 会等待 MySQL、Redis、Agent 健康后再启动。
+- 端口冲突：本地需要空闲 `3306`、`6379`、`8001`、`8080`。如已被占用，先停止本机同端口服务或修改 compose 端口映射。
+- 重置演示数据：执行 `docker compose down -v` 后再执行 `docker compose up --build`，会清空 Compose volume 中的 MySQL/Redis 数据。
+- 安全边界：本地 demo 密码仅用于演示；生产环境不能复用默认密码，也不能把 `.env`、真实 API Key 或真实客户数据提交到仓库。
+
 ## 项目一句话介绍
 
 这是一个基于 Spring Boot + FastAPI + LangGraph 的多 Agent 智能信贷审批辅助系统。Java 后端负责客户、贷款申请、审批流程、AI 报告入库、Agent 日志和人工审批；Python Agent 服务负责材料校验、风险评分、制度 RAG 检索、合规检查和 LLM 报告生成。AI/ML/RAG/LLM 只提供辅助建议，最终审批必须由人工接口确认。

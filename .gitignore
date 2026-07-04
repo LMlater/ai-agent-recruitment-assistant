@@ -32,6 +32,7 @@ target/
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.pytest-local-tmp/
 pytest-cache-files-*/
 
 # IDE

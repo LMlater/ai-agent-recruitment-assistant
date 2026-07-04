@@ -1,5 +1,17 @@
 # Resume Notes
 
+## 第 11 轮后简历补充
+
+### 可新增项目描述
+将 Spring Boot + FastAPI + LangGraph 信贷审批辅助项目包装为可 CI 验证、可 Docker Compose 一键启动、可 readiness 自检的面试交付版本，覆盖 Java/Python 双服务测试、Mock LLM 安全默认、容器化部署和演示文档闭环。
+
+### 可新增技术亮点
+- 搭建 GitHub Actions CI，分别运行 Python Agent pytest、Java 后端 Maven test，并用 readiness 脚本检查交付文件、Compose 服务结构和安全边界。
+- 为 FastAPI Agent 与 Spring Boot 后端编写 Dockerfile，后端采用 Maven 多阶段构建，Agent 默认 Mock LLM，避免真实 API Key 进入镜像或 CI。
+- 扩展 Docker Compose 为 MySQL、Redis、Agent、Backend 四服务本地演示栈，加入健康检查和 `depends_on: condition: service_healthy`。
+- 编写标准库一键栈脚本 `run_full_demo_stack.py`，支持 `--check-only`，输出启动命令、健康检查地址和 Demo 页面地址。
+- 将工程交付内容沉淀到 README、Demo Guide、Architecture、Final Interview Delivery、Validation Log，便于面试讲清系统边界和部署方式。
+
 ## 第 10 轮后简历补充
 
 ### 可新增项目描述

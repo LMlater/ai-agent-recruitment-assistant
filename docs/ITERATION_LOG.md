@@ -158,3 +158,14 @@
 - LLM prompt payload 现在压缩 `policy_references` 和 `risk_assessment`，减少真实模型超时概率，同时保留 `allowed_policy_codes` 与未知制度编号校验。
 - demo 输出新增 `demo_mode`、`llm_timeout_seconds`、`llm_max_tokens`，仍不输出 API Key。
 - 普通测试仍通过 pytest 隔离强制 Mock，不调用真实百炼；真实 LLM 超时 fallback 作为保护机制保留。
+# 第 11 轮：CI + Docker Compose 一键交付 + 最终工程包装
+
+- 新增 GitHub Actions CI：push/pull_request 到 `main` 时分别运行 `agent-service` Python 3.11 测试、`backend-service` Java 17 Maven 测试，并在两者通过后运行 readiness 静态检查。
+- 新增 `agent-service/Dockerfile`：Python 3.11 slim，默认 Mock LLM，不复制 `.env`，暴露 8001 并运行 Uvicorn。
+- 新增 `backend-service/Dockerfile`：Maven 3.9 + Temurin 17 多阶段构建，JRE 运行，使用 `MYSQL_URL`、`MYSQL_USER`、`MYSQL_PASSWORD`、`REDIS_HOST`、`REDIS_PORT`、`AGENT_SERVICE_BASE_URL`、`JWT_SECRET` 环境变量。
+- 扩展 `docker-compose.yml`：保留 MySQL/Redis 和初始化 SQL 挂载，新增健康检查、`agent-service`、`backend-service`，默认 Mock LLM，支持 `docker compose up --build` 启动完整本地演示栈。
+- 新增 `.dockerignore`：避免 `.env`、缓存、构建产物和日志进入镜像上下文。
+- 新增 `scripts/run_full_demo_stack.py`：标准库实现，支持 `--check-only`，检查 Docker、Dockerfile、Compose 服务和 readiness，并输出演示命令与 URL。
+- 增强 `scripts/check_demo_readiness.py`：检查 CI workflow、两个 Dockerfile、完整 Compose 四服务和最终交付文档，`--skip-services` 不要求本地服务已启动。
+- 更新 README、Demo Guide、Architecture、Final Interview Delivery、Resume Notes、Conversation Recovery、Validation Log，补齐 CI/Docker/Compose/readiness 的面试讲法。
+- 未新增业务能力，未删除第 8/9/10 轮成果；Tool Trace、SeniorReviewAgent、补件复审状态机和人工最终审批边界保持不变。

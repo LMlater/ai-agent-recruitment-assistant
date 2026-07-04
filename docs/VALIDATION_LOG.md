@@ -418,3 +418,77 @@ python scripts\run_e2e_credit_review_demo.py --application-id 1 --manual-decisio
 - demo 输出不打印 `DASHSCOPE_API_KEY`。
 - 普通 Python 测试通过 `tests/conftest.py` 强制 Mock LLM。
 - 本轮未修改 Java 数据库表结构。
+# 第 11 轮 CI + Docker Compose 工程包装验证
+
+日期：2026-07-04
+
+### TDD 红灯记录
+
+```powershell
+cd agent-service
+python -m pytest tests\test_check_demo_readiness.py tests\test_run_full_demo_stack.py -q
+```
+
+结果：按预期失败。readiness 尚未包含 Dockerfile、CI workflow、Compose 四服务检查，`scripts/run_full_demo_stack.py` 尚不存在。
+
+```powershell
+cd backend-service
+mvn -q -Dtest=DeliveryPackagingStaticTest test
+```
+
+结果：当前 Windows 环境在资源复制阶段出现 `AccessDeniedException`，未进入新增静态测试断言；随后使用仓库内 Maven repo 和资源跳过参数验证新增静态测试。
+
+### agent-service
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：通过，`62 passed, 1 skipped, 2 warnings`。跳过项仍为真实 LLM smoke 类测试；普通测试保持 Mock LLM，不调用真实 API。
+
+### backend-service
+
+```powershell
+cd backend-service
+mvn -q "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" test
+```
+
+结果：当前 Windows 本机环境失败，原因为 Maven resources 插件复制 `schema.sql` 到 `target/classes` 时出现 `AccessDeniedException`。这是本地文件权限问题；CI 的 Linux 环境仍配置为执行 plain `mvn test`。
+
+本地替代验证：
+
+```powershell
+mvn -q "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" test
+```
+
+结果：通过，退出码 `0`。
+
+### readiness
+
+```powershell
+python scripts\check_demo_readiness.py --skip-services
+```
+
+结果：通过，`ok=true`。检查项包含 `backend-service/Dockerfile`、`agent-service/Dockerfile`、`.github/workflows/ci.yml`、`scripts/run_full_demo_stack.py`、`docs/FINAL_INTERVIEW_DELIVERY.md` 和 Compose 四服务 `mysql`、`redis`、`agent-service`、`backend-service`。
+
+### full demo stack check
+
+```powershell
+python scripts\run_full_demo_stack.py --check-only
+```
+
+结果：脚本正常输出检查报告和启动 URL，但当前机器未安装/不可访问 Docker CLI，返回 `ok=false`，issues 为 `docker cli not available`、`docker compose plugin not available`。文件、Compose 服务结构和 readiness 子检查均通过。
+
+```powershell
+docker compose config
+```
+
+结果：未执行成功，当前环境提示 `docker` 命令不存在。因此本轮无法在本机验证 `docker compose config`、`docker compose build` 或 `docker compose up --build`。
+
+### 安全记录
+
+- 未提交 `.env`、真实 API Key、真实客户数据或真实生产密码。
+- Docker/Compose 默认使用 Mock LLM：`LLM_PROVIDER=mock`、`LLM_ENABLE_REAL_API=false`。
+- Demo 密码和 MySQL/Redis 密码只用于本地演示文档和 Compose 默认值，不代表生产配置。
+- 第 8/9/10 轮业务成果未删除；AI/ML/RAG/LLM 仍只生成审批辅助建议，最终 `APPROVED` / `REJECTED` 仍必须走人工审批接口。

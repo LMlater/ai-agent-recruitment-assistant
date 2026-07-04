@@ -1,5 +1,17 @@
 # Final Interview Delivery
 
+## 第 11 轮工程交付亮点
+
+本轮不是新增业务功能，而是把项目包装成可 CI 验证、可 Docker Compose 一键启动、可 readiness 自检的面试交付版本。
+
+面试可以这样讲：
+
+- 我把 Python Agent 和 Java 后端分别放进 CI：Agent 使用 Python 3.11 + Mock LLM 跑 `pytest`，后端使用 Java 17 + Maven 跑 `mvn test`。
+- CI 不依赖本地 MySQL/Redis，也不启 Docker 服务；最后用 `check_demo_readiness.py --skip-services` 验证交付文件、Compose 服务结构和安全边界。
+- 两个服务都有 Dockerfile：`agent-service` 默认 `LLM_PROVIDER=mock`，`backend-service` 使用多阶段 Maven 构建和 JRE 运行镜像。
+- `docker compose up --build` 可以启动 MySQL、Redis、Agent、Backend 四个服务，后端等待依赖健康后启动。
+- readiness 和一键栈脚本只使用 Python 标准库，不打印真实 API Key，不要求 `.env`。
+
 ## 一句话介绍
 
 SmartCreditMultiAgent 是一个基于 Spring Boot + FastAPI + LangGraph 的信贷审批辅助系统，把 Java 企业级后端、规则/ML 风控、制度 RAG、LLM 报告生成、多 Agent 编排、人工审批和审计留痕串成可演示闭环。

@@ -1,5 +1,39 @@
 # SmartCreditMultiAgent
 
+## 第 11 轮：面试演示最快启动方式
+
+本轮补齐 CI + Docker Compose + 一键演示栈交付。默认使用 Mock LLM，不需要真实 API Key；不要提交 `.env`。下面的 demo admin 密码和 MySQL/Redis 密码只用于本地演示，不代表生产配置。
+
+源码模式：
+
+```bash
+python scripts/check_demo_readiness.py --skip-services
+docker compose up -d mysql redis
+cd agent-service
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+```
+
+```bash
+cd backend-service
+mvn spring-boot:run
+```
+
+Docker 模式：
+
+```bash
+python scripts/run_full_demo_stack.py --check-only
+docker compose up --build
+```
+
+访问地址：
+
+```text
+Agent health: http://localhost:8001/health
+Demo page: http://localhost:8080/demo.html
+```
+
+CI 会在 GitHub Actions 中分别运行 `agent-service` 的 `python -m pytest tests -q`、`backend-service` 的 `mvn test`，并在两个测试任务通过后执行 `python scripts/check_demo_readiness.py --skip-services`。
+
 ## 快速演示入口
 
 本项目为公开数据 + 模拟制度 + 工程验证的信贷审批辅助系统，不是真实银行生产风控系统。AI/ML/RAG/LLM 只生成审批辅助建议，最终审批必须由人工接口确认。

@@ -23,13 +23,19 @@ REQUIRED_PATHS = (
     "backend-service",
     "agent-service",
     "scripts/run_e2e_credit_review_demo.py",
+    "scripts/run_full_demo_stack.py",
+    "backend-service/Dockerfile",
+    "agent-service/Dockerfile",
+    ".github/workflows/ci.yml",
     "docs/DEMO_GUIDE.md",
     "docs/ARCHITECTURE.md",
     "docs/API_WALKTHROUGH.md",
     "docs/INTERVIEW_SCRIPT.md",
+    "docs/FINAL_INTERVIEW_DELIVERY.md",
 )
 
 LOCAL_ENV_PATHS = (".env", "agent-service/.env", "backend-service/.env")
+COMPOSE_REQUIRED_SERVICES = ("mysql", "redis", "agent-service", "backend-service")
 
 
 def build_readiness_report(
@@ -42,6 +48,7 @@ def build_readiness_report(
 ) -> dict[str, Any]:
     root = (project_root or Path(__file__).resolve().parents[1]).resolve()
     files = check_required_files(root)
+    docker_compose = check_docker_compose(root)
     services = (
         check_services_reachability(
             backend_base_url=backend_base_url,
@@ -53,11 +60,17 @@ def build_readiness_report(
     )
     security = check_security(root)
 
-    issues = collect_issues(files=files, services=services, security=security)
+    issues = collect_issues(
+        files=files,
+        docker_compose=docker_compose,
+        services=services,
+        security=security,
+    )
     return {
         "ok": not issues,
         "project_root": str(root),
         "files": files,
+        "docker_compose": docker_compose,
         "services": services,
         "security": security,
         "issues": issues,
@@ -66,6 +79,22 @@ def build_readiness_report(
 
 def check_required_files(project_root: Path) -> dict[str, bool]:
     return {path: (project_root / path).exists() for path in REQUIRED_PATHS}
+
+
+def check_docker_compose(project_root: Path) -> dict[str, Any]:
+    compose_path = project_root / "docker-compose.yml"
+    if not compose_path.exists():
+        return {
+            "exists": False,
+            "services": {service: False for service in COMPOSE_REQUIRED_SERVICES},
+        }
+    text = compose_path.read_text(encoding="utf-8")
+    return {
+        "exists": True,
+        "services": {
+            service: f"{service}:" in text for service in COMPOSE_REQUIRED_SERVICES
+        },
+    }
 
 
 def check_services_reachability(
@@ -140,12 +169,16 @@ def is_env_file_tracked(project_root: Path) -> bool:
 def collect_issues(
     *,
     files: dict[str, bool],
+    docker_compose: dict[str, Any],
     services: dict[str, dict[str, Any]],
     security: dict[str, bool],
 ) -> list[str]:
     issues: list[str] = []
     if not all(files.values()):
         issues.append("missing required files")
+    compose_services = docker_compose.get("services", {})
+    if not docker_compose.get("exists") or not all(compose_services.values()):
+        issues.append("docker compose services missing")
     if services:
         unavailable = [name for name, value in services.items() if not value.get("reachable")]
         if unavailable:

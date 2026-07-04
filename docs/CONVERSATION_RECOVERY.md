@@ -1,5 +1,16 @@
 # Conversation Recovery
 
+## 第 11 轮恢复要点
+
+1. 第 11 轮主题是 CI + Docker Compose 一键交付 + 最终工程包装，不新增业务功能。
+2. 已保留第 8 轮 Tool System/tool_calls、 第 9 轮 SeniorReviewAgent/tool trace、 第 10 轮补件复审状态机和 `material_update_record`。
+3. 新增 `.github/workflows/ci.yml`：Agent Python 3.11 pytest、Backend Java 17 Maven test、readiness `--skip-services` 三个任务。
+4. 新增 `agent-service/Dockerfile`、`backend-service/Dockerfile` 和各自 `.dockerignore`，默认 Mock LLM，不复制 `.env`。
+5. `docker-compose.yml` 现在包含 `mysql`、`redis`、`agent-service`、`backend-service`，并带健康检查和容器内依赖地址。
+6. 新增 `scripts/run_full_demo_stack.py`，标准库实现，`--check-only` 可检查 Docker、交付文件、Compose 服务和 readiness。
+7. `scripts/check_demo_readiness.py` 已增强为检查 CI workflow、Dockerfile、Compose 四服务和最终交付文档；`--skip-services` 不要求本地服务启动。
+8. 后续如果继续开发，优先保持 Mock LLM 默认、安全边界、人工最终审批和已有状态机，不要把本地 `.env` 或真实 Key 写入仓库。
+
 ## 第 10 轮恢复要点
 
 1. 第 8 轮成果：显式 Tool System、`tool_calls`、材料缺失跳过 RiskAgent、Java 人工审批状态机收紧。
