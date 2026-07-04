@@ -71,6 +71,24 @@ http://localhost:8080/demo.html
 - 最终面试交付：[docs/FINAL_INTERVIEW_DELIVERY.md](docs/FINAL_INTERVIEW_DELIVERY.md)
 - 演示指南：[docs/DEMO_GUIDE.md](docs/DEMO_GUIDE.md)
 
+## 发布前验收
+
+最终验收入口见 [docs/FINAL_ACCEPTANCE_CHECKLIST.md](docs/FINAL_ACCEPTANCE_CHECKLIST.md)。提交后请到 GitHub Actions 页面确认 CI 实际运行结果；本仓库的 workflow 支持 push/PR 自动触发，也支持手动 Run workflow。
+
+本地可先运行：
+
+```bash
+python scripts/check_demo_readiness.py --skip-services
+python scripts/run_full_demo_stack.py --check-only
+```
+
+如果当前机器安装了 Docker CLI：
+
+```bash
+docker compose config
+docker compose up --build
+```
+
 ## 第 11 轮：面试演示最快启动方式
 
 本轮补齐 CI + Docker Compose + 一键演示栈交付。默认使用 Mock LLM，不需要真实 API Key；不要提交 `.env`。下面的 demo admin 密码和 MySQL/Redis 密码只用于本地演示，不代表生产配置。

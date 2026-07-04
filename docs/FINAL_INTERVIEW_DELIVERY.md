@@ -1,5 +1,14 @@
 # Final Interview Delivery
 
+## 第 13 轮发布前验收
+
+项目现在进入冻结交付状态，后续只建议修实际 CI/Docker/演示问题，不再主动扩展业务功能。最终验收清单入口为 `docs/FINAL_ACCEPTANCE_CHECKLIST.md`。
+
+- GitHub Actions 已支持 `workflow_dispatch`，可在 Actions 页面手动 Run workflow；push 到 `main` 或面向 `main` 的 PR 仍会自动触发。
+- CI 的 delivery package 阶段会执行 `docker compose config` 和 `python scripts/check_demo_readiness.py --skip-services`，用于校验 Docker Compose 静态结构和交付文件完整性。
+- 面试前建议先运行 `python scripts/check_demo_readiness.py --skip-services`，再检查 `http://localhost:8080/demo.html` 是否能按脚本操作。
+- 不建议现场临时打开真实 LLM；默认 Mock LLM 更稳定，也更符合本项目“工程验证 + 面试展示”的边界。
+
 ## 第 12 轮最终收口
 
 本轮将项目收口为“可打开 README 快速启动、可按脚本演示、可按手册排障”的最终面试交付版。

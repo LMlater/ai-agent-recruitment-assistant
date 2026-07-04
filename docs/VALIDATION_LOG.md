@@ -1,5 +1,79 @@
 # Validation Log
 
+## 第 13 轮：发布前验收与 CI 可触发性
+
+日期：2026-07-04
+
+### TDD 红灯记录
+
+```powershell
+cd agent-service
+python -m pytest tests\test_round13_release_acceptance.py -q
+```
+
+结果：按预期失败，失败点包括 CI workflow 缺少 `workflow_dispatch` 和 `delivery-package`、`docs/FINAL_ACCEPTANCE_CHECKLIST.md` 不存在、README 缺少发布前验收入口、Troubleshooting 缺少 Actions workflow run 与 Docker Compose config 排障说明。
+
+### agent-service
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：通过，`70 passed, 1 skipped, 2 warnings`。跳过项仍为真实 LLM smoke 类测试；普通测试保持 Mock LLM，不调用真实 API。
+
+### backend-service
+
+```powershell
+cd backend-service
+mvn test
+```
+
+结果：当前 Windows 本机环境失败，原因为 Maven resources 插件复制 `src/main/resources/db/schema.sql` 到 `target/classes/db/schema.sql` 时出现 `AccessDeniedException`。这是本地已知文件权限问题；CI 的 Linux runner 仍配置为执行 plain `mvn test`。
+
+本地替代验证：
+
+```powershell
+mvn -q "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" test
+```
+
+结果：通过，退出码 `0`。
+
+### readiness
+
+```powershell
+python scripts\check_demo_readiness.py --skip-services
+```
+
+结果：通过，`ok=true`。检查项包含 `docs/FINAL_ACCEPTANCE_CHECKLIST.md`，Compose 四服务结构仍为 `mysql`、`redis`、`agent-service`、`backend-service`，`.env` 未被 git 跟踪。
+
+### full demo stack check
+
+```powershell
+python scripts\run_full_demo_stack.py --check-only
+```
+
+结果：脚本正常输出报告；当前机器没有 Docker CLI，因此返回 `ok=false`，issues 为 `docker cli not available`、`docker compose plugin not available`。静态交付检查为 `static_ok=true`，readiness 子检查通过，并输出 source mode fallback 命令。
+
+### Docker
+
+```powershell
+docker compose config
+```
+
+结果：未执行成功，当前环境提示 `docker` 命令不存在。因此本轮无法在本机验证 `docker compose config` 或 `docker compose up --build`；CI 中已新增 `docker compose config` 静态校验，实际 run 结果需要到 GitHub Actions 页面确认。
+
+### GitHub Actions
+
+- 本轮新增 `workflow_dispatch`，便于在 GitHub Actions 页面手动触发 CI。
+- CI 实际 run 是否成功仍需要到 GitHub Actions 页面确认。
+
+### 安全记录
+
+- 本轮不新增业务功能，不修改审批状态机、Agent 主流程或数据库业务表。
+- 未提交 `.env`、真实 API Key、真实客户数据、真实征信报告或真实银行数据。
+- 默认仍为 Mock LLM；最终 `APPROVED` / `REJECTED` 仍必须由人工审批接口确认。
+
 ## 第 12 轮最终交付 Polish 验证
 
 日期：2026-07-04

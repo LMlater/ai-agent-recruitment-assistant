@@ -1,5 +1,18 @@
 # Conversation Recovery
 
+## 第 13 轮恢复要点
+
+1. 第 13 轮是最终发布验收，不新增业务功能，不修改审批状态机、Agent 主流程或数据库业务表。
+2. CI 增加 `workflow_dispatch`，GitHub Actions 页面可以手动 Run workflow；push 到 `main` 和面向 `main` 的 PR 仍会自动触发。
+3. CI 增加 Docker Compose 静态校验，`delivery-package` job 在 Python/Java 测试通过后执行 `docker compose config` 和 readiness `--skip-services`。
+4. 新增最终验收清单 `docs/FINAL_ACCEPTANCE_CHECKLIST.md`，覆盖功能、工程、安全边界、面试和当前已知限制。
+5. 后续只建议：
+   - 修 CI 实际失败；
+   - 修 Docker 实测失败；
+   - 根据简历投递反馈调整 README/简历表达；
+   - 不再主动堆功能。
+6. 继续保持默认 Mock LLM、不提交 `.env` 或真实 Key、不接真实银行数据、不让 AI/LLM/Agent 自动写最终审批状态。
+
 ## 第 12 轮恢复要点
 
 1. 第 8 轮完成 Tool System、`tool_calls`、材料缺失条件分支和人工审批状态机收紧。

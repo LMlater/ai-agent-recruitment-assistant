@@ -1,5 +1,14 @@
 # Iteration Log
 
+## 第 13 轮：发布前验收、CI 手动触发与最终验收清单
+
+- CI 增加 `workflow_dispatch`，GitHub Actions 页面可以手动 Run workflow；push/PR 触发逻辑继续保留。
+- CI 将最终交付检查收口到 `delivery-package` job，在 `agent-service` 和 `backend-service` 通过后执行 `docker compose config` 与 `python scripts/check_demo_readiness.py --skip-services`。
+- 新增 `docs/FINAL_ACCEPTANCE_CHECKLIST.md`，按功能验收、工程验收、安全边界验收、面试验收和当前已知限制整理最终发布前核对项。
+- 更新 `docs/VALIDATION_LOG.md`，如实记录本地 Python、Backend、readiness、full demo stack 和 Docker CLI 验证结果。
+- 本轮不新增业务功能，不修改审批状态机、Agent 主流程或数据库业务表。
+- 当前项目进入冻结交付状态，后续只建议修实际 CI/Docker/演示问题，或根据投递反馈调整 README/简历表达。
+
 ## 第 12 轮：最终交付 Polish、故障排查与演示脚本
 
 - README 顶部增加 CI badge、项目定位、Docker/源码最快启动方式、面试 Demo 7 步流程和不能夸大的边界说明。

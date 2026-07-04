@@ -21,6 +21,7 @@ REQUIRED_FILES = (
     "backend-service/Dockerfile",
     ".github/workflows/ci.yml",
     "scripts/check_demo_readiness.py",
+    "docs/FINAL_ACCEPTANCE_CHECKLIST.md",
 )
 REQUIRED_COMPOSE_SERVICES = ("mysql", "redis", "agent-service", "backend-service")
 COMMANDS = (

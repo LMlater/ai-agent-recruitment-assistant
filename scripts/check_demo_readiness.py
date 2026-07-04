@@ -34,6 +34,7 @@ REQUIRED_PATHS = (
     "docs/FINAL_INTERVIEW_DELIVERY.md",
     "docs/TROUBLESHOOTING.md",
     "docs/FINAL_DEMO_SCRIPT.md",
+    "docs/FINAL_ACCEPTANCE_CHECKLIST.md",
 )
 
 LOCAL_ENV_PATHS = (".env", "agent-service/.env", "backend-service/.env")
