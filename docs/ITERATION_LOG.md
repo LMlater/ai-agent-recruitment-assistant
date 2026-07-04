@@ -1,5 +1,15 @@
 # Iteration Log
 
+## 第 8 轮：Tool System、条件分支与审批状态机强化
+
+- Python `agent-service` 新增 `app/tools/` 显式工具层：材料校验、规则评分、模型信号、制度检索、合规护栏和报告生成均通过工具执行。
+- 每个成功执行的 Agent 都会在 `AgentResult.result.tool_calls` 中返回工具调用记录，包括 tool name、状态、输入/输出摘要、开始/结束时间、耗时和错误信息。
+- LangGraph workflow 从固定线性流程升级为条件路由：材料缺失时跳过 RiskAgent，写入 `risk_skipped=true`、`risk_score=0`、`risk_level=HIGH`、`suggested_amount=0`，并由 DecisionAgent 输出 `NEED_MORE_INFO`。
+- Java `ApprovalService` 收紧人工审批状态机：approve/reject 只允许 `AI_REVIEWED`；need-more-info 只允许 `SUBMITTED` 或 `AI_REVIEWED`；`DRAFT` 和终态不能直接或重复人工审批。
+- Demo 页面保留本地快捷演示能力，但文案改为“生成一笔脱敏演示申请”，并明确真实业务中客户和贷款申请来自业务系统，演示按钮只是 seed/mock fixture。
+- 本轮不接入真实银行数据，不提交 `.env`、真实 API Key 或真实客户信息，不让 LLM 调用写库工具，也不让 AI 自动完成最终审批。
+- 验证：`agent-service` 全量 pytest 通过；`backend-service` Maven 测试通过。
+
 ## 可视化 Demo 页面
 
 - 新增 `backend-service/src/main/resources/static/demo.html`，访问地址为 `http://localhost:8080/demo.html`，用于本地面试展示完整信贷审批辅助流程。

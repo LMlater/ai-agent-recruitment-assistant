@@ -25,7 +25,9 @@ class DemoPageStaticTest {
         assertTrue(html.contains("/api/v1/debug/llm-config"));
         assertTrue(html.contains("客户申请端"));
         assertTrue(html.contains("银行审批工作台"));
-        assertTrue(html.contains("一键准备演示数据"));
+        assertTrue(html.contains("生成一笔脱敏演示申请"));
+        assertTrue(html.contains("仅用于本地面试 Demo"));
+        assertTrue(html.contains("真实业务中客户和贷款申请来自业务系统"));
         assertTrue(html.contains("继续尝试登录"));
         assertTrue(html.contains("translateSummary"));
         assertTrue(html.contains("Raw JSON 折叠面板"));

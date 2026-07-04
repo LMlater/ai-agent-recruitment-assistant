@@ -48,7 +48,7 @@ http://localhost:8080/demo.html
 
 推荐点击顺序：
 
-1. 在客户申请端点击“一键准备演示数据”，自动执行 init admin、login、create customer、create loan application 和 submit application；admin 已存在时页面不会中断。
+1. 在客户申请端点击“生成一笔脱敏演示申请”，自动执行 init admin、login、create customer、create loan application 和 submit application；admin 已存在时页面不会中断。该按钮只是本地面试 Demo 的 seed/mock fixture，真实业务中客户和贷款申请来自业务系统。
 2. 切换到银行审批工作台，点击“触发 AI Review”。
 3. 查看 AI Review Summary、风险评分、Policy References、Agent 日志时间线和 LLM Provider/Used/Error。
 4. 如需展示接口结构，展开 Raw JSON 折叠面板，查看最近一次接口响应或完整 AI Report JSON。

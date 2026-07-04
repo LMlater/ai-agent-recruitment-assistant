@@ -9,6 +9,17 @@
 5. AI/ML/RAG/LLM 只生成审批辅助建议，最终 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须由人工审批接口确认，不允许宣传为自动贷款审批系统。
 6. 不得把真实 API Key、真实数据库密码、真实身份证、真实手机号、真实银行客户数据或其他敏感信息写入仓库。
 
+## 第 8 轮恢复要点
+
+1. 用户提出的三个关键考虑：Agent 不能只是线性 Python 类调用；LangGraph 需要体现条件分支；Java 人工审批不能从任意状态直接 approve/reject。
+2. 本轮新增 `agent-service/app/tools/` tool system：`MaterialChecklistTool`、`RiskRuleTool`、`RiskModelTool`、`PolicySearchTool`、`ComplianceGuardrailTool`、`ReportGenerationTool`。
+3. 每个执行过的 Agent 都在 `AgentResult.result.tool_calls` 中暴露工具调用 trace；Java DTO 的 `Map<String,Object>` 可兼容新增字段。
+4. LangGraph `ReviewWorkflow` 已加入 `route_after_intake` conditional edge：材料缺失时跳过 RiskAgent，设置 `risk_skipped=true`、`risk_score=0`、`risk_level=HIGH`、`suggested_amount=0`，然后继续 policy/compliance/decision。
+5. Java `ApprovalService` 状态机已收紧：approve/reject 只允许 `AI_REVIEWED`；need-more-info 只允许 `SUBMITTED` 或 `AI_REVIEWED`；`DRAFT` 和终态不允许人工审批。
+6. Demo 页面已区分真实业务流程和本地面试演示快捷入口：按钮改为“生成一笔脱敏演示申请”，并说明演示按钮只是 seed/mock fixture，真实客户和申请来自业务系统。
+7. 普通测试继续强制 Mock LLM，不调用真实 DashScope/百炼；不得提交 `agent-service/.env` 或任何真实密钥。
+8. 下一步建议：可增加高风险 senior review 条件分支、审批退回后重新提交状态流、工具调用明细在 Java 日志表中的结构化存储。
+
 ## 可视化 Demo 页面恢复记录
 
 1. 新增本地面试演示页：`backend-service/src/main/resources/static/demo.html`，访问地址为 `http://localhost:8080/demo.html`。

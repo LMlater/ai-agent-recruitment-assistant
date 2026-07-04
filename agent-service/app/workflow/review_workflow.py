@@ -24,6 +24,7 @@ class WorkflowState(TypedDict, total=False):
     summary: str
     decision_reasons: list[str]
     decision_report_generation: dict[str, Any]
+    tool_calls: list[dict[str, Any]]
 
 
 class ReviewWorkflow:
@@ -40,13 +41,25 @@ class ReviewWorkflow:
         graph.add_node("decision", DecisionAgent().run)
 
         graph.add_edge(START, "intake")
-        # Future extension point: add a conditional edge after intake for missing materials.
-        graph.add_edge("intake", "risk")
+        graph.add_conditional_edges(
+            "intake",
+            self._route_after_intake,
+            {
+                "missing_materials": "policy",
+                "ready_for_risk": "risk",
+            },
+        )
         graph.add_edge("risk", "policy")
         graph.add_edge("policy", "compliance")
         graph.add_edge("compliance", "decision")
         graph.add_edge("decision", END)
         return graph.compile()
+
+    def _route_after_intake(self, state: WorkflowState) -> str:
+        # Future extension point: add high-risk or compliance-specific branches after risk scoring.
+        if state.get("required_materials"):
+            return "missing_materials"
+        return "ready_for_risk"
 
     def run(self, request: ReviewRequest) -> ReviewResponse:
         initial_state: WorkflowState = {

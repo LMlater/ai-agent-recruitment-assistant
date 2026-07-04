@@ -1,6 +1,6 @@
 # Resume Notes
 
-## 第 6 轮后简历描述
+## 第 8 轮后简历描述
 
 ### 项目名称
 
@@ -8,18 +8,20 @@
 
 ### 一句话项目描述
 
-基于 Spring Boot + FastAPI + LangGraph 构建信贷审批辅助系统，融合规则评分、ML baseline、制度 RAG 检索和 LLM 报告生成，实现 AI 审批建议、报告入库、Agent 日志、审计留痕和人工最终审批闭环。
+基于 Spring Boot + FastAPI + LangGraph 构建信贷审批辅助系统，融合 tool calling、规则评分、ML baseline、制度 RAG 检索和 LLM 报告生成，实现 AI 审批建议、tool trace、条件路由、报告入库、审计留痕和人工最终审批闭环。
 
 ### Java 后端方向 bullet
 
 - 基于 Spring Boot + MyBatis 设计客户、贷款申请、AI 审批报告、Agent 执行日志、人工审批记录和审计日志等核心模块，提供 REST API 支撑本地演示闭环。
-- 实现贷款申请状态机边界：AI review 仅能将申请推进到 `AI_REVIEWED`，最终 `APPROVED` / `REJECTED` / `NEED_MORE_INFO` 必须由人工审批接口确认。
+- 实现贷款申请状态机边界：AI review 仅能将申请推进到 `AI_REVIEWED`；approve/reject 只允许从 `AI_REVIEWED` 进入，补件只允许从 `SUBMITTED` 或 `AI_REVIEWED` 进入。
 - 对接 Python FastAPI Agent 服务，反序列化结构化 `policy_references` 和 `decision_report_generation`，并将 AI report 与 Agent execution logs 持久化。
 - 编写 Java 单元测试覆盖 AI review 状态边界、结构化 DTO 合约、报告 JSON 保存和 Agent 日志保存，提升 Java/Python 双服务接口稳定性。
 
 ### AI Agent 方向 bullet
 
-- 基于 FastAPI + LangGraph 编排 IntakeAgent、RiskAgent、PolicyAgent、ComplianceAgent、DecisionAgent，形成可观测、可测试的多 Agent 审批辅助工作流。
+- 基于 FastAPI + LangGraph 编排 IntakeAgent、RiskAgent、PolicyAgent、ComplianceAgent、DecisionAgent，形成基于 tool calling 的多 Agent 审批辅助工作流。
+- 设计 `MaterialChecklistTool`、`RiskRuleTool`、`RiskModelTool`、`PolicySearchTool`、`ComplianceGuardrailTool`、`ReportGenerationTool`，每个 Agent 输出 `tool_calls` trace。
+- 使用 LangGraph conditional routing：材料缺失时跳过 RiskAgent，返回 `risk_skipped=true` 和补件建议，避免无效输入进入风控计算。
 - RiskAgent 融合规则评分与 Logistic Regression baseline，模型不可用时 fallback 到规则评分，并保留 `model_used`、风险概率和解释字段。
 - PolicyAgent 基于本地 Markdown 制度库实现 TF-IDF RAG 检索，返回结构化制度引用并提供评估集验证检索命中情况。
 - DecisionAgent 通过 LLM Provider 抽象支持 MockLLM 和 DashScope OpenAI-compatible 客户端，真实调用失败时 fallback，且不允许 LLM 改最终审批状态。
@@ -27,6 +29,7 @@
 ### 银行科技岗位方向 bullet
 
 - 围绕信贷审批辅助场景设计“AI 建议 + 人工复核”闭环，强调风险评分、制度引用、合规提示和审批留痕。
+- 强调 human-in-the-loop：LLM 只能生成报告文本，不调用写库工具，不自动完成贷款审批。
 - 将 RAG 检索到的制度条款编号、风险评分原因、模型辅助信号写入审批报告，提升审批建议可解释性。
 - 通过 AI report、Agent execution logs、approval record 和 audit log 保留关键链路证据，便于事后追踪和面试演示。
 - 明确系统边界：公开数据 + 模拟制度 + 工程验证，不接入真实银行生产数据，不让 AI 自动完成贷款审批。

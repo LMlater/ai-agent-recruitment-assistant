@@ -3,7 +3,7 @@ from app.tools.intake_tools import MaterialChecklistTool
 from app.tools.policy_tools import PolicySearchTool
 from app.tools.report_tools import ReportGenerationTool
 from app.tools.risk_tools import RiskModelTool, RiskRuleTool
-from app.tools.tool_runner import run_tool
+from app.tools.tool_runner import ToolCall, run_tool
 
 __all__ = [
     "ComplianceGuardrailTool",
@@ -12,5 +12,6 @@ __all__ = [
     "ReportGenerationTool",
     "RiskModelTool",
     "RiskRuleTool",
+    "ToolCall",
     "run_tool",
 ]

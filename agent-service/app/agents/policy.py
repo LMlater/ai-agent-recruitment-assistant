@@ -3,22 +3,31 @@ from typing import Any
 from app.agents.base import BaseAgent
 from app.schemas.review import ReviewRequest
 from app.services.policy_retrieval_service import PolicyRetrievalService
+from app.tools.policy_tools import PolicySearchTool
+from app.tools.tool_runner import run_tool
 
 
 class PolicyAgent(BaseAgent):
     agent_name = "PolicyAgent"
 
     def __init__(self, policy_retrieval_service: PolicyRetrievalService | None = None) -> None:
-        self.policy_retrieval_service = policy_retrieval_service or PolicyRetrievalService()
+        self.policy_search_tool = PolicySearchTool(policy_retrieval_service)
 
     def process(self, state: dict[str, Any]) -> tuple[dict[str, Any], str, str]:
         query = self._build_query(state)
-        references = self.policy_retrieval_service.search(query, top_k=5)
-        serialized_references = [reference.model_dump() for reference in references]
+        tool_output, tool_call = run_tool(
+            tool_name=self.policy_search_tool.tool_name,
+            input_summary="Search mock credit policy documents for review references",
+            operation=lambda: self.policy_search_tool.run(query, top_k=5),
+        )
+        serialized_references = tool_output.get("policy_references", [])
         return (
-            {"policy_references": serialized_references},
+            {
+                "policy_references": serialized_references,
+                "tool_calls": [tool_call.model_dump()],
+            },
             "Run RAG policy retrieval over mock credit policy documents",
-            f"Retrieved {len(serialized_references)} policy references",
+            tool_call.output_summary,
         )
 
     def _build_query(self, state: dict[str, Any]) -> str:

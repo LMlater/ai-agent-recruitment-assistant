@@ -462,7 +462,7 @@
 <body>
   <header>
     <h1>基于 Spring Boot + FastAPI + LangGraph 的多 Agent 智能信贷审批辅助系统</h1>
-    <p>AI/ML/RAG/LLM 只生成审批辅助建议，最终 APPROVED / REJECTED / NEED_MORE_INFO 必须由人工审批接口确认。</p>
+    <p>真实业务中客户和贷款申请来自业务系统；本页只提供本地面试 Demo 快捷入口。AI/ML/RAG/LLM 只生成审批辅助建议，最终 APPROVED / REJECTED / NEED_MORE_INFO 必须由人工审批接口确认。</p>
     <div class="top-status">
       <div class="top-status-item">
         <span>backend-service</span>
@@ -497,14 +497,14 @@
             <div class="button-stack">
               <button type="button" onclick="runAction(event, '检查 backend 状态', checkBackendStatus)">检查 backend 状态</button>
               <button type="button" onclick="runAction(event, '检查 agent-service 状态', checkAgentStatus)">检查 agent-service 状态</button>
-              <button type="button" class="primary" onclick="runAction(event, '一键准备演示数据', prepareDemoData)">一键准备演示数据</button>
+              <button type="button" class="primary" onclick="runAction(event, '生成一笔脱敏演示申请', prepareDemoData)">生成一笔脱敏演示申请</button>
               <button type="button" onclick="runAction(event, '初始化 demo admin', initAdmin)">初始化 demo admin</button>
               <button type="button" onclick="runAction(event, '登录 demo admin', loginAdmin)">登录 demo admin</button>
               <button type="button" onclick="runAction(event, '创建 demo customer', createCustomer)">创建 demo customer</button>
               <button type="button" onclick="runAction(event, '创建 loan application', createLoanApplication)">创建 loan application</button>
               <button type="button" onclick="runAction(event, '提交申请', submitApplication)">提交申请</button>
             </div>
-            <div class="notice">演示数据均为脱敏 mock customer。demo admin 默认账号只适合本地演示，不用于生产。</div>
+            <div class="notice">仅用于本地面试 Demo：自动创建脱敏客户、贷款申请并提交。Agent 不负责生成真实客户数据，演示按钮只是 seed/mock fixture。</div>
             <div id="message" class="message">等待操作。</div>
           </div>
         </aside>
@@ -513,7 +513,7 @@
           <article class="card">
             <h2>客户信息</h2>
             <div id="customerCard" class="card-content">
-              <div class="muted">准备演示数据后展示客户信息。</div>
+              <div class="muted">生成脱敏演示申请后展示客户信息。</div>
             </div>
           </article>
           <article class="card">
@@ -525,7 +525,7 @@
           <article class="card wide">
             <h2>申请端说明</h2>
             <div class="card-content">
-              <div class="notice">客户申请端只负责录入脱敏客户与贷款申请，并提交进入审批流程。AI Review 和最终审批均在银行审批工作台完成。</div>
+              <div class="notice">真实业务流程：客户和贷款申请由业务系统录入并提交；审批人员在申请提交后触发 AI Review 作为辅助审核。本地演示快捷入口只是为了面试时快速生成一笔脱敏样例。</div>
             </div>
           </article>
         </section>
@@ -543,7 +543,7 @@
               <button type="button" onclick="runAction(event, '查询 Agent Logs', fetchAgentLogs)">查询 Agent Logs</button>
               <button type="button" onclick="runAction(event, '查询审批历史', fetchApprovalHistory)">查询审批历史</button>
             </div>
-            <div class="notice">人工审批边界提示：AI Review 只给审批辅助建议，最终 APPROVED / REJECTED / NEED_MORE_INFO 必须由人工审批接口确认。</div>
+            <div class="notice">人工审批边界提示：AI Review 是审批人员在申请提交后触发的辅助审核；最终 APPROVED / REJECTED / NEED_MORE_INFO 必须由人工审批接口确认。</div>
           </div>
         </aside>
 
@@ -773,7 +773,7 @@
       } catch (error) {
         throw new Error("提交申请失败：" + error.message);
       }
-      state.nextSuccessMessage = "演示申请已准备好，可以触发 AI Review。";
+      state.nextSuccessMessage = "脱敏演示申请已生成并提交，可以在审批工作台触发 AI Review。";
       switchTab("bank");
       return { applicationId: state.applicationId, status: state.applicationStatus };
     }

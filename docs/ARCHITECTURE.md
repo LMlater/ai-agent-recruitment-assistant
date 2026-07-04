@@ -1,5 +1,32 @@
 # Architecture
 
+## 第 8 轮：Tool System 与条件路由
+
+本轮将 Python Agent 服务从“线性 Agent 类调用”升级为“Agent 编排 + 显式 Tool 能力 + Tool trace”。每个 Agent 仍代表一个审批角色，但具体能力由工具承载：
+
+- `MaterialChecklistTool`：材料完整性校验。
+- `RiskRuleTool`：规则风控评分。
+- `RiskModelTool`：Logistic Regression baseline 辅助信号，失败时返回 `model_used=false`。
+- `PolicySearchTool`：本地 TF-IDF 制度检索。
+- `ComplianceGuardrailTool`：AI/ML/RAG/LLM 审批边界与审计提示。
+- `ReportGenerationTool`：包装 LLM 报告生成和 fallback。
+
+`AgentResult.result.tool_calls` 会记录工具名、状态、输入/输出摘要、开始/结束时间、耗时和错误信息。这里的 tool calling 是工程侧可观测工具调用，不等于让 LLM 随意调用写库工具；LLM 不拥有 approve/reject/need-more-info 权限，最终审批仍只能由 Java 人工审批接口写入。
+
+LangGraph workflow 现在包含材料缺失条件分支：
+
+```text
+START -> intake
+  if required_materials not empty:
+      policy -> compliance -> decision -> END
+  else:
+      risk -> policy -> compliance -> decision -> END
+```
+
+材料缺失时跳过 RiskAgent，避免用无效收入、额度或期限做风控计算；工作流写入保守默认值 `risk_score=0`、`risk_level=HIGH`、`suggested_amount=0`，并在 `risk_assessment` 中标记 `risk_skipped=true`。DecisionAgent 会输出 `NEED_MORE_INFO`，仍保留制度引用、合规提示和 tool trace。后续可以在 risk 后继续扩展高风险 senior review 分支。
+
+Java 人工审批状态机也进一步收紧：approve/reject 只允许从 `AI_REVIEWED` 进入；need-more-info 只允许从 `SUBMITTED` 或 `AI_REVIEWED` 进入；`DRAFT` 和终态不能直接或重复人工审批。
+
 ## 第 6 轮面试版架构总览
 
 ```mermaid
@@ -9,6 +36,7 @@ flowchart LR
     Backend --> AgentAPI["FastAPI agent-service"]
     AgentAPI --> Graph["LangGraph ReviewWorkflow"]
     Graph --> Intake["IntakeAgent 材料校验"]
+    Intake --> Tools["Tool System / Tool Calls"]
     Graph --> Risk["RiskAgent 规则 + ML 风控"]
     Graph --> Policy["PolicyAgent RAG 制度检索"]
     Graph --> Compliance["ComplianceAgent 合规检查"]
@@ -33,12 +61,13 @@ flowchart LR
 
 ## Python Agent 服务职责
 
-- LangGraph 编排：按 IntakeAgent -> RiskAgent -> PolicyAgent -> ComplianceAgent -> DecisionAgent 执行。
+- LangGraph 编排：按条件路由执行 IntakeAgent、RiskAgent、PolicyAgent、ComplianceAgent、DecisionAgent；材料缺失时跳过 RiskAgent。
 - IntakeAgent：检查申请材料和基础字段完整性。
 - RiskAgent：融合规则评分和 Logistic Regression baseline。
 - PolicyAgent：基于本地 Markdown 制度库做 TF-IDF RAG 检索。
 - ComplianceAgent：生成合规提示，强调 AI/ML 只作辅助。
 - DecisionAgent：通过 LLM Provider 生成报告文本，并保留 fallback。
+- Tool trace：每个成功执行的 Agent 在 `AgentResult.result.tool_calls` 中保留工具调用记录。
 - LLM Provider：默认 Mock，可选 DashScope OpenAI-compatible，本地显式开启才会调用真实服务。
 
 ## 为什么是双服务架构

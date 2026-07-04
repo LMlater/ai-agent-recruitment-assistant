@@ -2,17 +2,19 @@ from typing import Any
 
 from app.agents.base import BaseAgent
 from app.services.report_generation_service import ReportGenerationService
+from app.tools.report_tools import ReportGenerationTool
+from app.tools.tool_runner import ToolCall, run_tool
 
 
 class DecisionAgent(BaseAgent):
     agent_name = "DecisionAgent"
 
     def __init__(self, report_generation_service: ReportGenerationService | None = None) -> None:
-        self.report_generation_service = report_generation_service or ReportGenerationService()
+        self.report_generation_tool = ReportGenerationTool(report_generation_service)
 
     def process(self, state: dict[str, Any]) -> tuple[dict[str, Any], str, str]:
         final_decision, summary, reasons = self._build_deterministic_decision(state)
-        report_generation = self._generate_report_with_fallback(
+        report_generation, tool_call = self._generate_report_with_fallback(
             state,
             final_decision,
             summary,
@@ -28,6 +30,7 @@ class DecisionAgent(BaseAgent):
                     "llm_provider": report_generation["llm_provider"],
                     "llm_error": report_generation["llm_error"],
                 },
+                "tool_calls": [tool_call.model_dump()],
             },
             "Summarize upstream agent outputs",
             self._output_summary(final_decision, report_generation),
@@ -78,7 +81,7 @@ class DecisionAgent(BaseAgent):
         final_decision: str,
         summary: str,
         reasons: list[str],
-    ) -> dict[str, Any]:
+    ) -> tuple[dict[str, Any], ToolCall]:
         context = {
             "final_decision": final_decision,
             "risk_level": state.get("risk_level"),
@@ -91,16 +94,20 @@ class DecisionAgent(BaseAgent):
             "compliance_warnings": state.get("compliance_warnings", []),
             "required_materials": state.get("required_materials", []),
         }
-        try:
-            return self.report_generation_service.generate(context)
-        except Exception as exc:
-            return {
+        report_generation, tool_call = run_tool(
+            tool_name=self.report_generation_tool.tool_name,
+            input_summary="Generate manual-review report from structured agent state",
+            operation=lambda: self.report_generation_tool.run(context),
+        )
+        if not report_generation.get("summary"):
+            report_generation = {
                 "summary": summary,
                 "decision_reasons": reasons,
                 "llm_used": False,
                 "llm_provider": "fallback",
-                "llm_error": str(exc),
+                "llm_error": tool_call.error_message,
             }
+        return report_generation, tool_call
 
     def _output_summary(self, final_decision: str, report_generation: dict[str, Any]) -> str:
         if report_generation.get("llm_used"):

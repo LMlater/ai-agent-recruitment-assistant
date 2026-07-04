@@ -35,9 +35,16 @@ python scripts/run_e2e_credit_review_demo.py --application-id 1
 http://localhost:8080/demo.html
 ```
 
-面试演示顺序：先启动 `agent-service`，再启动 `backend-service`，打开 `demo.html`。页面分为“客户申请端”和“银行审批工作台”：先点击“一键准备演示数据”生成脱敏客户与已提交申请，再到银行审批工作台触发 AI Review、查看风险评分、制度引用、Agent 时间线和 LLM 信息，最后通过人工审批接口确认最终状态。
+面试演示顺序：先启动 `agent-service`，再启动 `backend-service`，打开 `demo.html`。页面分为“客户申请端”和“银行审批工作台”：先点击“生成一笔脱敏演示申请”创建本地 seed/mock fixture，再到银行审批工作台触发 AI Review、查看风险评分、制度引用、Agent 工具调用时间线和 LLM 信息，最后通过人工审批接口确认最终状态。真实业务中客户和贷款申请来自业务系统，不由 Agent 自动生成。
 
 安全说明：不要提交 `.env` 或真实 API Key；demo admin 默认账号密码只用于本地演示。
+
+## 第 8 轮：Tool System、条件分支与审批状态机强化
+
+- Python `agent-service` 新增显式 tool 层：材料校验、规则评分、模型信号、制度检索、合规护栏和报告生成都通过工具执行，并在 `AgentResult.result.tool_calls` 中保留 trace。
+- LangGraph 从固定线性流程升级为条件路由：材料缺失时跳过 RiskAgent，写入 `risk_skipped=true` 和保守默认风险值，直接进入制度检索、合规检查和补件建议。
+- Java 人工审批状态机收紧：approve/reject 只能从 `AI_REVIEWED` 进入，need-more-info 只能从 `SUBMITTED` 或 `AI_REVIEWED` 进入，终态不能重复审批。
+- Demo 页面区分真实业务流程和本地面试演示快捷入口，避免误解为真实业务中“一键生成客户和申请”。
 
 ## 第 5 轮：端到端演示闭环
 
@@ -178,7 +185,7 @@ curl -X POST http://localhost:8001/api/v1/reviews \
 - JWT 登录和当前用户接口。
 - Java 调 Python Agent 服务并保存 AI 报告、Agent 日志、审计日志。
 - FastAPI `POST /api/v1/reviews`。
-- LangGraph 固定顺序工作流：IntakeAgent -> RiskAgent -> PolicyAgent -> ComplianceAgent -> DecisionAgent。
+- LangGraph 条件工作流：IntakeAgent 后按材料完整性路由，材料缺失时跳过 RiskAgent，否则执行 RiskAgent -> PolicyAgent -> ComplianceAgent -> DecisionAgent。
 - 三档规则风控评分测试：LOW、MEDIUM、HIGH。
 - Mock 制度文档和 RetrievalService 预留。
 

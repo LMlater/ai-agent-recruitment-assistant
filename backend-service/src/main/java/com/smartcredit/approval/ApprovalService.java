@@ -42,6 +42,7 @@ public class ApprovalService {
         if (application == null) {
             throw new BusinessException("Loan application not found");
         }
+        validateManualTransition(application.getStatus(), toStatus);
         ApprovalRecord record = new ApprovalRecord();
         record.setApplicationId(applicationId);
         record.setOperatorId(operatorId);
@@ -52,5 +53,21 @@ public class ApprovalService {
         loanApplicationMapper.updateStatus(applicationId, toStatus.name());
         auditLogService.record(operatorId, action, "loan_application", applicationId, comment, ip);
         return record;
+    }
+
+    private void validateManualTransition(String fromStatus, LoanStatus toStatus) {
+        if (toStatus == LoanStatus.APPROVED || toStatus == LoanStatus.REJECTED) {
+            if (!LoanStatus.AI_REVIEWED.name().equals(fromStatus)) {
+                throw new BusinessException("Only AI_REVIEWED applications can be approved or rejected");
+            }
+            return;
+        }
+        if (toStatus == LoanStatus.NEED_MORE_INFO) {
+            if (!LoanStatus.SUBMITTED.name().equals(fromStatus) && !LoanStatus.AI_REVIEWED.name().equals(fromStatus)) {
+                throw new BusinessException("Only SUBMITTED or AI_REVIEWED applications can request more information");
+            }
+            return;
+        }
+        throw new BusinessException("Unsupported manual approval transition");
     }
 }

@@ -1,25 +1,27 @@
 from typing import Any
 
 from app.agents.base import BaseAgent
+from app.tools.compliance_tools import ComplianceGuardrailTool
+from app.tools.tool_runner import run_tool
 
 
 class ComplianceAgent(BaseAgent):
     agent_name = "ComplianceAgent"
 
-    def process(self, state: dict[str, Any]) -> tuple[dict[str, Any], str, str]:
-        warnings = [
-            "AI output is an approval assistance suggestion only; final approval must be performed manually.",
-            "ML model output is an auxiliary signal and must be reviewed with rule reasons and policy references.",
-            "Audit records must be retained for review workflow traceability.",
-        ]
-        risk_level = state.get("risk_level")
-        if risk_level == "HIGH":
-            warnings.append("High-risk customer must enter manual senior review before any business decision.")
-        if state.get("required_materials"):
-            warnings.append("Missing or invalid materials require supplementary material handling.")
+    def __init__(self, compliance_guardrail_tool: ComplianceGuardrailTool | None = None) -> None:
+        self.compliance_guardrail_tool = compliance_guardrail_tool or ComplianceGuardrailTool()
 
+    def process(self, state: dict[str, Any]) -> tuple[dict[str, Any], str, str]:
+        tool_output, tool_call = run_tool(
+            tool_name=self.compliance_guardrail_tool.tool_name,
+            input_summary="Check AI decision boundaries and audit requirements",
+            operation=lambda: self.compliance_guardrail_tool.run(state),
+        )
         return (
-            {"compliance_warnings": warnings},
+            {
+                "compliance_warnings": tool_output.get("compliance_warnings", []),
+                "tool_calls": [tool_call.model_dump()],
+            },
             "Check AI decision boundaries and audit requirements",
-            "Compliance guardrails prepared",
+            tool_call.output_summary,
         )

@@ -38,7 +38,7 @@
 第 8 轮建议新增 `agent-service/app/tools/`，把现有能力显式封装为工具：
 
 - `MaterialChecklistTool`：检查年龄、收入、额度、期限、资产证明等材料完整性。
-- `RiskRuleTool`：输出规则评分、扣分原因和建议额度。
+- `RiskRuleTool`：输出规则评分、扣分原因和债务收入比。
 - `RiskModelTool`：调用 Logistic Regression baseline，输出模型概率、模型等级和解释。
 - `PolicySearchTool`：调用本地制度 RAG，返回结构化制度引用。
 - `ComplianceGuardrailTool`：输出 AI/ML/RAG/LLM 使用边界、人工复核和审计留痕要求。
@@ -66,7 +66,7 @@
 START
   -> intake
   -> route_after_intake
-       missing_materials -> compliance -> decision
+       missing_materials -> policy -> compliance -> decision
        complete          -> risk -> policy -> compliance -> decision
   -> END
 ```
@@ -80,9 +80,9 @@ risk != HIGH -> policy -> compliance -> decision
 
 注意：即使 high risk 走特殊分支，也只是生成更严格的人工复核建议，不自动最终拒绝。
 
-### 6. Java 审批状态机需要收紧
+### 6. Java 审批状态机已收紧
 
-当前 Java 已限制 AI review 不能写最终状态、普通状态更新不能写最终状态。下一步建议继续收紧人工审批入口：
+Java 已限制 AI review 不能写最终状态、普通状态更新不能写最终状态；第 8 轮继续收紧了人工审批入口：
 
 - `DRAFT` 不允许人工 approve/reject。
 - `SUBMITTED` 应先 AI review 或要求补充材料，不能直接 approve/reject。
@@ -114,3 +114,20 @@ risk != HIGH -> policy -> compliance -> decision
 - 不把模型包装成生产级风控模型。
 - 不默认调用真实 LLM API。
 - 不提交 `.env`、真实 API Key、真实数据库密码、真实身份证、真实手机号或真实银行客户信息。
+
+## 第 8 轮已完成
+
+本轮把 Agent 工程从线性 demo 推进到更可解释的工具化工作流：
+
+- Agent = role + tool + state + trace + guardrail。
+- `agent-service/app/tools/` 承载具体能力，Agent 负责编排和状态更新。
+- `AgentResult.result.tool_calls` 暴露工具调用记录，便于面试展示和 Java 后端兼容保存。
+- LangGraph 在 Intake 后增加材料缺失条件分支，缺失材料时跳过 RiskAgent，避免无效输入进入风控计算。
+- Java 人工审批状态机收紧，防止 `DRAFT`、`SUBMITTED` 直接 approve/reject，以及终态重复审批。
+
+## 后续建议
+
+1. 在 RiskAgent 后增加高风险 senior review 条件分支。
+2. 为 `tool_calls` 增加 Java 侧结构化展示或单独日志字段。
+3. 设计 `NEED_MORE_INFO -> 补件 -> SUBMITTED` 的复审状态流。
+4. 将当前本地 TF-IDF RAG 替换为可插拔向量检索实现，但继续保留 mock/test 默认路径。
