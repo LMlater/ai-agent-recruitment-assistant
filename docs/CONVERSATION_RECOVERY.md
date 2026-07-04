@@ -1,5 +1,14 @@
 # Conversation Recovery
 
+## 第 7 轮上下文保存约定
+
+1. 从 2026-07-04 起，用户明确要求：后续项目中最重要的记忆、技术取舍、阶段进展、面试包装思路和下一步计划，都应及时整合进项目文档，防止 ChatGPT/Codex 对话丢失后无法恢复。
+2. 长期稳定信息优先写入 `PROJECT_CONTEXT.md`；每轮恢复要点、验证记录和下一步建议优先写入 `docs/CONVERSATION_RECOVERY.md`；功能迭代写入 `docs/ITERATION_LOG.md`；简历和面试表达写入 `docs/RESUME_NOTES.md`。
+3. 后续每轮结束时，尽量记录：本轮为什么做、做了什么、当前能跑到哪里、哪些仍是 mock、哪些安全边界不能突破、下一轮建议做什么。
+4. 项目核心定位保持不变：这是面向求职和面试展示的金融科技工程项目，核心价值是 Java 后端工程 + 信贷审批业务流程 + LangGraph 多 Agent + 风控评分 + 制度 RAG + LLM 报告生成 + 人工复核与审计留痕。
+5. AI/ML/RAG/LLM 只生成审批辅助建议，最终 `APPROVED`、`REJECTED`、`NEED_MORE_INFO` 必须由人工审批接口确认，不允许宣传为自动贷款审批系统。
+6. 不得把真实 API Key、真实数据库密码、真实身份证、真实手机号、真实银行客户数据或其他敏感信息写入仓库。
+
 ## 可视化 Demo 页面恢复记录
 
 1. 新增本地面试演示页：`backend-service/src/main/resources/static/demo.html`，访问地址为 `http://localhost:8080/demo.html`。
