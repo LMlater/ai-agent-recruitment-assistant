@@ -264,6 +264,19 @@
       opacity: 0.62;
     }
 
+    textarea {
+      width: 100%;
+      min-height: 96px;
+      resize: vertical;
+      margin: 8px 0;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--text);
+      font: inherit;
+      line-height: 1.5;
+    }
+
     .manual-buttons {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -623,14 +636,20 @@
             <h2>人工审批</h2>
             <div class="card-content">
               <div class="manual-buttons">
-                <button type="button" data-manual-approval class="primary" onclick="runAction(event, 'Approve 人工审批', manualApproval, 'approve')">Approve</button>
-                <button type="button" data-manual-approval class="danger" onclick="runAction(event, 'Reject 人工审批', manualApproval, 'reject')">Reject</button>
-                <button type="button" data-manual-approval class="warning" onclick="runAction(event, 'Need More Info 人工审批', manualApproval, 'need-more-info')">Need More Info</button>
+                <button type="button" data-manual-approval data-manual-action="approve" class="primary" onclick="runAction(event, 'Approve 人工审批', manualApproval, 'approve')">Approve</button>
+                <button type="button" data-manual-approval data-manual-action="reject" class="danger" onclick="runAction(event, 'Reject 人工审批', manualApproval, 'reject')">Reject</button>
+                <button type="button" data-manual-approval data-manual-action="need-more-info" class="warning" onclick="runAction(event, 'Need More Info 人工审批', manualApproval, 'need-more-info')">Need More Info</button>
               </div>
               <div class="notice">人工审批边界提示：这里写入最终审批状态，AI 不能自动审批，也不能绕过人工确认。</div>
               <div id="manualApprovalCard" style="margin-top: 12px;">
                 <div class="muted">人工审批后展示最终状态。</div>
               </div>
+            </div>
+          </article>
+          <article class="card">
+            <h2>补件复审</h2>
+            <div id="materialReviewCard" class="card-content">
+              <div class="muted">当状态为 NEED_MORE_INFO 时展示补件入口。</div>
             </div>
           </article>
           <article class="card">
@@ -683,6 +702,7 @@
       aiReport: null,
       agentLogs: [],
       approvalHistory: [],
+      materialUpdates: [],
       llmInfo: { provider: "mock", used: "-", error: null },
       lastJson: {},
       currentJsonText: "{}",
@@ -927,10 +947,12 @@
       state.aiReport = null;
       state.agentLogs = [];
       state.approvalHistory = [];
+      state.materialUpdates = [];
       state.llmInfo = { provider: state.llmInfo.provider || "mock", used: "-", error: null };
-      setManualApprovalLocked(false);
+      refreshManualApprovalButtons();
       renderManualApprovalReset();
       renderApprovalHistory();
+      renderMaterialReassessment();
       renderApplicationDetail();
       renderLoanCard();
       renderLlmInfo();
@@ -944,6 +966,8 @@
       state.currentApplication = data;
       renderLoanCard();
       renderApplicationDetail();
+      refreshManualApprovalButtons();
+      renderMaterialReassessment();
       return data;
     }
 
@@ -966,6 +990,8 @@
       renderPolicyReferences(getPolicyReferences(data));
       renderAgentLogs(getValue(data, "agent_results", "agentResults") || []);
       renderLlmInfo();
+      refreshManualApprovalButtons();
+      renderMaterialReassessment();
       return data;
     }
 
@@ -1004,12 +1030,15 @@
       const finalStatus = getValue(data, "to_status", "toStatus") || decisionToStatus(decision);
       state.applicationStatus = finalStatus;
       state.currentApplication = Object.assign({}, state.currentApplication || {}, { status: finalStatus });
-      state.finalApprovalCompleted = true;
-      state.nextSuccessMessage = "最终审批已完成，如需重新演示请准备新的演示申请。";
-      setManualApprovalLocked(true);
+      state.finalApprovalCompleted = finalStatus === "APPROVED" || finalStatus === "REJECTED";
+      state.nextSuccessMessage = state.finalApprovalCompleted
+        ? "最终审批已完成，如需重新演示请准备新的演示申请。"
+        : "已进入 NEED_MORE_INFO，请在补件复审区提交材料摘要。";
+      refreshManualApprovalButtons();
       renderLoanCard();
       renderApplicationDetail();
       renderManualApproval(data);
+      renderMaterialReassessment();
       await fetchApprovalHistory();
       return data;
     }
@@ -1019,6 +1048,48 @@
       const data = await apiRequest("/api/approvals/" + state.applicationId + "/history");
       state.approvalHistory = Array.isArray(data) ? data : [];
       renderApprovalHistory();
+      return data;
+    }
+
+    async function updateMaterials() {
+      requireApplication();
+      const summary = document.getElementById("materialSummaryInput").value.trim();
+      if (!summary) {
+        throw new Error("请填写材料补充说明");
+      }
+      const data = await apiRequest("/api/loan-applications/" + state.applicationId + "/materials", {
+        method: "POST",
+        body: JSON.stringify({ materialSummary: summary })
+      });
+      state.applicationStatus = data.status || "MATERIAL_UPDATED";
+      state.currentApplication = data;
+      state.nextSuccessMessage = "补件摘要已保存，状态已变为 MATERIAL_UPDATED。";
+      renderLoanCard();
+      renderApplicationDetail();
+      refreshManualApprovalButtons();
+      await fetchMaterialUpdates();
+      renderMaterialReassessment();
+      return data;
+    }
+
+    async function resubmitApplication() {
+      requireApplication();
+      const data = await apiRequest("/api/loan-applications/" + state.applicationId + "/resubmit", { method: "POST" });
+      state.applicationStatus = data.status || "RESUBMITTED";
+      state.currentApplication = data;
+      state.nextSuccessMessage = "申请已重新提交为 RESUBMITTED，请重新触发 AI Review。";
+      renderLoanCard();
+      renderApplicationDetail();
+      refreshManualApprovalButtons();
+      renderMaterialReassessment();
+      return data;
+    }
+
+    async function fetchMaterialUpdates() {
+      requireApplication();
+      const data = await apiRequest("/api/loan-applications/" + state.applicationId + "/material-updates");
+      state.materialUpdates = Array.isArray(data) ? data : [];
+      renderMaterialReassessment();
       return data;
     }
 
@@ -1249,6 +1320,54 @@
       }).join("") + '</ul>';
     }
 
+    function renderMaterialReassessment() {
+      const target = document.getElementById("materialReviewCard");
+      const status = state.applicationStatus || (state.currentApplication || {}).status || "-";
+      const history = renderMaterialUpdates();
+      const boundary = '<div class="notice">补件内容是本地 mock 摘要；不上传真实身份证、手机号、征信报告或银行流水。补件后必须重新 AI Review，旧 AI report 保留，最终审批仍由人工确认。</div>';
+      if (status === "NEED_MORE_INFO") {
+        target.innerHTML =
+          boundary +
+          '<label class="label" for="materialSummaryInput">材料补充说明</label>' +
+          '<textarea id="materialSummaryInput">补充近 6 个月收入流水和资产证明摘要</textarea>' +
+          '<button type="button" class="primary" onclick="runAction(event, \'提交补件\', updateMaterials)">提交补件</button>' +
+          history;
+        return;
+      }
+      if (status === "MATERIAL_UPDATED") {
+        target.innerHTML =
+          boundary +
+          '<div class="notice">材料摘要已更新，下一步请重新提交申请进入 RESUBMITTED。</div>' +
+          '<button type="button" class="primary" onclick="runAction(event, \'重新提交申请\', resubmitApplication)">重新提交申请</button>' +
+          history;
+        return;
+      }
+      if (status === "RESUBMITTED") {
+        target.innerHTML =
+          boundary +
+          '<div class="notice">申请已重新提交为 RESUBMITTED，请重新触发 AI Review，完成后状态会回到 AI_REVIEWED。</div>' +
+          history;
+        return;
+      }
+      target.innerHTML = boundary + history + '<div class="muted">当前状态为 ' + escapeHtml(status) + '，暂无补件操作。</div>';
+    }
+
+    function renderMaterialUpdates() {
+      const updates = state.materialUpdates || [];
+      if (!updates.length) {
+        return '<div class="muted" style="margin-top: 10px;">暂无补件历史。</div>';
+      }
+      return '<ul class="list" style="margin-top: 10px;">' + updates.map((item) => {
+        const fromStatus = getValue(item, "from_status", "fromStatus") || "-";
+        const toStatus = getValue(item, "to_status", "toStatus") || "-";
+        const summary = getValue(item, "material_summary", "materialSummary") || "-";
+        return '<li class="list-item">' +
+          '<div class="list-title"><span>' + escapeHtml(fromStatus) + ' -> ' + escapeHtml(toStatus) + '</span><span class="muted">#' + escapeHtml(item.id || "-") + '</span></div>' +
+          '<div>' + escapeHtml(summary) + '</div>' +
+        '</li>';
+      }).join("") + '</ul>';
+    }
+
     function renderManualApprovalReset() {
       document.getElementById("manualApprovalCard").innerHTML = '<div class="muted">人工审批后展示最终状态。</div>';
     }
@@ -1375,6 +1494,21 @@
       document.getElementById("currentWorkflowId").textContent = state.workflowId || "-";
     }
 
+    function refreshManualApprovalButtons() {
+      const status = state.applicationStatus || (state.currentApplication || {}).status || "";
+      document.querySelectorAll("[data-manual-approval]").forEach((button) => {
+        const action = button.dataset.manualAction;
+        let enabled = false;
+        if (status === "AI_REVIEWED") {
+          enabled = true;
+        } else if ((status === "SUBMITTED" || status === "RESUBMITTED") && action === "need-more-info") {
+          enabled = true;
+        }
+        button.disabled = !enabled;
+        button.dataset.locked = enabled ? "false" : "true";
+      });
+    }
+
     function setManualApprovalLocked(locked) {
       document.querySelectorAll("[data-manual-approval]").forEach((button) => {
         button.disabled = locked;
@@ -1448,7 +1582,9 @@
     renderLoanCard();
     renderApplicationDetail();
     renderApprovalHistory();
+    renderMaterialReassessment();
     renderLlmInfo();
+    refreshManualApprovalButtons();
   </script>
 </body>
 </html>

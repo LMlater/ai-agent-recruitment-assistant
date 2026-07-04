@@ -69,6 +69,17 @@ class ApprovalServiceTest {
     }
 
     @Test
+    void resubmittedApplicationCanRequestMoreInformationBeforeAiReview() {
+        when(loanApplicationMapper.selectById(7L)).thenReturn(applicationWithStatus(LoanStatus.RESUBMITTED));
+
+        ApprovalRecord record = approvalService.needMoreInfo(7L, 99L, "still missing income proof", "127.0.0.1");
+
+        assertEquals(LoanStatus.RESUBMITTED.name(), record.getFromStatus());
+        assertEquals(LoanStatus.NEED_MORE_INFO.name(), record.getToStatus());
+        verify(loanApplicationMapper).updateStatus(7L, LoanStatus.NEED_MORE_INFO.name());
+    }
+
+    @Test
     void draftApplicationCannotBeManuallyApprovedRejectedOrRequestedForMoreInfo() {
         assertManualTransitionsRejectedFrom(LoanStatus.DRAFT);
     }
@@ -80,6 +91,24 @@ class ApprovalServiceTest {
 
         when(loanApplicationMapper.selectById(7L)).thenReturn(applicationWithStatus(LoanStatus.SUBMITTED));
         assertThrows(BusinessException.class, () -> approvalService.reject(7L, 99L, "manual reject", "127.0.0.1"));
+    }
+
+    @Test
+    void resubmittedOrMaterialUpdatedApplicationsCannotBeApprovedOrRejected() {
+        for (LoanStatus status : List.of(LoanStatus.RESUBMITTED, LoanStatus.MATERIAL_UPDATED)) {
+            when(loanApplicationMapper.selectById(7L)).thenReturn(applicationWithStatus(status));
+            assertThrows(BusinessException.class, () -> approvalService.approve(7L, 99L, "manual approve", "127.0.0.1"));
+
+            when(loanApplicationMapper.selectById(7L)).thenReturn(applicationWithStatus(status));
+            assertThrows(BusinessException.class, () -> approvalService.reject(7L, 99L, "manual reject", "127.0.0.1"));
+        }
+    }
+
+    @Test
+    void materialUpdatedApplicationCannotRequestMoreInfoAgainBeforeResubmission() {
+        when(loanApplicationMapper.selectById(7L)).thenReturn(applicationWithStatus(LoanStatus.MATERIAL_UPDATED));
+
+        assertThrows(BusinessException.class, () -> approvalService.needMoreInfo(7L, 99L, "need info", "127.0.0.1"));
     }
 
     @Test

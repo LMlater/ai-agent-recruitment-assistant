@@ -1,5 +1,16 @@
 # Iteration Log
 
+## 第 10 轮：补件复审轻量闭环与面试交付收口
+
+- Java `LoanStatus` 新增 `MATERIAL_UPDATED`、`RESUBMITTED`，实现 `NEED_MORE_INFO -> MATERIAL_UPDATED -> RESUBMITTED -> AI_REVIEWED` 复审状态流。
+- 新增 `material_update_record` 表、`MaterialUpdateRecord` 实体和 `MaterialUpdateRecordMapper`，补件只保存本地 mock 摘要，不保存真实敏感材料。
+- 新增 `POST /api/loan-applications/{id}/materials`、`POST /api/loan-applications/{id}/resubmit`、`GET /api/loan-applications/{id}/material-updates`。
+- `AgentReviewService` 允许 `RESUBMITTED` 重新 AI review，完成后统一回到 `AI_REVIEWED`；`MATERIAL_UPDATED` 和 `NEED_MORE_INFO` 不能直接 AI review。
+- `ApprovalService` 保持 approve/reject 只能从 `AI_REVIEWED` 进入；`SUBMITTED`、`RESUBMITTED`、`AI_REVIEWED` 可 need-more-info，`MATERIAL_UPDATED` 不允许人工审批跳转。
+- Demo 页面支持演示 AI Review、人工 Need More Info、补件、重新提交、再次 AI Review 和最终人工 Approve/Reject。
+- 文档新增最终面试交付文档，更新 README、架构、API、面试 Q&A、复评设计、恢复说明和简历表达。
+- 本轮不接入真实银行数据，不提交 `.env`、真实 API Key 或真实客户材料，普通测试继续使用 Mock LLM。
+
 ## 第 9 轮：Tool Trace 端到端、高风险 Senior Review 与复评设计
 
 - Java `AgentReviewService` 在不修改数据库表结构的前提下，将 `AgentResult.result.tool_calls` 追加为 `agent_execution_log.output_summary` 短摘要，并继续保留 `decision_report_generation` 的 `llm_used`、`llm_provider`、`llm_error`。

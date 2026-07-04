@@ -115,6 +115,35 @@ class AgentReviewServiceTest {
     }
 
     @Test
+    void executeAiReviewAllowsResubmittedAndMovesApplicationToAiReviewed() {
+        when(loanApplicationMapper.selectById(7L)).thenReturn(applicationWithStatus(LoanStatus.RESUBMITTED));
+        when(customerMapper.selectById(3L)).thenReturn(customer());
+        when(agentReviewClient.review(any())).thenReturn(reviewResponse());
+
+        agentReviewService.executeAiReview(7L, 99L, "127.0.0.1");
+
+        verify(loanApplicationMapper).updateAiReviewResult(
+                eq(7L),
+                eq(LoanStatus.AI_REVIEWED.name()),
+                eq(86),
+                eq("LOW"),
+                eq("APPROVE"),
+                eq("AI suggests manual approval review.")
+        );
+    }
+
+    @Test
+    void executeAiReviewRejectsMaterialUpdatedAndNeedMoreInfoBeforeResubmission() {
+        for (LoanStatus status : List.of(LoanStatus.MATERIAL_UPDATED, LoanStatus.NEED_MORE_INFO)) {
+            when(loanApplicationMapper.selectById(7L)).thenReturn(applicationWithStatus(status));
+
+            assertThrows(BusinessException.class, () -> agentReviewService.executeAiReview(7L, 99L, "127.0.0.1"));
+
+            verify(agentReviewClient, never()).review(any());
+        }
+    }
+
+    @Test
     void executeAiReviewKeepsDecisionMetadataWhenToolCallsAreMissing() {
         LoanApplication application = applicationWithStatus(LoanStatus.SUBMITTED);
         AgentReviewResponse response = reviewResponseWithoutToolCalls();
@@ -150,7 +179,7 @@ class AgentReviewServiceTest {
 
     @Test
     void executeAiReviewRejectsStatusesOutsideSubmittedOrAiReviewed() {
-        for (LoanStatus status : List.of(LoanStatus.DRAFT, LoanStatus.APPROVED, LoanStatus.REJECTED, LoanStatus.NEED_MORE_INFO)) {
+        for (LoanStatus status : List.of(LoanStatus.DRAFT, LoanStatus.MATERIAL_UPDATED, LoanStatus.APPROVED, LoanStatus.REJECTED, LoanStatus.NEED_MORE_INFO)) {
             when(loanApplicationMapper.selectById(7L)).thenReturn(applicationWithStatus(status));
 
             assertThrows(BusinessException.class, () -> agentReviewService.executeAiReview(7L, 99L, "127.0.0.1"));

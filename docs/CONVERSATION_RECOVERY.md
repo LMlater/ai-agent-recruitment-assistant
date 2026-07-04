@@ -1,5 +1,16 @@
 # Conversation Recovery
 
+## 第 10 轮恢复要点
+
+1. 第 8 轮成果：显式 Tool System、`tool_calls`、材料缺失跳过 RiskAgent、Java 人工审批状态机收紧。
+2. 第 9 轮成果：Python tool trace -> Java log summary -> Demo UI 端到端展示，以及高风险 `SeniorReviewAgent` 条件分支。
+3. 第 10 轮成果：补件复审轻量闭环，状态为 `NEED_MORE_INFO -> MATERIAL_UPDATED -> RESUBMITTED -> AI_REVIEWED`。
+4. 新增 Java 表/实体/Mapper：`material_update_record`、`MaterialUpdateRecord`、`MaterialUpdateRecordMapper`，补件只保存 mock 摘要。
+5. 新增接口：`POST /api/loan-applications/{id}/materials`、`POST /api/loan-applications/{id}/resubmit`、`GET /api/loan-applications/{id}/material-updates`。
+6. 当前完整业务链路：创建申请 -> 提交 -> AI Review -> 人工 Need More Info -> 补件 -> 重新提交 -> 再次 AI Review -> 人工 Approve/Reject。
+7. 每次 AI Review 都新增 AI report，不覆盖旧报告；补件、重提、AI Review、人工审批都通过 audit/record 留痕。
+8. 下一轮建议：补 GitHub Actions CI 或 Docker Compose 一键启动，进一步提升工程交付完整度。
+
 ## 第 9 轮恢复要点
 
 1. 本轮主题是 Tool Trace End-to-End + High Risk Senior Review Branch + Reassessment Flow Design。

@@ -1,5 +1,24 @@
 # Architecture
 
+## 第 10 轮：补件复审状态机
+
+第 10 轮把 `NEED_MORE_INFO` 从简单终态扩展为可复审的业务状态流，落地完整轻量方案：
+
+```text
+DRAFT -> SUBMITTED -> AI_REVIEWED -> NEED_MORE_INFO
+      -> MATERIAL_UPDATED -> RESUBMITTED -> AI_REVIEWED
+      -> APPROVED / REJECTED
+```
+
+关键规则：
+
+- `POST /api/loan-applications/{id}/materials` 只允许从 `NEED_MORE_INFO` 进入，保存补件 mock 摘要到 `material_update_record`，状态变为 `MATERIAL_UPDATED`。
+- `POST /api/loan-applications/{id}/resubmit` 只允许从 `MATERIAL_UPDATED` 进入，状态变为 `RESUBMITTED`。
+- `RESUBMITTED` 必须重新触发 AI Review，AI Review 后统一回到 `AI_REVIEWED`。
+- `MATERIAL_UPDATED` 不能直接 approve/reject/need-more-info，也不能直接 AI Review；它必须先重提。
+- 每次 AI Review 都新增 `ai_decision_report`，旧报告不覆盖；补件和重提写入 `audit_log`，补件摘要可通过 `GET /api/loan-applications/{id}/material-updates` 查询。
+- AI/ML/RAG/LLM 仍只产生审批辅助建议，最终 `APPROVED` / `REJECTED` 只允许人工审批接口写入。
+
 ## 第 9 轮：Tool Trace E2E 与高风险复核分支
 
 本轮在第 8 轮 tool system 基础上补齐“Python 结构化工具调用 -> Java 日志摘要 -> Demo UI 展示”的端到端可观测链路，同时将高风险申请显式路由到高级人工复核要求分支。

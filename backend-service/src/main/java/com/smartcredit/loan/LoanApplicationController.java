@@ -6,6 +6,8 @@ import com.smartcredit.common.PageResponse;
 import com.smartcredit.common.Result;
 import com.smartcredit.loan.dto.CreateLoanApplicationRequest;
 import com.smartcredit.loan.dto.UpdateStatusRequest;
+import com.smartcredit.loan.dto.UpdateMaterialsRequest;
+import com.smartcredit.material.MaterialUpdateRecord;
 import com.smartcredit.security.CurrentUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,6 +41,30 @@ public class LoanApplicationController {
     @PostMapping("/{id}/submit")
     public Result<LoanApplication> submit(@PathVariable Long id, HttpServletRequest servletRequest) {
         return Result.success(loanApplicationService.submit(id, CurrentUser.getRequiredUserId(), servletRequest.getRemoteAddr()));
+    }
+
+    @PostMapping("/{id}/materials")
+    public Result<LoanApplication> updateMaterials(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateMaterialsRequest request,
+            HttpServletRequest servletRequest
+    ) {
+        return Result.success(loanApplicationService.updateMaterials(
+                id,
+                request.materialSummary(),
+                CurrentUser.getRequiredUserId(),
+                servletRequest.getRemoteAddr()
+        ));
+    }
+
+    @PostMapping("/{id}/resubmit")
+    public Result<LoanApplication> resubmit(@PathVariable Long id, HttpServletRequest servletRequest) {
+        return Result.success(loanApplicationService.resubmit(id, CurrentUser.getRequiredUserId(), servletRequest.getRemoteAddr()));
+    }
+
+    @GetMapping("/{id}/material-updates")
+    public Result<List<MaterialUpdateRecord>> materialUpdates(@PathVariable Long id) {
+        return Result.success(loanApplicationService.materialUpdates(id));
     }
 
     @GetMapping("/{id}")

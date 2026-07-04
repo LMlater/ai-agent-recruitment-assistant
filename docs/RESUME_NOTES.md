@@ -1,5 +1,18 @@
 # Resume Notes
 
+## 第 10 轮后简历补充
+
+### 可新增项目描述
+
+实现 `NEED_MORE_INFO -> MATERIAL_UPDATED -> RESUBMITTED -> AI_REVIEWED` 补件复审闭环，支持补件摘要记录、重新提交、重新 AI Review、多轮 AI report 保留和人工最终审批审计留痕，体现信贷审批业务状态机而非普通 CRUD。
+
+### 可新增技术亮点
+
+- 设计并实现补件复审状态机，限制非法状态跳转，保证补件后必须重新 AI review，不能沿用旧 AI report 直接终审。
+- 新增 `material_update_record` 和材料更新查询接口，记录补件摘要、操作人、状态变化和时间，配合 audit log 完成追溯。
+- Demo 页面支持完整演示 `AI Review -> Need More Info -> 补件 -> 重提 -> 再次 AI Review -> 人工终审`。
+- 保留多轮 AI report，每次复评新增报告而不覆盖旧报告，便于面试解释审计、回溯和业务合规。
+
 ## 第 9 轮后简历补充
 
 ### 可新增项目描述

@@ -60,11 +60,14 @@ public class AgentReviewService {
         if (LoanStatus.SUBMITTED.name().equals(status)) {
             return;
         }
+        if (LoanStatus.RESUBMITTED.name().equals(status)) {
+            return;
+        }
         // Demo and reassessment path: allow rerunning AI assistance after a prior AI review.
         if (LoanStatus.AI_REVIEWED.name().equals(status)) {
             return;
         }
-        throw new BusinessException("AI review can only run when application status is SUBMITTED or AI_REVIEWED");
+        throw new BusinessException("AI review can only run when application status is SUBMITTED, RESUBMITTED or AI_REVIEWED");
     }
 
     private void saveReport(Long applicationId, AgentReviewResponse response) {

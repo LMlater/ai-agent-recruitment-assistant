@@ -63,8 +63,10 @@ public class ApprovalService {
             return;
         }
         if (toStatus == LoanStatus.NEED_MORE_INFO) {
-            if (!LoanStatus.SUBMITTED.name().equals(fromStatus) && !LoanStatus.AI_REVIEWED.name().equals(fromStatus)) {
-                throw new BusinessException("Only SUBMITTED or AI_REVIEWED applications can request more information");
+            if (!LoanStatus.SUBMITTED.name().equals(fromStatus)
+                    && !LoanStatus.RESUBMITTED.name().equals(fromStatus)
+                    && !LoanStatus.AI_REVIEWED.name().equals(fromStatus)) {
+                throw new BusinessException("Only SUBMITTED, RESUBMITTED or AI_REVIEWED applications can request more information");
             }
             return;
         }

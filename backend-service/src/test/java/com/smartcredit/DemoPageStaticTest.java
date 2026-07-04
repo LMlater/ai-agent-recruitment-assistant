@@ -59,5 +59,15 @@ class DemoPageStaticTest {
         assertTrue(html.contains("暂无工具调用记录"));
         assertTrue(html.contains("read-only/auditable assistance"));
         assertTrue(html.contains("Agent does not call final approval write tools"));
+        assertTrue(html.contains("function updateMaterials"));
+        assertTrue(html.contains("function resubmitApplication"));
+        assertTrue(html.contains("function fetchMaterialUpdates"));
+        assertTrue(html.contains("/materials"));
+        assertTrue(html.contains("/resubmit"));
+        assertTrue(html.contains("/material-updates"));
+        assertTrue(html.contains("MATERIAL_UPDATED"));
+        assertTrue(html.contains("RESUBMITTED"));
+        assertTrue(html.contains("补件后必须重新 AI Review"));
+        assertTrue(html.contains("不上传真实身份证、手机号、征信报告或银行流水"));
     }
 }

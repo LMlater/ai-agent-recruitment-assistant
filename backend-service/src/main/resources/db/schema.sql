@@ -98,6 +98,17 @@ create table if not exists approval_record (
     key idx_approval_application(application_id)
 ) engine=InnoDB default charset=utf8mb4;
 
+create table if not exists material_update_record (
+    id bigint primary key auto_increment,
+    application_id bigint not null,
+    operator_id bigint not null,
+    material_summary text not null,
+    from_status varchar(32) not null,
+    to_status varchar(32) not null,
+    created_at datetime not null default current_timestamp,
+    key idx_material_application(application_id)
+) engine=InnoDB default charset=utf8mb4;
+
 create table if not exists audit_log (
     id bigint primary key auto_increment,
     user_id bigint null,

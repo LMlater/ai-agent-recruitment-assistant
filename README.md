@@ -8,6 +8,7 @@
 - 架构图与职责边界：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - API 演示流程：[docs/API_WALKTHROUGH.md](docs/API_WALKTHROUGH.md)
 - 面试讲解稿：[docs/INTERVIEW_SCRIPT.md](docs/INTERVIEW_SCRIPT.md)
+- 最终面试交付：[docs/FINAL_INTERVIEW_DELIVERY.md](docs/FINAL_INTERVIEW_DELIVERY.md)
 - 简历要点：[docs/RESUME_NOTES.md](docs/RESUME_NOTES.md)
 - 验证日志：[docs/VALIDATION_LOG.md](docs/VALIDATION_LOG.md)
 
@@ -38,6 +39,14 @@ http://localhost:8080/demo.html
 面试演示顺序：先启动 `agent-service`，再启动 `backend-service`，打开 `demo.html`。页面分为“客户申请端”和“银行审批工作台”：先点击“生成一笔脱敏演示申请”创建本地 seed/mock fixture，再到银行审批工作台触发 AI Review、查看风险评分、制度引用、Agent 工具调用时间线和 LLM 信息，最后通过人工审批接口确认最终状态。真实业务中客户和贷款申请来自业务系统，不由 Agent 自动生成。
 
 安全说明：不要提交 `.env` 或真实 API Key；demo admin 默认账号密码只用于本地演示。
+
+## 第 10 轮：补件复审轻量闭环与面试交付收口
+
+- Java 状态机新增 `MATERIAL_UPDATED`、`RESUBMITTED`，落地完整复审流：`NEED_MORE_INFO -> MATERIAL_UPDATED -> RESUBMITTED -> AI_REVIEWED`。
+- 新增 `POST /api/loan-applications/{id}/materials`、`POST /api/loan-applications/{id}/resubmit` 和 `GET /api/loan-applications/{id}/material-updates`，补件只保存 mock 摘要，不上传真实材料。
+- 补件和重提都会写 audit log；每次重新 AI Review 都新增 AI report，不覆盖旧报告。
+- Demo 页面支持演示 `AI Review -> Need More Info -> 补件 -> 重新提交 -> 再次 AI Review -> 人工 Approve/Reject`。
+- 最终 `APPROVED` / `REJECTED` 仍必须由 Java 人工审批接口确认，LLM 不拥有最终审批写库能力。
 
 ## 第 9 轮：Tool Trace 端到端与高风险 Senior Review 分支
 

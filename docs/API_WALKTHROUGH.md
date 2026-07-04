@@ -112,7 +112,7 @@ curl.exe -s -X POST "$base/api/approvals/$applicationId/reject" `
   -d '{"comment":"manual rejection after checking AI report and agent logs"}'
 ```
 
-## 10. 人工 need-more-info
+## 10. 人工 need-more-info 与补件复审
 
 ```powershell
 curl.exe -s -X POST "$base/api/approvals/$applicationId/need-more-info" `
@@ -121,7 +121,25 @@ curl.exe -s -X POST "$base/api/approvals/$applicationId/need-more-info" `
   -d '{"comment":"please provide additional repayment capacity proof"}'
 ```
 
-同一笔申请演示时只选择一种最终人工动作，避免连续覆盖最终状态。
+进入 `NEED_MORE_INFO` 后，真实业务通常需要补件、重提和重新 AI review。第 10 轮实现了轻量闭环：
+
+```powershell
+curl.exe -s -X POST "$base/api/loan-applications/$applicationId/materials" `
+  -H "Authorization: Bearer $token" `
+  -H "Content-Type: application/json" `
+  -d '{"materialSummary":"补充近 6 个月收入流水和资产证明摘要"}'
+
+curl.exe -s "$base/api/loan-applications/$applicationId/material-updates" `
+  -H "Authorization: Bearer $token"
+
+curl.exe -s -X POST "$base/api/loan-applications/$applicationId/resubmit" `
+  -H "Authorization: Bearer $token"
+
+$review2 = curl.exe -s -X POST "$base/api/loan-applications/$applicationId/ai-review" `
+  -H "Authorization: Bearer $token" | ConvertFrom-Json
+```
+
+补件内容只保存 mock 摘要，不上传真实身份证、手机号、征信报告或银行流水。重新 AI review 会新增一条 AI report，不覆盖旧报告；最终 approve/reject 仍走人工审批接口。
 
 ## 11. 查询审批历史
 
