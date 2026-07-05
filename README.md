@@ -2,6 +2,37 @@
 
 [![CI](https://github.com/LMlater/ai-agent-recruitment-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/LMlater/ai-agent-recruitment-assistant/actions/workflows/ci.yml)
 
+## Round 16: Batch File AI Review + Formal Frontend Workspace
+
+本轮新增正式前端入口 `frontend-service`，技术栈为 Vue 3 + Vite + Element Plus。推荐面试演示优先使用正式工作台；`backend-service/src/main/resources/static/demo.html` 保留为无 Node 环境下的 fallback demo 页面。
+
+启动顺序：
+
+```bash
+cd agent-service
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001
+```
+
+```bash
+cd backend-service
+mvn spring-boot:run
+```
+
+```bash
+cd frontend-service
+npm install
+npm run dev
+```
+
+访问：
+
+```text
+Formal workspace: http://localhost:5173
+Fallback demo: http://localhost:8080/demo.html
+```
+
+推荐演示流程：登录 demo admin，手动上传 `docs/sample_import/loan_applications_sample.csv`，点击“批量 AI 检测上传文件”，逐条查看 Agent Trace、Tool Calls、Policy References、真实 LLM 报告摘要和人工审批区。批量 AI 检测在前端顺序调用单笔 AI Review 接口，避免真实 LLM 并发限流；最终 `APPROVED / REJECTED / NEED_MORE_INFO` 仍必须由人工审批接口确认。
+
 ## Round 15.1: Clarify Project CSV Fixture Upload Flow
 
 仓库内置 `docs/sample_import/loan_applications_sample.csv` 作为脱敏批量申请样例。面试演示时，用户从本地仓库目录选择该 CSV 上传，系统解析文件后创建待审申请队列。下载模板只是辅助入口，不代表系统绕过上传自动生成申请。

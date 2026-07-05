@@ -1,5 +1,15 @@
 # API Walkthrough
 
+## Round 16: 正式前端与批量 AI 检测
+
+正式前端 `frontend-service` 不新增后端批量 AI Review 接口。上传 CSV 后，前端从 `POST /api/loan-applications/batch-import` 返回的 `imported[].applicationId` 中取得申请 ID，并按顺序调用已有单笔接口：
+
+```text
+POST /api/loan-applications/{applicationId}/ai-review
+```
+
+每条检测完成后，后端仍保存 AI report 和 Agent logs；前端再展示 Agent Trace、Tool Calls、Policy References 和人工审批操作。该流程避免真实 LLM 并发调用导致限流。
+
 ## Round 15.1: CSV fixture 上传说明
 
 仓库内置 `docs/sample_import/loan_applications_sample.csv` 是脱敏批量申请 fixture。可视化 demo 的主流程是用户在页面手动选择该文件上传；后端只解析用户上传的 CSV，不提供绕过上传的样例导入接口。

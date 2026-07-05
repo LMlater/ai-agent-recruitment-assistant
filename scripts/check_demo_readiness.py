@@ -22,6 +22,13 @@ DEFAULT_AGENT_BASE_URL = "http://localhost:8001"
 REQUIRED_PATHS = (
     "backend-service",
     "agent-service",
+    "frontend-service/package.json",
+    "frontend-service/index.html",
+    "frontend-service/vite.config.js",
+    "frontend-service/src/main.js",
+    "frontend-service/src/api.js",
+    "frontend-service/src/App.vue",
+    "frontend-service/src/styles.css",
     "scripts/run_e2e_credit_review_demo.py",
     "scripts/run_full_demo_stack.py",
     "backend-service/Dockerfile",

@@ -19,6 +19,9 @@ REQUIRED_FILES = (
     "docker-compose.yml",
     "agent-service/Dockerfile",
     "backend-service/Dockerfile",
+    "frontend-service/package.json",
+    "frontend-service/vite.config.js",
+    "frontend-service/src/App.vue",
     ".github/workflows/ci.yml",
     "scripts/check_demo_readiness.py",
     "docs/FINAL_ACCEPTANCE_CHECKLIST.md",
@@ -26,6 +29,7 @@ REQUIRED_FILES = (
 REQUIRED_COMPOSE_SERVICES = ("mysql", "redis", "agent-service", "backend-service")
 COMMANDS = (
     "docker compose up --build",
+    "Frontend workspace: http://localhost:5173",
     "Agent health: http://localhost:8001/health",
     "Demo page: http://localhost:8080/demo.html",
 )
@@ -33,6 +37,7 @@ SOURCE_MODE_COMMANDS = (
     "docker compose up -d mysql redis",
     "cd agent-service && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8001",
     "cd backend-service && mvn spring-boot:run",
+    "cd frontend-service && npm install && npm run dev",
 )
 
 

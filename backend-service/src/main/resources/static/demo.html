@@ -1127,16 +1127,17 @@
     }
 
     async function runAction(event, label, action, ...args) {
+      const options = args.length && args[args.length - 1] && args[args.length - 1].aiReview === true ? args.pop() : {};
       const button = event && event.currentTarget;
       const oldText = button ? button.textContent : "";
-      const isAiReview = action === runAiReview;
+      const isAiReviewAction = options.aiReview === true || action === runAiReview;
       try {
         if (button) {
           button.disabled = true;
-          button.classList.toggle("is-loading", isAiReview);
+          button.classList.toggle("is-loading", isAiReviewAction);
           button.textContent = label + "中...";
         }
-        if (isAiReview) {
+        if (isAiReviewAction) {
           startAiReviewLoading(button);
         } else {
           setMessage(label + "中...", "info");
@@ -1153,7 +1154,7 @@
         setMessage(label + "失败：" + error.message, "error");
         return null;
       } finally {
-        if (isAiReview) {
+        if (isAiReviewAction) {
           stopAiReviewLoading();
         }
         if (button) {
@@ -1310,7 +1311,9 @@
         const application = await apiRequest("/api/loan-applications/" + encodeURIComponent(applicationId));
         await selectApplicationFromList(application);
       }
-      return runAiReview();
+      const result = await runAiReview();
+      await fetchPendingApplications();
+      return result;
     }
 
     function renderImportResult(result) {
@@ -1352,7 +1355,7 @@
             '<td>' + escapeHtml(item.riskLevel || "-") + '</td>' +
             '<td>' + escapeHtml(decisionText(item.aiDecision)) + '<div class="muted">' + escapeHtml(item.aiDecision || "-") + '</div></td>' +
             '<td><div class="button-row"><button type="button" class="secondary" onclick="runAction(event, \'选择申请\', selectApplicationFromList, state.pendingApplications.find((item) => String(item.id) === \'' + escapeHtml(id) + '\'))">选择</button>' +
-            '<button type="button" class="primary" onclick="runAction(event, \'AI预审\', runAiReviewForApplication, \'' + escapeHtml(id) + '\')">AI预审</button></div></td>' +
+            '<button type="button" class="primary" onclick="runAction(event, \'AI预审\', runAiReviewForApplication, \'' + escapeHtml(id) + '\', { aiReview: true })">AI预审</button></div></td>' +
           '</tr>';
         }).join("") + '</tbody></table></div>';
     }

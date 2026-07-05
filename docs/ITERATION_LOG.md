@@ -1,5 +1,15 @@
 # Iteration Log
 
+## Round 16: Batch File AI Review + Formal Frontend Workspace
+
+- 修复 `demo.html` 待审申请列表中点击 `AI预审` 没有明显 loading 的问题：`runAction` 支持 `{ aiReview: true }` 标记，`runAiReviewForApplication` 现在会触发 AI Review loading、按钮禁用和等待秒数提示。
+- `runAiReviewForApplication` 成功后刷新待审申请列表，使 `riskLevel` / `aiDecision` 等字段能及时更新。
+- 新增 `frontend-service` 正式前端工作台，技术栈为 Vue 3 + Vite + Element Plus。
+- 正式工作台支持 demo admin 登录、CSV 手动上传、导入结果展示、顺序批量 AI 检测、逐行检测状态、汇总指标、申请详情、Agent Trace、Tool Calls、Policy References、人工审批和补件复审入口。
+- 批量 AI 检测在前端顺序调用已有单笔 `POST /api/loan-applications/{applicationId}/ai-review`，不新增后端长事务批量接口，不并发调用真实 LLM。
+- `demo.html` 保留为无 Node 环境下的 fallback；推荐正式演示优先使用 `frontend-service`。
+- 本轮不改审批状态机、不改 Python Agent 流程、不让 AI 自动最终审批、不提交 `.env` 或真实 API Key。
+
 ## Round 15.1: Clarify Project CSV Fixture Upload Flow
 
 - 澄清第 15 轮 CSV 批量导入演示流程：`docs/sample_import/loan_applications_sample.csv` 是仓库内置脱敏 fixture，用户需要在 demo 页面手动选择该 CSV 上传。

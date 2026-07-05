@@ -1,5 +1,83 @@
 # Validation Log
 
+## Round 16: Batch File AI Review + Formal Frontend Workspace
+
+日期：2026-07-05
+
+### TDD 红灯记录
+
+```powershell
+cd agent-service
+python -m pytest tests\test_round16_frontend_workspace.py -q
+```
+
+结果：按预期失败，失败点包括 `demo.html` 尚未包含 `isAiReviewAction`，以及 `frontend-service/package.json` 等正式前端文件尚不存在。
+
+### targeted Round 16 static tests
+
+```powershell
+cd agent-service
+python -m pytest tests\test_round16_frontend_workspace.py -q
+```
+
+结果：通过，`2 passed`。覆盖 `demo.html` 列表 AI 预审 loading 修复锚点、`frontend-service` Vue/Vite/Element Plus 文件、API 封装、顺序批量 AI 检测、Agent Trace、Tool Calls、Policy References 和人工审批文案。
+
+```powershell
+cd backend-service
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" "-Dtest=DemoPageStaticTest" test
+```
+
+结果：通过，`Tests run: 1, Failures: 0, Errors: 0, Skipped: 0`。
+
+### agent-service
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：通过，`74 passed, 1 skipped, 2 warnings`。跳过项仍为真实 LLM smoke 类测试；普通测试保持 Mock LLM，不调用真实 API。警告包括 Starlette/httpx deprecation 和本机 `.pytest_cache` 写入权限警告。
+
+### readiness
+
+```powershell
+python scripts\check_demo_readiness.py --skip-services
+```
+
+结果：通过，`ok=true`。readiness 现在也检查 `frontend-service/package.json`、`frontend-service/src/App.vue`、`frontend-service/src/api.js` 等正式前端关键文件；`env_file_tracked=false`、`prints_api_key=false`。
+
+### backend-service
+
+```powershell
+cd backend-service
+mvn test
+```
+
+结果：当前 Windows 本机环境失败，原因为 Maven resources 插件复制 `src/main/resources/static/demo.html` 到 `target/classes/static/demo.html` 时出现 `AccessDeniedException`。这是本地 target 资源复制权限问题，未伪造为通过。
+
+本地替代验证：
+
+```powershell
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" test
+```
+
+结果：通过，`Tests run: 34, Failures: 0, Errors: 0, Skipped: 0`。该命令只作为本机权限问题下的 Java 测试逻辑验证，不替代 CI 的普通 `mvn test`。
+
+### frontend-service
+
+```powershell
+cd frontend-service
+npm run build
+```
+
+结果：未运行成功，当前本机没有 `npm` 命令，PowerShell 返回 `The term 'npm' is not recognized`。未伪造前端 build 通过；需要安装 Node/npm 后执行 `npm install` 和 `npm run build`。
+
+### 安全记录
+
+- 本轮没有提交 `.env`、真实 API Key、本地敏感配置、真实身份证、真实手机号、征信报告或银行流水。
+- 批量 AI 检测顺序调用已有单笔 AI Review 接口，不新增自动最终审批逻辑。
+- 最终 `APPROVED / REJECTED / NEED_MORE_INFO` 仍由人工审批接口确认。
+
 ## Round 15.1: Clarify Project CSV Fixture Upload Flow
 
 日期：2026-07-05

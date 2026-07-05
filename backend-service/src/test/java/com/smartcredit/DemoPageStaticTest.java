@@ -84,6 +84,10 @@ class DemoPageStaticTest {
         assertFalse(html.contains("/batch-import-" + "sample"));
         assertTrue(html.contains("刷新待审列表"));
         assertTrue(html.contains("AI预审"));
+        assertTrue(html.contains("isAiReviewAction"));
+        assertTrue(html.contains("{ aiReview: true }"));
+        assertTrue(html.contains("AI Review 正在执行：规则评分、ML baseline、Policy RAG、合规检查和真实 LLM 报告生成中"));
+        assertTrue(html.contains("await fetchPendingApplications()"));
         assertTrue(html.contains("请勿上传真实身份证号、手机号、征信报告或银行流水"));
         assertTrue(html.contains("AI 已预审"));
         assertTrue(html.contains("/api/loan-applications/batch-import"));

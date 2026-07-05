@@ -1,5 +1,19 @@
 # Final Demo Script
 
+## Round 16: 正式工作台演示流程
+
+1. 启动 `agent-service`。
+2. 启动 `backend-service`。
+3. 启动 `frontend-service`，访问 `http://localhost:5173`。
+4. 初始化并登录 demo admin。
+5. 在正式工作台上传 `docs/sample_import/loan_applications_sample.csv`。
+6. 点击“批量 AI 检测上传文件”。
+7. 查看文件内每条申请的检测状态、风险等级、AI 建议和耗时。
+8. 选择高风险申请，展示 SeniorReviewAgent、Tool Trace、Policy RAG 和真实 LLM 报告摘要。
+9. 在人工审批区执行“人工通过 / 人工拒绝 / 要求补件”；补件场景继续演示“提交补件摘要 -> 重新提交 -> 再次 AI 检测”。
+
+说明：批量检测由前端顺序调用已有单笔 AI Review 接口，不新增后端长事务批量接口，不并发刷真实 LLM。`demo.html` 继续保留为无 Node 环境下的 fallback。
+
 ## Round 15.1: CSV fixture 手动上传演示步骤
 
 1. 打开 demo 页面。

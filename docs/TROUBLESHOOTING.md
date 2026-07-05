@@ -1,5 +1,30 @@
 # Troubleshooting
 
+## Round 16: frontend-service 启动或构建问题
+
+正式前端入口：
+
+```text
+frontend-service
+http://localhost:5173
+```
+
+启动命令：
+
+```bash
+cd frontend-service
+npm install
+npm run dev
+```
+
+如果本机没有 Node/npm，`node --version` 或 `npm --version` 会提示命令不存在。此时不要伪造前端 build 结果，可以继续使用 fallback：
+
+```text
+http://localhost:8080/demo.html
+```
+
+批量 AI 检测时间较长时，优先检查是否启用了真实 LLM。前端会顺序处理每条申请，避免并发调用真实 LLM 导致超时或限流。
+
 ## Round 15.1: 不知道上传哪个 CSV
 
 如果不知道上传哪个 CSV，请使用仓库内置样例：

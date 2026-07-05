@@ -1,5 +1,14 @@
 # Conversation Recovery
 
+## Round 16 恢复要点
+
+1. 本轮新增正式前端 `frontend-service`，技术栈为 Vue 3 + Vite + Element Plus；旧 `demo.html` 保留为 fallback。
+2. `demo.html` 的待审列表 `AI预审` 按钮已接入 `{ aiReview: true }`，会显示 AI Review loading、禁用按钮、等待秒数和真实 LLM 30-90 秒提示。
+3. `frontend-service` 的批量 AI 检测不新增后端批量接口，而是在前端顺序调用已有单笔 AI Review 接口，避免真实 LLM 并发限流。
+4. 正式工作台主流程：登录 -> 手动上传 `docs/sample_import/loan_applications_sample.csv` -> 批量 AI 检测上传文件 -> 查看逐行结果 -> 打开详情查看 Agent Trace / Tool Calls / Policy References -> 人工审批。
+5. 最终 `APPROVED / REJECTED / NEED_MORE_INFO` 仍必须由人工审批接口确认；AI/LLM 不拥有最终审批写库权限。
+6. 当前本机没有 Node/npm，前端 build 需要在安装 Node 环境后运行；无 Node 时继续使用 `http://localhost:8080/demo.html` fallback。
+
 ## Round 15.1 恢复要点
 
 1. 第 15.1 轮只做文案和静态测试小修，不新增业务接口。
