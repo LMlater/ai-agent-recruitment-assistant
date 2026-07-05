@@ -1,5 +1,15 @@
 # Troubleshooting
 
+## Round 15.1: 不知道上传哪个 CSV
+
+如果不知道上传哪个 CSV，请使用仓库内置样例：
+
+```text
+docs/sample_import/loan_applications_sample.csv
+```
+
+注意：浏览器出于安全限制，不能自动读取或自动选择本地文件，所以需要用户手动点击“选择文件”，从本地仓库目录中选择该 CSV 上传。项目没有自动导入内置样例的专用按钮或接口。
+
 ## 第 15 轮：批量导入常见问题
 
 ### CSV 上传后部分行失败

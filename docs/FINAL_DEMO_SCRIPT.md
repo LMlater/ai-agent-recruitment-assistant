@@ -1,9 +1,23 @@
 # Final Demo Script
 
+## Round 15.1: CSV fixture 手动上传演示步骤
+
+1. 打开 demo 页面。
+2. 登录 demo admin。
+3. 在“批量导入脱敏申请”区域点击选择文件。
+4. 选择仓库中的 `docs/sample_import/loan_applications_sample.csv`。
+5. 点击“上传 CSV 导入”。
+6. 查看待审申请列表。
+7. 选择高风险申请并触发 AI预审。
+8. 展示 SeniorReviewAgent、Tool Trace、Policy RAG 和真实 LLM 报告。
+9. 人工通过 / 人工拒绝 / 要求补件。
+
+说明：这一步模拟上游业务系统或客户经理批量提交信贷申请文件。浏览器不能自动读取或自动选择本地仓库文件，所以必须由演示者手动选择 CSV 上传。不要把它讲成系统自动导入内置样例。
+
 ## 第 15 轮演示提示：从批量导入进入审批工作台
 
 - 面试时可以先说明：真实业务里客户和贷款申请通常来自业务系统、客户经理台账或批量导入，而不是由 AI Agent 自动生成。
-- 在客户申请端使用“下载 CSV 模板”，或直接打开 `docs/sample_import/loan_applications_sample.csv` 说明字段。
+- 在客户申请端点击“选择文件”，手动选择 `docs/sample_import/loan_applications_sample.csv` 上传；“下载 CSV 模板”只是辅助入口，可用于下载同结构模板后编辑脱敏数据。
 - 上传脱敏 CSV 后，导入服务会创建客户和贷款申请，并把申请自动提交为 `SUBMITTED`，页面展示为“待 AI 预审”。
 - 切到银行审批工作台，点击“刷新待审列表”，选择一笔申请，再触发 `AI预审`。
 - 人工审批按钮使用中文表达：“人工通过”“人工拒绝”“要求补件”。要强调 AI/ML/RAG/LLM 只给审批辅助建议，最终状态仍由人工接口写入。

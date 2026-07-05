@@ -1,5 +1,9 @@
 # API Walkthrough
 
+## Round 15.1: CSV fixture 上传说明
+
+仓库内置 `docs/sample_import/loan_applications_sample.csv` 是脱敏批量申请 fixture。可视化 demo 的主流程是用户在页面手动选择该文件上传；后端只解析用户上传的 CSV，不提供绕过上传的样例导入接口。
+
 ## 批量导入脱敏申请
 
 登录后可以下载 CSV 模板：

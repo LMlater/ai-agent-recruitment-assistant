@@ -880,10 +880,12 @@
           <article class="card wide">
             <h2>批量导入脱敏申请</h2>
             <div class="card-content">
-              <div class="notice">请只上传脱敏/模拟数据，不要上传真实身份证号、手机号、征信报告或银行流水。当前版本优先支持 CSV，Excel .xlsx 请先另存为 CSV。</div>
+              <div class="notice">项目已内置一份脱敏 CSV 样例文件：<code>docs/sample_import/loan_applications_sample.csv</code>。演示时请点击“选择文件”，从本地仓库目录中选择该 CSV，然后点击“上传 CSV 导入”。这模拟上游业务系统或客户经理批量提交信贷申请文件。</div>
+              <div class="muted">推荐上传项目内置样例：docs/sample_import/loan_applications_sample.csv</div>
+              <div class="muted">如果不想从项目目录选择文件，也可以下载同样结构的 CSV 模板，编辑脱敏数据后再上传。请勿上传真实身份证号、手机号、征信报告或银行流水。</div>
               <div class="button-row">
                 <button type="button" class="secondary" onclick="runAction(event, '下载 CSV 模板', downloadCsvTemplate)">下载 CSV 模板</button>
-                <button type="button" class="primary" onclick="runAction(event, '导入脱敏申请', importCsvApplications)">导入脱敏申请</button>
+                <button type="button" class="primary" onclick="runAction(event, '上传 CSV 导入', importCsvApplications)">上传 CSV 导入</button>
               </div>
               <input id="csvImportInput" class="file-input" type="file" accept=".csv,text/csv">
               <div id="importResultCard" class="message">尚未导入 CSV。</div>

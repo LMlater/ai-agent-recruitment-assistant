@@ -1,5 +1,13 @@
 # Iteration Log
 
+## Round 15.1: Clarify Project CSV Fixture Upload Flow
+
+- 澄清第 15 轮 CSV 批量导入演示流程：`docs/sample_import/loan_applications_sample.csv` 是仓库内置脱敏 fixture，用户需要在 demo 页面手动选择该 CSV 上传。
+- Demo 页面批量导入区域增加项目内置样例路径提示，并将按钮文案从“导入脱敏申请”调整为“上传 CSV 导入”。
+- 下载 CSV 模板仅作为辅助入口：可下载同结构模板、编辑脱敏数据后再上传；它不代表系统绕过上传自动生成申请。
+- 明确不新增自动导入内置样例的专用接口或按钮，不把导入改回自动 seed 数据。
+- 本轮不改审批状态机、不改 Python Agent 流程、不引入 Excel 解析、不删除第 15 轮已有 CSV 上传能力。
+
 ## 第 15 轮：批量申请导入与中文审批工作台
 
 - Java 后端新增 CSV 批量导入服务，支持从脱敏 CSV 逐行创建 `Customer` 和 `LoanApplication`，并自动提交到 `SUBMITTED`。

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DemoPageStaticTest {
@@ -75,10 +76,15 @@ class DemoPageStaticTest {
         assertTrue(html.contains("批量导入脱敏申请"));
         assertTrue(html.contains("待审申请列表"));
         assertTrue(html.contains("下载 CSV 模板"));
-        assertTrue(html.contains("导入脱敏申请"));
+        assertTrue(html.contains("上传 CSV 导入"));
+        assertTrue(html.contains("docs/sample_import/loan_applications_sample.csv"));
+        assertTrue(html.contains("项目已内置一份脱敏 CSV 样例文件"));
+        assertTrue(html.contains("选择文件"));
+        assertFalse(html.contains("一键" + "导入内置样例"));
+        assertFalse(html.contains("/batch-import-" + "sample"));
         assertTrue(html.contains("刷新待审列表"));
         assertTrue(html.contains("AI预审"));
-        assertTrue(html.contains("请只上传脱敏/模拟数据"));
+        assertTrue(html.contains("请勿上传真实身份证号、手机号、征信报告或银行流水"));
         assertTrue(html.contains("AI 已预审"));
         assertTrue(html.contains("/api/loan-applications/batch-import"));
         assertTrue(html.contains("/api/loan-applications/batch-import-template"));

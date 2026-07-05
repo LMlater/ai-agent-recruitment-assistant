@@ -1,5 +1,67 @@
 # Validation Log
 
+## Round 15.1: Clarify Project CSV Fixture Upload Flow
+
+日期：2026-07-05
+
+### TDD 红灯记录
+
+```powershell
+cd backend-service
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" "-Dtest=DemoPageStaticTest" test
+```
+
+结果：按预期失败，页面尚未包含 `上传 CSV 导入`、`项目已内置一份脱敏 CSV 样例文件`、`选择文件` 和 `docs/sample_import/loan_applications_sample.csv` 等 Round 15.1 文案锚点。
+
+### targeted backend static test
+
+```powershell
+cd backend-service
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" "-Dtest=DemoPageStaticTest" test
+```
+
+结果：通过，`Tests run: 1, Failures: 0, Errors: 0, Skipped: 0`。静态测试确认页面展示项目内置 CSV fixture 路径、`上传 CSV 导入`、手动选择文件提示，并确认页面不包含自动导入内置样例按钮或绕过上传的样例接口路径。
+
+### agent-service
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：通过，`72 passed, 1 skipped, 2 warnings`。跳过项仍为真实 LLM smoke 类测试；普通测试保持 Mock LLM，不调用真实 API。警告包括 Starlette/httpx deprecation 和本机 `.pytest_cache` 写入权限警告。
+
+### readiness
+
+```powershell
+python scripts\check_demo_readiness.py --skip-services
+```
+
+结果：通过，`ok=true`。静态文件、Docker Compose 四服务、最终交付文档和安全检查均通过，`env_file_tracked=false`、`prints_api_key=false`。
+
+### backend-service
+
+```powershell
+cd backend-service
+mvn test
+```
+
+结果：当前 Windows 本机环境失败，原因为 Maven resources 插件复制 `src/main/resources/static/demo.html` 到 `target/classes/static/demo.html` 时出现 `AccessDeniedException`。这是本地 target 资源复制权限问题，未伪造为通过。
+
+本地替代验证：
+
+```powershell
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" test
+```
+
+结果：通过，`Tests run: 34, Failures: 0, Errors: 0, Skipped: 0`。该命令只作为本机权限问题下的 Java 测试逻辑验证，不替代 CI 的普通 `mvn test`。
+
+### 安全记录
+
+- 本轮没有提交 `.env`、真实 API Key、本地敏感配置、真实身份证、真实手机号、征信报告或银行流水。
+- 没有新增绕过文件上传的样例导入接口或按钮。
+- CSV fixture 仍为 `docs/sample_import/loan_applications_sample.csv`，用于演示者手动上传测试批量导入。
+
 ## 第 15 轮：批量申请导入与中文审批工作台
 
 日期：2026-07-05

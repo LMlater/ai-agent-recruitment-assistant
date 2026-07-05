@@ -2,6 +2,20 @@
 
 [![CI](https://github.com/LMlater/ai-agent-recruitment-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/LMlater/ai-agent-recruitment-assistant/actions/workflows/ci.yml)
 
+## Round 15.1: Clarify Project CSV Fixture Upload Flow
+
+仓库内置 `docs/sample_import/loan_applications_sample.csv` 作为脱敏批量申请样例。面试演示时，用户从本地仓库目录选择该 CSV 上传，系统解析文件后创建待审申请队列。下载模板只是辅助入口，不代表系统绕过上传自动生成申请。
+
+正确流程：
+
+```text
+打开 demo 页面 -> 登录 demo admin -> 在批量导入区域点击选择文件
+-> 选择 docs/sample_import/loan_applications_sample.csv
+-> 点击“上传 CSV 导入” -> 查看待审申请列表 -> 触发 AI预审
+```
+
+本项目没有自动导入内置样例的专用接口或按钮；CSV 导入必须经过浏览器文件上传流程。
+
 ## 第 15 轮：批量导入与中文审批工作台
 
 本轮让 Demo 更接近真实信贷业务入口：客户和贷款申请可以从脱敏 CSV 批量导入。页面保留低/高风险快速演示按钮，但它们只作为面试快捷样例，不再是唯一入口。
