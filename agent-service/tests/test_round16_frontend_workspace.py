@@ -235,3 +235,40 @@ def test_round17_frontend_router_auth_and_detail_page_polish():
         "overflow-x: hidden",
     ):
         assert expected in styles_css
+
+
+def test_round17_1_frontend_parses_persisted_tool_calls_and_localizes_trace():
+    detail_vue = _read_repo_text("frontend-service/src/pages/ApplicationDetail.vue")
+
+    for expected in (
+        "parseToolCallsFromOutputSummary",
+        "resolveToolCalls",
+        "parsed_output_summary",
+        "tools=",
+        "agentChineseDescription",
+        "toolChineseDescription",
+        "MaterialChecklistTool",
+        "RiskRuleTool",
+        "RiskModelTool",
+        "SeniorReviewChecklistTool",
+        "PolicySearchTool",
+        "ComplianceGuardrailTool",
+        "ReportGenerationTool",
+        "所属 Agent",
+        "来源",
+        "结构化 tool_calls",
+        "从 Agent 日志摘要解析",
+        "该工具调用从持久化 Agent 日志 outputSummary 中解析得到",
+        "暂无结构化 Tool Calls",
+    ):
+        assert expected in detail_vue
+
+    for still_supported in (
+        "normalizeToolCalls",
+        "normalizeLogs",
+        "outputSummary",
+        "item.tool_calls",
+        "result.tool_calls",
+        "item.output_summary",
+    ):
+        assert still_supported in detail_vue

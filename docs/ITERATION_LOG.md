@@ -256,3 +256,10 @@
 - 批量结果保存到 `smartcredit.frontend.lastBatchRows`，刷新工作台可恢复；退出登录时清空。
 - 后端已有 `JwtAuthInterceptor` 保护 `/api/**`，排除 `/api/auth/login` 和 `/api/auth/init-admin`，本轮未改审批状态机、Agent 流程或新增后端批量 Review 接口。
 - 纳入 `frontend-service/package-lock.json`，锁定 `vue-router` 和现有 npm 依赖。
+## Round 17.1: Parse Persisted Tool Calls and Localize Agent Trace
+
+- 修复正式前端详情页 Tool Calls tab 为空的展示问题。根因不是工具未调用，而是独立详情页重新读取 Java 持久化后的 Agent logs 时，工具调用已被拼进 `outputSummary` 的 `tools=...` 文本中。
+- `ApplicationDetail.vue` 继续优先使用结构化 `item.toolCalls`、`item.tool_calls`、`result.tool_calls`、`result.toolCalls`；当结构化数据为空时，再解析 `outputSummary` 中的 `tools=ToolName:SUCCESS(0ms)`。
+- Tool Calls 卡片现在展示工具名、中文说明、所属 Agent、状态、耗时、输入摘要、输出摘要、来源和错误信息。解析来源会标记为 `parsed_output_summary`，页面显示“从 Agent 日志摘要解析”。
+- Agent Trace 卡片新增中文说明，并保留原始 `inputSummary` / `outputSummary`，便于面试时解释 Intake/Risk/SeniorReview/Policy/Compliance/Decision 各节点职责。
+- 本轮只改正式前端展示层和静态测试/文档；未改 Java 审批状态机、未改 Python Agent 流程、未新增后端批量 Review 接口、未新增数据库字段。

@@ -1008,3 +1008,57 @@ python scripts\check_demo_readiness.py --skip-services
 ```
 
 结果：`ok=true`，`issues=[]`。
+## Round 17.1 验证记录
+
+日期：2026-07-05
+
+### 红灯
+
+```powershell
+cd agent-service
+python -m pytest tests\test_round16_frontend_workspace.py::test_round17_1_frontend_parses_persisted_tool_calls_and_localizes_trace -q
+```
+
+结果：按预期失败，`ApplicationDetail.vue` 尚不存在 `parseToolCallsFromOutputSummary`、`resolveToolCalls`、`parsed_output_summary` 等展示层解析逻辑。
+
+### 静态测试绿灯
+
+```powershell
+cd agent-service
+python -m pytest tests\test_round16_frontend_workspace.py -q
+```
+
+结果：`5 passed`。pytest cache 写入本地 `.pytest_cache` 时仍有 Windows 权限 warning，不影响断言结果。
+
+### 全量验证
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：`77 passed, 1 skipped, 2 warnings`。warning 为 Starlette/httpx deprecation 与本地 pytest cache 写入权限。
+
+```powershell
+cd backend-service
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" test
+```
+
+结果：`Tests run: 34, Failures: 0, Errors: 0, Skipped: 0`，`BUILD SUCCESS`。
+
+```powershell
+cd frontend-service
+npm run build
+```
+
+结果：普通沙箱下因 esbuild 子进程 `spawn EPERM` 失败；提升权限重跑后 Vite build 成功，`1609 modules transformed`。仅有 Rollup PURE 注释和 chunk size warning。
+
+```powershell
+python scripts\check_demo_readiness.py --skip-services
+```
+
+结果：`ok=true`，`issues=[]`。
+
+### 变更说明
+
+本轮只修正式前端展示层：保留结构化 `tool_calls` 兼容逻辑，并在结构化为空时解析持久化 Agent 日志 `outputSummary` 里的 `tools=...`。Agent Trace 和 Tool Calls 增加中文说明，未改 Java 审批状态机、未改 Python Agent 流程、未新增后端批量 Review 接口。

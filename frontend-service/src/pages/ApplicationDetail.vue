@@ -68,24 +68,30 @@
           <div v-for="agent in agentTimeline" :key="agent.agentName" class="timeline-card">
             <strong>{{ agent.agentName }}</strong>
             <el-tag class="inline-tag" :type="agent.status === 'SUCCESS' ? 'success' : 'warning'">{{ agent.status || "-" }}</el-tag>
+            <div class="hint">{{ agentChineseDescription(agent.agentName) }}</div>
             <div class="tool-meta">
               <span>duration: {{ formatDuration(agent.durationMs) }}</span>
               <span>inputSummary: {{ agent.inputSummary || "-" }}</span>
               <span>outputSummary: {{ agent.outputSummary || "-" }}</span>
+              <span v-if="toolSummaryFromOutput(agent.outputSummary)">工具摘要：{{ toolSummaryFromOutput(agent.outputSummary) }}</span>
             </div>
           </div>
         </el-tab-pane>
 
         <el-tab-pane label="Tool Calls" name="tools">
-          <div v-if="!toolCalls.length" class="empty">暂无 Tool Calls。</div>
+          <div v-if="!toolCalls.length" class="empty">暂无结构化 Tool Calls；如果 Agent Trace 的 outputSummary 中包含 tools=...，请检查解析逻辑或重新执行 AI Review。</div>
           <div v-for="(tool, index) in toolCalls" :key="`${tool.toolName}-${index}`" class="tool-card">
             <strong>{{ tool.toolName }}</strong>
+            <div class="hint">{{ toolChineseDescription(tool.toolName) }}</div>
             <div class="tool-meta">
-              <span>status: {{ tool.status || "-" }}</span>
-              <span>duration: {{ formatDuration(tool.durationMs) }}</span>
-              <span>inputSummary: {{ tool.inputSummary || "-" }}</span>
-              <span>outputSummary: {{ tool.outputSummary || "-" }}</span>
+              <span>所属 Agent: {{ tool.agentName || "-" }}</span>
+              <span>状态: {{ tool.status || "-" }}</span>
+              <span>耗时: {{ formatDuration(tool.durationMs) }}</span>
+              <span>来源: {{ toolSourceText(tool.source) }}</span>
+              <span>输入摘要: {{ tool.inputSummary || "-" }}</span>
+              <span>输出摘要: {{ tool.outputSummary || "-" }}</span>
             </div>
+            <div v-if="tool.source === 'parsed_output_summary'" class="hint top-gap">该工具调用从持久化 Agent 日志 outputSummary 中解析得到。</div>
             <div v-if="tool.errorMessage" class="danger-note">error: {{ tool.errorMessage }}</div>
           </div>
         </el-tab-pane>
@@ -235,26 +241,109 @@ function normalizeReport(report) {
 function normalizeLogs(items) {
   return (items || []).map((item) => {
     const result = parseJson(item.result) || item.result || {};
+    const agentName = item.agentName || item.agent_name || item.name || "Agent";
+    const outputSummary = item.outputSummary || item.output_summary || item.summary || "";
     return {
-      agentName: item.agentName || item.agent_name || item.name || "Agent",
+      agentName,
       status: item.status,
       inputSummary: item.inputSummary || item.input_summary || "",
-      outputSummary: item.outputSummary || item.output_summary || item.summary || "",
+      outputSummary,
       durationMs: item.durationMs ?? item.duration_ms ?? "",
-      toolCalls: normalizeToolCalls(item.toolCalls || item.tool_calls || result.tool_calls || result.toolCalls || [])
+      toolCalls: resolveToolCalls(item, result, agentName, outputSummary)
     };
   });
 }
 
-function normalizeToolCalls(items) {
+function resolveToolCalls(item, result, agentName, outputSummary) {
+  const structured = normalizeToolCalls(
+    item.toolCalls || item.tool_calls || result.tool_calls || result.toolCalls || [],
+    agentName,
+    "structured"
+  );
+
+  if (structured.length) {
+    return structured;
+  }
+
+  return parseToolCallsFromOutputSummary(outputSummary, agentName);
+}
+
+function normalizeToolCalls(items, agentName, source = "structured") {
   return (items || []).map((item) => ({
     toolName: item.toolName || item.tool_name || item.name || "Tool",
     status: item.status || "-",
     durationMs: item.durationMs ?? item.duration_ms ?? item.duration ?? "",
     inputSummary: item.inputSummary || item.input_summary || "",
     outputSummary: item.outputSummary || item.output_summary || "",
-    errorMessage: item.errorMessage || item.error_message || item.error || ""
+    errorMessage: item.errorMessage || item.error_message || item.error || "",
+    agentName,
+    source
   }));
+}
+
+function parseToolCallsFromOutputSummary(outputSummary, agentName) {
+  if (!outputSummary || !outputSummary.includes("tools=")) {
+    return [];
+  }
+
+  const toolsPart = outputSummary.split("tools=").pop() || "";
+  return toolsPart
+    .split(",")
+    .map((raw) => raw.trim())
+    .map((raw) => {
+      const match = raw.match(/^([A-Za-z0-9_]+)\s*:\s*([A-Z_]+)\s*\(([^)]*)\)$/);
+      if (!match) {
+        return null;
+      }
+      return {
+        toolName: match[1],
+        status: match[2],
+        durationMs: match[3],
+        inputSummary: "",
+        outputSummary: "",
+        errorMessage: "",
+        source: "parsed_output_summary",
+        agentName
+      };
+    })
+    .filter(Boolean);
+}
+
+function toolSummaryFromOutput(outputSummary) {
+  if (!outputSummary || !outputSummary.includes("tools=")) {
+    return "";
+  }
+  return outputSummary.split("tools=").pop()?.trim() || "";
+}
+
+function agentChineseDescription(agentName) {
+  return {
+    IntakeAgent: "材料完整性检查：校验客户基础信息和贷款申请材料是否齐全。",
+    RiskAgent: "风险评估：执行规则风控评分，并融合 ML baseline 风险信号。",
+    SeniorReviewAgent: "高级人工复核：高风险申请进入人工复核清单分支。",
+    PolicyAgent: "制度检索：基于模拟信贷制度库进行 Policy RAG 检索。",
+    ComplianceAgent: "合规护栏：检查 AI 建议是否越过自动审批边界。",
+    DecisionAgent: "报告生成：汇总风险、制度引用、工具调用和审批辅助建议。"
+  }[agentName] || "Agent 执行节点。";
+}
+
+function toolChineseDescription(toolName) {
+  return {
+    MaterialChecklistTool: "材料清单工具：检查客户和申请字段是否完整。",
+    RiskRuleTool: "规则风控工具：根据负债、逾期、收入、资产等字段计算规则风险。",
+    RiskModelTool: "ML baseline 工具：生成辅助模型风险信号。",
+    SeniorReviewChecklistTool: "高级复核清单工具：为高风险申请生成重点人工复核事项。",
+    PolicySearchTool: "制度检索工具：从模拟信贷制度库中检索相关条款。",
+    ComplianceGuardrailTool: "合规护栏工具：确认 AI 只给辅助建议，不自动终审。",
+    ReportGenerationTool: "报告生成工具：调用 Mock/真实 LLM 生成审批辅助报告。"
+  }[toolName] || "Agent 工具调用。";
+}
+
+function toolSourceText(source) {
+  return {
+    structured: "结构化 tool_calls",
+    parsed_output_summary: "从 Agent 日志摘要解析"
+  }[source] || source || "-";
 }
 
 function parseJson(value) {

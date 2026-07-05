@@ -213,3 +213,10 @@
 4. 工作台刷新后恢复批量结果属于预期行为；若要验证未登录门控，先退出登录或清空 localStorage。
 5. 左侧导航和顶部能力标签已经是真实快捷入口。没有当前申请时，详情/Trace/Policy/Approval 入口会提示“请先选择申请”。
 6. 本轮没有改 Java 审批状态机、Python Agent 流程，也没有新增后端批量 AI Review 接口。
+## Round 17.1 恢复要点
+
+1. 本轮修复的是正式前端 `/applications/:id?tab=tools` 可能显示“暂无 Tool Calls”的问题。
+2. 根因：详情页读取的是 Java 持久化后的 Agent logs，工具调用常以 `tools=MaterialChecklistTool:SUCCESS(0ms)` 形式保存在 `outputSummary` 中，而不是结构化 `result.tool_calls`。
+3. `ApplicationDetail.vue` 现在优先使用结构化 tool calls；结构化为空时，从 `outputSummary` 的 `tools=...` 解析出 Tool Calls 卡片。
+4. Agent Trace 已增加中文职责说明，同时保留英文原始摘要；Tool Calls 已增加工具中文说明、所属 Agent 和来源。
+5. 本轮没有改后端业务逻辑、Agent 流程、审批状态机、数据库字段或批量 Review 接口。
