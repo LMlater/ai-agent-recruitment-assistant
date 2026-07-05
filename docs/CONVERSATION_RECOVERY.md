@@ -1,5 +1,17 @@
 # Conversation Recovery
 
+## 第 15 轮恢复要点
+
+1. 本轮目标是让 Demo 更像真实信贷审批入口：支持客户经理/业务系统侧的脱敏 CSV 批量申请导入，并在银行审批工作台查看待审申请。
+2. 后端新增 `LoanApplicationImportService`，导入字段为 `applicant_name,id_card_masked,phone_masked,age,monthly_income,work_years,existing_debt,overdue_count,asset_proof_count,loan_amount,term_months,purpose`。
+3. 新增接口：`GET /api/loan-applications/batch-import-template` 下载 CSV 模板；`POST /api/loan-applications/batch-import` 上传 CSV 并返回成功/失败明细。
+4. 批量导入会逐行创建 `Customer` 和 `LoanApplication`，并自动提交为 `SUBMITTED`；单行失败不阻断其他合法行，表头错误会直接失败。
+5. 导入严格拒绝完整身份证号和完整手机号；不要把真实身份证、手机号、征信报告、银行流水或其他敏感信息写入仓库或上传到 demo。
+6. `.xlsx` 当前不支持直接导入，提示用户先使用 CSV 模板；Excel 解析可作为后续增强，不属于本轮范围。
+7. `demo.html` 仍是原生 HTML/CSS/JavaScript，没有引入 Vue/React；保留低/高风险快捷样例，同时新增批量导入、待审列表、中文状态映射和中文人工审批按钮。
+8. 待审列表使用 `GET /api/loan-applications?page=1&size=20`；选中申请后同步页面状态并切换到银行审批工作台。
+9. 本轮没有修改 Python Agent 主流程、没有改变人工最终审批边界、没有提交 `.env` 或真实 API Key。
+
 ## 第 14 轮恢复要点
 
 1. 用户本机没有 Docker，但 MySQL 已初始化，backend-service 此前可启动。

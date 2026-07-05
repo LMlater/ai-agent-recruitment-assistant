@@ -1,0 +1,4 @@
+applicant_name,id_card_masked,phone_masked,age,monthly_income,work_years,existing_debt,overdue_count,asset_proof_count,loan_amount,term_months,purpose
+Low Risk Demo,4401********2099,138****2099,32,12000,5,30000,0,2,80000,24,low risk interview demo loan
+Medium Risk Demo,4401********3099,138****3099,35,8500,3,65000,1,1,120000,36,medium risk interview demo loan
+High Risk Demo,4401********9099,139****9099,24,4200,1,90000,3,0,180000,36,high risk interview demo loan

@@ -1,5 +1,17 @@
 # Iteration Log
 
+## 第 15 轮：批量申请导入与中文审批工作台
+
+- Java 后端新增 CSV 批量导入服务，支持从脱敏 CSV 逐行创建 `Customer` 和 `LoanApplication`，并自动提交到 `SUBMITTED`。
+- 新增接口 `GET /api/loan-applications/batch-import-template` 和 `POST /api/loan-applications/batch-import`；导入结果返回总行数、成功数、失败数、成功导入项和逐行错误。
+- 导入字段固定为 `applicant_name,id_card_masked,phone_masked,age,monthly_income,work_years,existing_debt,overdue_count,asset_proof_count,loan_amount,term_months,purpose`。
+- 导入逻辑拒绝完整身份证号、完整手机号等敏感明文；单行错误不会阻断其他合法行，表头错误会直接失败。
+- `.xlsx` 明确提示“当前版本优先支持 CSV 导入，Excel 模板作为后续增强；请先使用 CSV 模板。”
+- Demo 页面保留低/高风险快捷样例，同时新增“批量导入脱敏申请”“待审申请列表”“人工通过 / 人工拒绝 / 要求补件”等中文化审批工作台入口。
+- 待审列表通过 `GET /api/loan-applications?page=1&size=20` 刷新，选择申请后会同步页面状态并切换到银行审批工作台。
+- 新增 `docs/sample_import/loan_applications_sample.csv`，并更新 README、Final Demo Script、Troubleshooting、API Walkthrough、Conversation Recovery 和 Validation Log。
+- 本轮不重构为 Vue/React，不删除已有 demo 能力，不提交 `.env`、真实 API Key、真实身份证、真实手机号、征信报告或银行流水。
+
 ## 第 14 轮：Demo UI Polish 与真实 LLM 等待体验优化
 
 - `demo.html` 保持原生 HTML/CSS/JavaScript，不引入 Vue、React、npm、webpack 或 vite。

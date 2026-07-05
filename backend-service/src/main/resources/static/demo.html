@@ -637,6 +637,41 @@
       font-size: 12px;
     }
 
+    .file-input {
+      width: 100%;
+      margin: 8px 0;
+      padding: 9px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      background: var(--panel-soft);
+      color: var(--text);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 800;
+      background: var(--panel-soft);
+    }
+
     button.secondary {
       border-color: var(--line);
       background: var(--panel-soft);
@@ -823,8 +858,9 @@
           <h2>客户申请端</h2>
           <div class="panel-body">
             <div class="button-stack">
-              <button type="button" onclick="runAction(event, '检查 backend 状态', checkBackendStatus)">检查 backend 状态</button>
-              <button type="button" onclick="runAction(event, '检查 agent-service 状态', checkAgentStatus)">检查 agent-service 状态</button>
+              <button type="button" onclick="runAction(event, '检查后端状态', checkBackendStatus)">检查后端状态</button>
+              <button type="button" onclick="runAction(event, '检查 Agent 状态', checkAgentStatus)">检查 Agent 状态</button>
+              <div class="muted">快速演示样例</div>
               <div class="button-row">
                 <button type="button" class="primary" onclick="runAction(event, '生成低风险样例', prepareDemoData, 'low')">生成低风险样例</button>
                 <button type="button" class="warning" onclick="runAction(event, '生成高风险样例', prepareDemoData, 'high')">生成高风险样例</button>
@@ -835,12 +871,24 @@
               <button type="button" onclick="runAction(event, '创建 loan application', createLoanApplication)">创建 loan application</button>
               <button type="button" onclick="runAction(event, '提交申请', submitApplication)">提交申请</button>
             </div>
-            <div class="notice">仅用于本地面试 Demo：自动创建脱敏客户、贷款申请并提交。可使用“生成一笔脱敏演示申请”的低风险或高风险样例入口；Agent 不负责生成真实客户数据，演示按钮只是 seed/mock fixture。</div>
+            <div class="notice">仅用于本地面试 Demo：真实业务中申请来自上游业务系统或客户经理批量提交；这里的样例按钮只用于面试快速演示，也兼容原来的“生成一笔脱敏演示申请”流程。</div>
             <div id="message" class="message">等待操作。</div>
           </div>
         </aside>
 
         <section class="dashboard">
+          <article class="card wide">
+            <h2>批量导入脱敏申请</h2>
+            <div class="card-content">
+              <div class="notice">请只上传脱敏/模拟数据，不要上传真实身份证号、手机号、征信报告或银行流水。当前版本优先支持 CSV，Excel .xlsx 请先另存为 CSV。</div>
+              <div class="button-row">
+                <button type="button" class="secondary" onclick="runAction(event, '下载 CSV 模板', downloadCsvTemplate)">下载 CSV 模板</button>
+                <button type="button" class="primary" onclick="runAction(event, '导入脱敏申请', importCsvApplications)">导入脱敏申请</button>
+              </div>
+              <input id="csvImportInput" class="file-input" type="file" accept=".csv,text/csv">
+              <div id="importResultCard" class="message">尚未导入 CSV。</div>
+            </div>
+          </article>
           <article class="card">
             <h2>客户信息</h2>
             <div id="customerCard" class="card-content">
@@ -869,18 +917,25 @@
           <h2>银行审批工作台</h2>
           <div class="panel-body">
             <div class="button-stack">
-              <button type="button" class="primary" data-ai-review-button onclick="runAction(event, '触发 AI Review', runAiReview)">AI Review</button>
-              <button type="button" class="secondary" onclick="runAction(event, '查询 AI Reports', fetchAiReports)">查询报告</button>
-              <button type="button" class="secondary" onclick="runAction(event, '查询 Agent Logs', fetchAgentLogs)">查询日志</button>
+              <button type="button" class="primary" data-ai-review-button onclick="runAction(event, '触发 AI预审', runAiReview)">AI预审</button>
+              <button type="button" class="secondary" onclick="runAction(event, '查询 AI 报告', fetchAiReports)">查询 AI 报告</button>
+              <button type="button" class="secondary" onclick="runAction(event, '查询 Agent 日志', fetchAgentLogs)">查询 Agent 日志</button>
               <button type="button" class="secondary" onclick="runAction(event, '查询审批历史', fetchApprovalHistory)">查询审批历史</button>
+              <button type="button" class="secondary" onclick="runAction(event, '刷新待审列表', fetchPendingApplications)">刷新待审列表</button>
               <button type="button" class="secondary" onclick="runAction(event, '重新开始演示', prepareDemoData, 'low')">重新开始演示</button>
             </div>
             <div class="notice">人工审批边界提示：AI Review 是审批人员在申请提交后触发的辅助审核；当前 LLM Provider 可为 DashScope/OpenAI-compatible；真实 LLM 只用于报告生成，不拥有最终审批写库权限。</div>
-            <div id="approvalButtonHelp" class="button-help">Approve / Reject 仅在 AI_REVIEWED 后可用；Need More Info 可在 SUBMITTED、RESUBMITTED 或 AI_REVIEWED 时由人工触发。</div>
+            <div id="approvalButtonHelp" class="button-help">人工通过 / 人工拒绝仅在 AI 已预审后可用；要求补件可在待 AI 预审、已重提或 AI 已预审时由人工触发。</div>
           </div>
         </aside>
 
         <section class="dashboard">
+          <article class="card wide">
+            <h2>待审申请列表</h2>
+            <div id="pendingApplicationsCard" class="card-content">
+              <div class="muted">点击“刷新待审列表”后展示待审申请队列。</div>
+            </div>
+          </article>
           <article class="card">
             <h2>申请详情</h2>
             <div id="applicationDetailCard" class="card-content">
@@ -917,9 +972,9 @@
             <h2>人工审批</h2>
             <div class="card-content">
               <div class="manual-buttons">
-                <button type="button" data-manual-approval data-manual-action="approve" class="primary" onclick="runAction(event, 'Approve 人工审批', manualApproval, 'approve')">Approve</button>
-                <button type="button" data-manual-approval data-manual-action="reject" class="danger" onclick="runAction(event, 'Reject 人工审批', manualApproval, 'reject')">Reject</button>
-                <button type="button" data-manual-approval data-manual-action="need-more-info" class="warning" onclick="runAction(event, 'Need More Info 人工审批', manualApproval, 'need-more-info')">Need More Info</button>
+                <button type="button" data-manual-approval data-manual-action="approve" class="primary" onclick="runAction(event, '人工通过', manualApproval, 'approve')">人工通过</button>
+                <button type="button" data-manual-approval data-manual-action="reject" class="danger" onclick="runAction(event, '人工拒绝', manualApproval, 'reject')">人工拒绝</button>
+                <button type="button" data-manual-approval data-manual-action="need-more-info" class="warning" onclick="runAction(event, '要求补件', manualApproval, 'need-more-info')">要求补件</button>
               </div>
               <div class="notice">人工审批边界提示：这里写入最终审批状态，AI 不能自动审批，也不能绕过人工确认。</div>
               <div id="manualApprovalCard" style="margin-top: 12px;">
@@ -1005,7 +1060,9 @@
       demoCustomer: DEMO_CUSTOMER,
       demoLoan: DEMO_LOAN,
       loadingTimer: null,
-      loadingStartedAt: null
+      loadingStartedAt: null,
+      pendingApplications: [],
+      importResult: null
     };
 
     function unwrapResult(json) {
@@ -1020,7 +1077,7 @@
 
     async function apiRequest(path, options = {}) {
       const headers = Object.assign({ "Accept": "application/json" }, options.headers || {});
-      if (options.body !== undefined) {
+      if (options.body !== undefined && !(options.body instanceof FormData)) {
         headers["Content-Type"] = "application/json";
       }
       if (state.token) {
@@ -1149,8 +1206,153 @@
         throw new Error("提交申请失败：" + error.message);
       }
       state.nextSuccessMessage = "脱敏演示申请已生成并提交，可以在审批工作台触发 AI Review。";
+      await fetchPendingApplications();
       switchTab("bank");
       return { applicationId: state.applicationId, status: state.applicationStatus };
+    }
+
+    async function downloadCsvTemplate() {
+      requireLogin();
+      const response = await fetch("/api/loan-applications/batch-import-template", {
+        headers: { Authorization: `Bearer ${state.token}` }
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `下载 CSV 模板失败：HTTP ${response.status}`);
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "loan_applications_template.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      state.nextSuccessMessage = "CSV 模板已开始下载。";
+      return { downloaded: true };
+    }
+
+    async function importCsvApplications() {
+      requireLogin();
+      const input = document.getElementById("csvImportInput");
+      if (!input.files || !input.files.length) {
+        throw new Error("请先选择 CSV 文件");
+      }
+      const formData = new FormData();
+      formData.append("file", input.files[0]);
+      const result = await apiRequest("/api/loan-applications/batch-import", {
+        method: "POST",
+        body: formData
+      });
+      state.importResult = result;
+      renderImportResult(result);
+      await fetchPendingApplications();
+      if (result && Array.isArray(result.imported) && result.imported.length) {
+        const first = result.imported[0];
+        await selectApplicationFromList({
+          id: first.applicationId,
+          customerId: first.customerId,
+          amount: first.amount,
+          termMonths: first.termMonths,
+          purpose: first.purpose,
+          status: first.status
+        });
+        state.nextSuccessMessage = "CSV 导入完成，已自动选择第一条待审申请。下一步请点击“触发 AI预审”。";
+      } else {
+        state.nextSuccessMessage = "CSV 导入完成，但没有成功行，请查看导入错误。";
+      }
+      switchTab("bank");
+      return result;
+    }
+
+    async function fetchPendingApplications() {
+      requireLogin();
+      const page = await apiRequest("/api/loan-applications?page=1&size=20");
+      state.pendingApplications = Array.isArray(page.records) ? page.records : [];
+      renderPendingApplications();
+      return page;
+    }
+
+    async function selectApplicationFromList(application) {
+      state.applicationId = application.id;
+      state.customerId = application.customerId;
+      state.currentApplication = application;
+      state.applicationStatus = application.status || "-";
+      state.workflowId = null;
+      state.aiReview = null;
+      state.aiReport = null;
+      state.agentLogs = [];
+      state.approvalHistory = [];
+      state.materialUpdates = [];
+      state.finalApprovalCompleted = false;
+      renderLoanCard();
+      renderCustomerCard();
+      renderApplicationDetail();
+      renderAiSummary({});
+      renderPolicyReferences([]);
+      renderAgentLogs([]);
+      renderApprovalHistory();
+      renderMaterialReassessment();
+      refreshManualApprovalButtons();
+      updateStatusPanel();
+      switchTab("bank");
+      return application;
+    }
+
+    async function runAiReviewForApplication(applicationId) {
+      const matched = state.pendingApplications.find((item) => String(item.id) === String(applicationId));
+      if (matched) {
+        await selectApplicationFromList(matched);
+      } else {
+        const application = await apiRequest("/api/loan-applications/" + encodeURIComponent(applicationId));
+        await selectApplicationFromList(application);
+      }
+      return runAiReview();
+    }
+
+    function renderImportResult(result) {
+      const target = document.getElementById("importResultCard");
+      if (!result) {
+        target.className = "message";
+        target.innerHTML = "尚未导入 CSV。";
+        return;
+      }
+      target.className = "message " + (result.failedCount ? "error" : "ok");
+      const errors = Array.isArray(result.errors) && result.errors.length
+        ? '<ul class="list" style="margin-top: 8px;">' + result.errors.map((item) => '<li class="list-item">' + escapeHtml(item) + '</li>').join("") + '</ul>'
+        : '<div class="muted">无错误行。</div>';
+      target.innerHTML =
+        '<div><strong>totalRows:</strong> ' + escapeHtml(result.totalRows ?? 0) +
+        ' · <strong>successCount:</strong> ' + escapeHtml(result.successCount ?? 0) +
+        ' · <strong>failedCount:</strong> ' + escapeHtml(result.failedCount ?? 0) + '</div>' +
+        errors;
+    }
+
+    function renderPendingApplications() {
+      const target = document.getElementById("pendingApplicationsCard");
+      const applications = state.pendingApplications || [];
+      if (!applications.length) {
+        target.innerHTML = '<div class="muted">暂无待审申请。可先导入 CSV，或使用快速演示样例。</div>';
+        return;
+      }
+      target.innerHTML = '<div class="table-wrap"><table><thead><tr>' +
+        '<th>applicationId</th><th>customerId</th><th>amount</th><th>termMonths</th><th>purpose</th><th>status</th><th>riskLevel</th><th>aiDecision</th><th>操作</th>' +
+        '</tr></thead><tbody>' + applications.map((item) => {
+          const id = item.id || "-";
+          return '<tr>' +
+            '<td>' + escapeHtml(id) + '</td>' +
+            '<td>' + escapeHtml(item.customerId || "-") + '</td>' +
+            '<td>' + escapeHtml(item.amount ?? "-") + '</td>' +
+            '<td>' + escapeHtml(item.termMonths ?? "-") + '</td>' +
+            '<td>' + escapeHtml(item.purpose || "-") + '</td>' +
+            '<td><span class="badge">' + escapeHtml(statusText(item.status)) + '</span><div class="muted">' + escapeHtml(item.status || "-") + '</div></td>' +
+            '<td>' + escapeHtml(item.riskLevel || "-") + '</td>' +
+            '<td>' + escapeHtml(decisionText(item.aiDecision)) + '<div class="muted">' + escapeHtml(item.aiDecision || "-") + '</div></td>' +
+            '<td><div class="button-row"><button type="button" class="secondary" onclick="runAction(event, \'选择申请\', selectApplicationFromList, state.pendingApplications.find((item) => String(item.id) === \'' + escapeHtml(id) + '\'))">选择</button>' +
+            '<button type="button" class="primary" onclick="runAction(event, \'AI预审\', runAiReviewForApplication, \'' + escapeHtml(id) + '\')">AI预审</button></div></td>' +
+          '</tr>';
+        }).join("") + '</tbody></table></div>';
     }
 
     function startAiReviewLoading(button) {
@@ -1379,9 +1581,13 @@
       state.applicationStatus = finalStatus;
       state.currentApplication = Object.assign({}, state.currentApplication || {}, { status: finalStatus });
       state.finalApprovalCompleted = finalStatus === "APPROVED" || finalStatus === "REJECTED";
-      state.nextSuccessMessage = state.finalApprovalCompleted
-        ? "最终审批已完成，如需重新演示请准备新的演示申请。"
-        : "已进入 NEED_MORE_INFO，请在补件复审区提交材料摘要。";
+      if (finalStatus === "APPROVED") {
+        state.nextSuccessMessage = "人工通过已完成。最终审批已完成，如需重新演示请准备新的演示申请。";
+      } else if (finalStatus === "REJECTED") {
+        state.nextSuccessMessage = "人工拒绝已完成。最终审批已完成，如需重新演示请准备新的演示申请。";
+      } else {
+        state.nextSuccessMessage = "已要求补件，请在补件复审区提交材料摘要。";
+      }
       refreshManualApprovalButtons();
       renderLoanCard();
       renderApplicationDetail();
@@ -1467,7 +1673,7 @@
         row("贷款金额", application.amount || fallbackLoan.amount),
         row("期限（月）", application.termMonths || fallbackLoan.termMonths),
         row("用途", application.purpose || fallbackLoan.purpose),
-        row("状态", state.applicationStatus || application.status || "-")
+        row("状态", statusText(state.applicationStatus || application.status || "-") + " (" + (state.applicationStatus || application.status || "-") + ")")
       ].join("");
     }
 
@@ -1480,7 +1686,7 @@
         row("amount", application.amount || fallbackLoan.amount),
         row("term_months", application.termMonths || fallbackLoan.termMonths),
         row("purpose", application.purpose || fallbackLoan.purpose),
-        row("status", state.applicationStatus || application.status || "-"),
+        row("status", statusText(state.applicationStatus || application.status || "-") + " (" + (state.applicationStatus || application.status || "-") + ")"),
         row("workflow_id", state.workflowId || "-")
       ].join("");
     }
@@ -1489,11 +1695,13 @@
       const report = data.report || {};
       const riskScore = getValue(data, "risk_score", "riskScore") ?? "-";
       const riskLevel = getValue(data, "risk_level", "riskLevel") || "-";
+      const decision = getValue(data, "final_decision", "finalDecision") || "-";
       document.getElementById("aiSummaryCard").innerHTML =
         '<div class="score-box">' +
           '<div class="score-number">' + escapeHtml(riskScore) + '</div>' +
           '<div>' +
-            row("final_decision", getValue(data, "final_decision", "finalDecision") || "-") +
+            row("AI 建议", decisionText(decision)) +
+            row("原始建议", decision) +
             row("risk_level", '<span class="badge ok">' + escapeHtml(riskLevel) + '</span>', true) +
             row("suggested_amount", getValue(data, "suggested_amount", "suggestedAmount") ?? "-") +
             row("summary", report.summary || data.summary || "-") +
@@ -1671,8 +1879,8 @@
     function renderManualApproval(data) {
       document.getElementById("manualApprovalCard").innerHTML = [
         row("approval_id", data.id || "-"),
-        row("from_status", data.fromStatus || "-"),
-        row("to_status", data.toStatus || "-"),
+        row("from_status", statusText(data.fromStatus) + " (" + (data.fromStatus || "-") + ")"),
+        row("to_status", statusText(data.toStatus) + " (" + (data.toStatus || "-") + ")"),
         row("comment", data.comment || "-"),
         row("说明", "这是最终审批状态，由人工审批接口写入。")
       ].join("");
@@ -1687,7 +1895,8 @@
       }
       target.innerHTML = '<ul class="list">' + history.map((item) => {
         return '<li class="list-item">' +
-          '<div class="list-title"><span>' + escapeHtml(item.fromStatus || "-") + ' -> ' + escapeHtml(item.toStatus || "-") + '</span><span class="muted">#' + escapeHtml(item.id || "-") + '</span></div>' +
+          '<div class="list-title"><span>' + escapeHtml(statusText(item.fromStatus)) + ' -> ' + escapeHtml(statusText(item.toStatus)) + '</span><span class="muted">#' + escapeHtml(item.id || "-") + '</span></div>' +
+          '<div class="muted">' + escapeHtml(item.fromStatus || "-") + ' -> ' + escapeHtml(item.toStatus || "-") + '</div>' +
           '<div>' + escapeHtml(item.comment || "-") + '</div>' +
         '</li>';
       }).join("") + '</ul>';
@@ -1908,7 +2117,7 @@
       if (help) {
         help.textContent = finalStatus
           ? "该申请已完成最终人工审批，不能继续补件或重复审批。若要重新演示，请生成新的演示申请。"
-          : "Approve / Reject 仅在 AI_REVIEWED 后可用；Need More Info 可在 SUBMITTED、RESUBMITTED 或 AI_REVIEWED 时由人工触发。";
+          : "人工通过 / 人工拒绝仅在 AI 已预审后可用；要求补件可在待 AI 预审、已重提或 AI 已预审时由人工触发。";
       }
       renderTerminalStatus();
     }
@@ -1953,6 +2162,29 @@
         '<div class="terminal-title"><span>演示完成 · ' + escapeHtml(status) + '</span><span class="badge ok">Human-in-the-loop</span></div>' +
         '<div>该申请已完成最终人工审批，不能继续补件或重复审批。若要重新演示，请生成新的演示申请。</div>' +
         '<div class="button-row" style="margin-top: 10px;"><button type="button" class="secondary" onclick="runAction(event, \'重新开始演示\', prepareDemoData, \'low\')">重新开始演示</button><button type="button" class="secondary" onclick="switchTab(\'customer\')">返回客户申请端</button></div>';
+    }
+
+    function statusText(status) {
+      const mapping = {
+        DRAFT: "草稿",
+        SUBMITTED: "待 AI 预审",
+        AI_REVIEWED: "AI 已预审",
+        NEED_MORE_INFO: "要求补件",
+        MATERIAL_UPDATED: "已补件",
+        RESUBMITTED: "已重提",
+        APPROVED: "人工通过",
+        REJECTED: "人工拒绝"
+      };
+      return mapping[status] || status || "-";
+    }
+
+    function decisionText(decision) {
+      const mapping = {
+        APPROVE: "建议通过",
+        REJECT: "建议拒绝",
+        NEED_MORE_INFO: "建议补件"
+      };
+      return mapping[decision] || decision || "-";
     }
 
     function decisionToStatus(decision) {
@@ -2024,6 +2256,7 @@
     renderMaterialReassessment();
     renderLlmInfo();
     refreshManualApprovalButtons();
+    renderPendingApplications();
   </script>
 </body>
 </html>

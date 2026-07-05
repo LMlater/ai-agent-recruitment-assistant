@@ -69,5 +69,21 @@ class DemoPageStaticTest {
         assertTrue(html.contains("RESUBMITTED"));
         assertTrue(html.contains("补件后必须重新 AI Review"));
         assertTrue(html.contains("不上传真实身份证、手机号、征信报告或银行流水"));
+        assertTrue(html.contains("人工通过"));
+        assertTrue(html.contains("人工拒绝"));
+        assertTrue(html.contains("要求补件"));
+        assertTrue(html.contains("批量导入脱敏申请"));
+        assertTrue(html.contains("待审申请列表"));
+        assertTrue(html.contains("下载 CSV 模板"));
+        assertTrue(html.contains("导入脱敏申请"));
+        assertTrue(html.contains("刷新待审列表"));
+        assertTrue(html.contains("AI预审"));
+        assertTrue(html.contains("请只上传脱敏/模拟数据"));
+        assertTrue(html.contains("AI 已预审"));
+        assertTrue(html.contains("/api/loan-applications/batch-import"));
+        assertTrue(html.contains("/api/loan-applications/batch-import-template"));
+        assertTrue(html.contains("function renderPendingApplications"));
+        assertTrue(html.contains("function selectApplicationFromList"));
+        assertTrue(html.contains("function statusText"));
     }
 }

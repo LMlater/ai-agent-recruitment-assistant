@@ -1,5 +1,46 @@
 # API Walkthrough
 
+## 批量导入脱敏申请
+
+登录后可以下载 CSV 模板：
+
+```powershell
+curl.exe -L "$base/api/loan-applications/batch-import-template" `
+  -H "Authorization: Bearer $token" `
+  -o "loan_applications_template.csv"
+```
+
+CSV 表头必须保持为：
+
+```text
+applicant_name,id_card_masked,phone_masked,age,monthly_income,work_years,existing_debt,overdue_count,asset_proof_count,loan_amount,term_months,purpose
+```
+
+上传 CSV：
+
+```powershell
+curl.exe -s -X POST "$base/api/loan-applications/batch-import" `
+  -H "Authorization: Bearer $token" `
+  -F "file=@docs/sample_import/loan_applications_sample.csv"
+```
+
+返回结果会包含：
+
+- `totalRows`：CSV 数据行总数。
+- `successCount`：成功创建并提交的申请数。
+- `failedCount`：失败行数。
+- `imported`：成功导入的申请 ID、客户 ID、申请人脱敏信息、状态等。
+- `errors`：逐行错误信息。
+
+导入成功的申请会自动进入 `SUBMITTED`，可通过待审列表查询：
+
+```powershell
+curl.exe -s "$base/api/loan-applications?page=1&size=20" `
+  -H "Authorization: Bearer $token"
+```
+
+安全边界：CSV 只能使用脱敏/模拟数据。完整身份证号、完整手机号会被拒绝；当前版本优先支持 CSV，`.xlsx` 请先另存为 CSV。
+
 本文档用于面试演示 Java 后端 API 流程。示例使用 PowerShell `curl.exe`，demo admin 账号只用于本地演示，不可用于生产环境。所有最终审批都通过 `/api/approvals/...` 人工接口完成，AI review 不会直接把申请状态改成 `APPROVED` 或 `REJECTED`。
 
 ## 可视化页面入口

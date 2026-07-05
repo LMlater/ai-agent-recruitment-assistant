@@ -1,5 +1,38 @@
 # Troubleshooting
 
+## 第 15 轮：批量导入常见问题
+
+### CSV 上传后部分行失败
+
+这是预期行为。批量导入采用逐行容错：表头合法时，合法行会继续创建客户和贷款申请，非法行会进入 `errors` 列表，不会阻断整份文件。常见原因包括：
+
+- 身份证号没有脱敏，出现完整 18 位身份证号或 17 位 + X。
+- 手机号没有脱敏，出现完整 11 位手机号。
+- 金额、年龄、月收入、负债、期限等数字字段为空或格式错误。
+- CSV 列数不是 12 列，或表头和模板不一致。
+
+### 上传 `.xlsx` 被拒绝
+
+当前版本优先支持 CSV 导入，Excel 模板作为后续增强。处理方式：
+
+1. 下载页面里的 CSV 模板，或使用 `docs/sample_import/loan_applications_sample.csv`。
+2. 如已在 Excel 中维护数据，先“另存为 CSV UTF-8”。
+3. 确认字段顺序保持为：
+
+```text
+applicant_name,id_card_masked,phone_masked,age,monthly_income,work_years,existing_debt,overdue_count,asset_proof_count,loan_amount,term_months,purpose
+```
+
+### 导入后看不到申请
+
+先确认页面已登录 demo admin，再点击“刷新待审列表”。待审列表调用：
+
+```text
+GET /api/loan-applications?page=1&size=20
+```
+
+导入成功的申请会自动提交为 `SUBMITTED`，在页面显示为“待 AI 预审”。选择申请后可进入银行审批工作台触发 `AI预审`。
+
 本手册用于第 12 轮最终交付排查。它只覆盖本地 demo、CI、Docker Compose 和面试演示常见问题，不引入新的业务功能。
 
 ## 1. Docker 未安装

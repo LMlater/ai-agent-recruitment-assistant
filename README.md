@@ -2,6 +2,18 @@
 
 [![CI](https://github.com/LMlater/ai-agent-recruitment-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/LMlater/ai-agent-recruitment-assistant/actions/workflows/ci.yml)
 
+## 第 15 轮：批量导入与中文审批工作台
+
+本轮让 Demo 更接近真实信贷业务入口：客户和贷款申请可以从脱敏 CSV 批量导入。页面保留低/高风险快速演示按钮，但它们只作为面试快捷样例，不再是唯一入口。
+
+- 新增 `GET /api/loan-applications/batch-import-template` 下载 CSV 模板。
+- 新增 `POST /api/loan-applications/batch-import` 上传 CSV，逐行创建 `Customer` 和 `LoanApplication`，并自动提交为 `SUBMITTED`。
+- CSV 字段为 `applicant_name,id_card_masked,phone_masked,age,monthly_income,work_years,existing_debt,overdue_count,asset_proof_count,loan_amount,term_months,purpose`。
+- 导入会拒绝完整身份证号、完整手机号等敏感明文；单行失败会记录到导入结果，不阻断其他合法行。
+- 当前版本优先支持 CSV；`.xlsx` 会返回明确提示：请先另存为 CSV，Excel 模板作为后续增强。
+- Demo 页新增“批量导入脱敏申请”“待审申请列表”“人工通过 / 人工拒绝 / 要求补件”等中文化审批工作台能力。
+- 示例文件见 `docs/sample_import/loan_applications_sample.csv`。
+
 SmartCreditMultiAgent 是一个面向 Java 后端/金融科技/AI Agent 工程面试的信贷审批辅助项目。
 
 它不是普通 CRUD，也不是简单 ChatBot，而是把 Spring Boot 业务后端、FastAPI + LangGraph 多 Agent、Tool Calling、风控规则 + ML baseline、制度 RAG、LLM 报告生成、补件复审、人工审批和审计留痕串成一个可演示闭环。

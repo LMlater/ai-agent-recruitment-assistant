@@ -1,5 +1,67 @@
 # Validation Log
 
+## 第 15 轮：批量申请导入与中文审批工作台
+
+日期：2026-07-05
+
+### TDD 红灯记录
+
+```powershell
+cd backend-service
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" "-Dtest=LoanApplicationImportServiceTest,DemoPageStaticTest" test
+```
+
+结果：按预期编译失败，因为 `LoanApplicationImportService` 尚未实现。这是本轮后端导入服务的红灯测试。
+
+### targeted backend tests
+
+```powershell
+cd backend-service
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" "-Dtest=LoanApplicationImportServiceTest,DemoPageStaticTest" test
+```
+
+结果：通过，`Tests run: 4, Failures: 0, Errors: 0, Skipped: 0`。覆盖 CSV 导入成功/失败混合场景、完整身份证/手机号拦截、`.xlsx` 提示、客户字段映射和 demo 静态锚点。
+
+### agent-service
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：通过，`72 passed, 1 skipped, 2 warnings`。跳过项仍为真实 LLM smoke 类测试；普通测试保持 Mock LLM，不调用真实 API。警告包括 Starlette/httpx deprecation 和本机 `.pytest_cache` 写入权限警告。
+
+### readiness
+
+```powershell
+python scripts\check_demo_readiness.py --skip-services
+```
+
+结果：通过，`ok=true`。静态文件、Docker Compose 四服务、最终交付文档和安全检查均通过，`env_file_tracked=false`、`prints_api_key=false`。
+
+### backend-service
+
+```powershell
+cd backend-service
+mvn test
+```
+
+结果：当前 Windows 本机环境失败，原因为 Maven resources 插件复制 `src/main/resources/static/demo.html` 到 `target/classes/static/demo.html` 时出现 `AccessDeniedException`。这是本地 target 资源复制权限问题，未伪造为通过。
+
+本地替代验证：
+
+```powershell
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" test
+```
+
+结果：通过，`Tests run: 34, Failures: 0, Errors: 0, Skipped: 0`。该命令只作为本机权限问题下的 Java 测试逻辑验证，不替代 CI 的普通 `mvn test`。
+
+### 安全记录
+
+- 本轮没有提交 `.env`、真实 API Key、本地敏感配置、真实身份证、真实手机号、征信报告或银行流水。
+- 示例 CSV 只包含脱敏/模拟数据。
+- AI/ML/RAG/LLM 仍只生成审批辅助建议；最终 `APPROVED` / `REJECTED` / `NEED_MORE_INFO` 仍由人工审批接口完成。
+
 ## 第 14 轮：Demo UI Polish 与真实 LLM 等待体验
 
 日期：2026-07-05
