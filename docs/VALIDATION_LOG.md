@@ -1,5 +1,63 @@
 # Validation Log
 
+## 第 14 轮：Demo UI Polish 与真实 LLM 等待体验
+
+日期：2026-07-05
+
+### TDD 红灯记录
+
+```powershell
+cd agent-service
+python -m pytest tests/test_round14_demo_ui_polish.py -q
+```
+
+结果：按预期失败，`demo.html` 尚未包含 `Human-in-the-loop`、`Tool Trace`、`Real LLM Report`、`重新开始演示`、真实 LLM 30-90 秒等待提示和终态解释等 Round 14 UI 锚点。
+
+### agent-service
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：通过，`72 passed, 1 skipped, 2 warnings in 5.52s`。跳过项仍为真实 LLM smoke 类测试；普通测试保持 Mock LLM，不调用真实 API。警告包括 Starlette/httpx deprecation 和本机 `.pytest_cache` 写入权限警告。
+
+### readiness
+
+```powershell
+python scripts\check_demo_readiness.py --skip-services
+```
+
+结果：通过，`ok=true`。静态文件、Docker Compose 四服务、最终交付文档和安全检查均通过，`env_file_tracked=false`、`prints_api_key=false`。
+
+### backend-service
+
+```powershell
+cd backend-service
+mvn test
+```
+
+结果：当前 Windows 本机环境失败，原因为 Maven resources 插件复制 `src/main/resources/static/demo.html` 到 `target/classes/static/demo.html` 时出现 `AccessDeniedException`。这是本地 target 资源复制权限问题，未伪造为通过。
+
+本地替代验证：
+
+```powershell
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" test
+```
+
+结果：通过，`Tests run: 31, Failures: 0, Errors: 0, Skipped: 0`。该命令只作为本机权限问题下的 Java 测试逻辑验证，不替代 CI 的普通 `mvn test`。
+
+### 本地真实 LLM 与 Redis
+
+- 本轮未调用真实 LLM API；用户此前确认本地 DashScope/OpenAI-compatible 配置可用，页面已明确提示真实 LLM 报告生成可能需要 30-90 秒。
+- Redis 当前本机不可用，但不是 demo 主链路强依赖；排障文档已记录无 Redis 时 backend-service 仍可先启动验证核心链路。
+
+### 安全记录
+
+- 未提交 `.env`、真实 API Key、真实客户数据、真实身份证、手机号、征信报告或银行流水。
+- Demo 页面新增高风险样例仍为脱敏 mock fixture。
+- AI/ML/RAG/LLM 仍只生成审批辅助建议，最终 `APPROVED` / `REJECTED` 必须走人工按钮。
+
 ## 第 13 轮：发布前验收与 CI 可触发性
 
 日期：2026-07-04

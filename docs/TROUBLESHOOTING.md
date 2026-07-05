@@ -192,6 +192,21 @@ mvn -Dmaven.resources.skip=true test
 - 真实 provider 只允许本地显式启用。
 - 不要把 DashScope/百炼/OpenAI Key 写入 README、文档、脚本、测试或提交历史。
 
+## 8.1 AI Review 长时间等待
+
+现象：
+
+- Demo 页面点击 AI Review 后等待 30-90 秒。
+- 按钮处于禁用状态，并显示 `已等待 Ns`。
+
+处理：
+
+- 这不一定是卡死，可能是 `ReportGenerationTool` 正在调用真实 LLM 生成报告。
+- 查看 `agent-service` 控制台，确认 DashScope/OpenAI-compatible provider 是否正在响应。
+- 检查本地 provider 配置是否正确，但不要把真实 API Key 写入仓库。
+- 如果现场网络不稳定或真实 LLM 超时，可以临时切回 Mock LLM fallback；普通测试和 CI 仍应保持 Mock。
+- Redis 当前不是主链路强依赖；本地无 Redis 时，backend-service 仍可启动并完成核心 demo 链路。
+
 ## 9. Demo 页面操作失败
 
 常见原因：

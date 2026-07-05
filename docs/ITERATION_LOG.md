@@ -1,5 +1,17 @@
 # Iteration Log
 
+## 第 14 轮：Demo UI Polish 与真实 LLM 等待体验优化
+
+- `demo.html` 保持原生 HTML/CSS/JavaScript，不引入 Vue、React、npm、webpack 或 vite。
+- 页面调整为更现代的金融科技 dashboard：浅灰蓝背景、柔和卡片、顶部能力 badge、演示步骤条、边界说明和更统一的按钮样式。
+- AI Review 增加真实 LLM 等待体验：点击后立即显示 loading、`已等待 Ns`、30-90 秒提示，并禁用重复点击。
+- 终态 `APPROVED` / `REJECTED` 增加清晰解释：不能继续补件或重复审批，重新演示需要生成新的演示申请。
+- Tool Calls 使用小卡片展示工具中文说明、状态 badge、耗时、输入/输出摘要；`ReportGenerationTool` 明确标注真实 LLM 报告生成可能较慢。
+- Agent Timeline 增加流程链视图：`IntakeAgent -> RiskAgent -> SeniorReviewAgent? -> PolicyAgent -> ComplianceAgent -> DecisionAgent`，低风险路径说明未进入 `SeniorReviewAgent`。
+- 新增低风险/高风险样例按钮，高风险样例用于面试展示 HIGH risk 和 `SeniorReviewAgent`。
+- 更新 README、Final Demo Script、Troubleshooting、Conversation Recovery 和 Validation Log，补充真实 LLM、Redis 不阻塞主链路和本轮验证记录。
+- 本轮不改审批状态机、不改 Java 后端业务逻辑、不改 Python Agent 主流程、不提交 `.env` 或真实 API Key。
+
 ## 无 Docker 启动文档修正
 
 - README 和 `docs/TROUBLESHOOTING.md` 补充“无 Docker 本地源码启动方式”，明确 Docker 不是必须项，只是工程化交付加分项。

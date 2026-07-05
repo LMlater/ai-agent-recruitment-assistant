@@ -7,18 +7,20 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f4f6f8;
+      --bg: #f6f8fb;
+      --bg-gradient: radial-gradient(circle at top left, #e0f2fe 0, transparent 32%), linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
       --panel: #ffffff;
-      --panel-soft: #f9fafb;
-      --line: #d8dee6;
-      --text: #1f2937;
-      --muted: #667085;
+      --panel-soft: #f8fafc;
+      --line: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
       --accent: #0f766e;
       --accent-dark: #115e59;
-      --danger: #b42318;
-      --warning: #b54708;
-      --ok: #067647;
-      --shadow: 0 1px 3px rgba(16, 24, 40, 0.08);
+      --accent-soft: #ccfbf1;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --ok: #059669;
+      --shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
     }
 
     * {
@@ -27,17 +29,18 @@
 
     body {
       margin: 0;
-      background: var(--bg);
+      background: var(--bg-gradient);
       color: var(--text);
       font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
       line-height: 1.5;
     }
 
     header {
-      background: #102a43;
-      color: #fff;
-      padding: 24px clamp(16px, 4vw, 40px);
-      border-bottom: 4px solid var(--accent);
+      background: rgba(255, 255, 255, 0.76);
+      color: var(--text);
+      padding: 26px clamp(16px, 4vw, 40px) 18px;
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
     }
 
     h1 {
@@ -50,13 +53,13 @@
     header p {
       max-width: 1080px;
       margin: 0;
-      color: #dbe7f3;
+      color: var(--muted);
       font-size: 15px;
     }
 
     .top-status {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 10px;
       margin-top: 16px;
     }
@@ -64,14 +67,15 @@
     .top-status-item {
       min-height: 60px;
       padding: 10px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.84);
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
     }
 
     .top-status-item span {
       display: block;
-      color: #bfd0df;
+      color: var(--muted);
       font-size: 12px;
     }
 
@@ -83,7 +87,7 @@
     }
 
     main {
-      padding: 20px clamp(12px, 3vw, 28px) 32px;
+      padding: 18px clamp(12px, 3vw, 28px) 34px;
     }
 
     .tabs {
@@ -141,8 +145,9 @@
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 14px;
       box-shadow: var(--shadow);
+      overflow: hidden;
     }
 
     .panel h2 {
@@ -171,7 +176,7 @@
       min-height: 160px;
       background: var(--panel);
       border: 1px solid var(--line);
-      border-radius: 8px;
+      border-radius: 14px;
       box-shadow: var(--shadow);
       overflow: hidden;
     }
@@ -220,10 +225,10 @@
     }
 
     button {
-      min-height: 38px;
+      min-height: 40px;
       width: 100%;
       border: 1px solid #9db4c0;
-      border-radius: 6px;
+      border-radius: 10px;
       background: #fff;
       color: var(--text);
       font: inherit;
@@ -494,6 +499,240 @@
       overflow-wrap: anywhere;
     }
 
+    .hero {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+
+    .hero-kicker {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .capability-badge,
+    .step-badge,
+    .duration-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 118, 110, 0.18);
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .boundary-strip,
+    .demo-stepper,
+    .loading-panel,
+    .terminal-panel {
+      max-width: 1240px;
+      margin: 0 auto 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: var(--shadow);
+    }
+
+    .boundary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      padding: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .boundary-strip strong {
+      display: block;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .demo-stepper {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(92px, 1fr));
+      gap: 8px;
+      padding: 12px;
+      overflow-x: auto;
+    }
+
+    .demo-step {
+      min-height: 58px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-soft);
+      color: var(--muted);
+    }
+
+    .demo-step strong {
+      display: block;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .demo-step.active {
+      border-color: rgba(15, 118, 110, 0.42);
+      background: #ecfeff;
+      color: var(--accent-dark);
+      box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.12);
+    }
+
+    .demo-step.done {
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .loading-panel,
+    .terminal-panel {
+      display: none;
+      padding: 12px 14px;
+    }
+
+    .loading-panel.active,
+    .terminal-panel.active {
+      display: block;
+    }
+
+    .loading-title,
+    .terminal-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+      font-weight: 800;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #99f6e4;
+      border-top-color: var(--accent);
+      border-radius: 999px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .button-help {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    button.secondary {
+      border-color: var(--line);
+      background: var(--panel-soft);
+      color: var(--text);
+    }
+
+    button.danger {
+      background: #fff7f7;
+    }
+
+    button.warning {
+      background: #fffbeb;
+    }
+
+    button:disabled {
+      border-color: #cbd5e1;
+      background: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+      opacity: 1;
+    }
+
+    button.is-loading:disabled {
+      cursor: wait;
+    }
+
+    #policyCard .list {
+      max-height: 360px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .tool-call {
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+    }
+
+    .tool-call.llm-tool {
+      border-color: rgba(15, 118, 110, 0.36);
+      background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);
+    }
+
+    .tool-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .tool-name {
+      font-weight: 800;
+    }
+
+    .tool-desc {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tool-summary {
+      display: grid;
+      gap: 6px;
+      padding-top: 6px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 13px;
+    }
+
+    .timeline-chain {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .agent-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .agent-chip.hit {
+      border-color: #bbf7d0;
+      background: #dcfce7;
+      color: var(--ok);
+    }
+
+    .agent-chip.optional {
+      border-style: dashed;
+    }
+
     @media (max-width: 980px) {
       .layout,
       .card-grid,
@@ -501,8 +740,14 @@
       .top-status,
       .workspace,
       .dashboard,
-      .raw-toolbar {
+      .raw-toolbar,
+      .boundary-strip,
+      .button-row {
         grid-template-columns: 1fr;
+      }
+
+      .demo-stepper {
+        grid-template-columns: repeat(7, minmax(140px, 1fr));
       }
 
       .kv {
@@ -513,29 +758,60 @@
 </head>
 <body>
   <header>
-    <h1>基于 Spring Boot + FastAPI + LangGraph 的多 Agent 智能信贷审批辅助系统</h1>
-    <p>真实业务中客户和贷款申请来自业务系统；本页只提供本地面试 Demo 快捷入口。AI/ML/RAG/LLM 只生成审批辅助建议，最终 APPROVED / REJECTED / NEED_MORE_INFO 必须由人工审批接口确认。</p>
-    <div class="top-status">
-      <div class="top-status-item">
-        <span>backend-service</span>
-        <strong>http://localhost:8080 <span id="backendStatus" class="badge warn">未检查</span></strong>
+    <div class="hero">
+      <h1>SmartCreditMultiAgent</h1>
+      <p>信贷审批辅助系统 · Spring Boot + FastAPI + LangGraph</p>
+      <p class="muted">项目中文名：基于 Spring Boot + FastAPI + LangGraph 的多 Agent 智能信贷审批辅助系统</p>
+      <div class="hero-kicker" aria-label="核心演示能力">
+        <span class="capability-badge">Human-in-the-loop</span>
+        <span class="capability-badge">Tool Trace</span>
+        <span class="capability-badge">Policy RAG</span>
+        <span class="capability-badge">Real LLM Report</span>
       </div>
-      <div class="top-status-item">
-        <span>agent-service</span>
-        <strong>http://localhost:8001 <span id="agentStatus" class="badge warn">未检查</span></strong>
-      </div>
-      <div class="top-status-item">
-        <span>LLM Provider</span>
-        <strong id="topLlmProvider">mock</strong>
-      </div>
-      <div class="top-status-item">
-        <span>当前申请 / workflow</span>
-        <strong><span id="currentApplicationId">-</span> / <span id="currentWorkflowId">-</span></strong>
+      <div class="top-status">
+        <div class="top-status-item">
+          <span>backend-service</span>
+          <strong>http://localhost:8080 <span id="backendStatus" class="badge warn">未检查</span></strong>
+        </div>
+        <div class="top-status-item">
+          <span>agent-service</span>
+          <strong>http://localhost:8001 <span id="agentStatus" class="badge warn">未检查</span></strong>
+        </div>
+        <div class="top-status-item">
+          <span>LLM Provider</span>
+          <strong id="topLlmProvider">mock</strong>
+        </div>
+        <div class="top-status-item">
+          <span>当前申请 ID / workflow ID</span>
+          <strong><span id="currentApplicationId">-</span> / <span id="currentWorkflowId">-</span></strong>
+        </div>
+        <div class="top-status-item">
+          <span>申请状态</span>
+          <strong id="topApplicationStatus">-</strong>
+        </div>
       </div>
     </div>
   </header>
 
   <main>
+    <section class="boundary-strip" aria-label="演示边界">
+      <div><strong>AI 只生成审批辅助建议</strong>不自动放贷，不绕过人工审批。</div>
+      <div><strong>最终 APPROVED / REJECTED</strong>必须由人工按钮确认。</div>
+      <div><strong>Demo 使用 mock/脱敏数据</strong>不上传真实身份证、手机号、征信报告或银行流水。</div>
+    </section>
+
+    <section id="demoStepper" class="demo-stepper" aria-label="演示步骤条"></section>
+
+    <section id="aiReviewLoading" class="loading-panel" aria-live="polite">
+      <div class="loading-title">
+        <span><span class="spinner" aria-hidden="true"></span> AI Review 正在执行</span>
+        <span id="aiReviewElapsed" class="duration-chip">已等待 0s</span>
+      </div>
+      <div>AI Review 正在执行：规则评分、ML baseline、Policy RAG、合规检查和真实 LLM 报告生成中。真实 LLM 可能需要 30-90 秒，请勿重复点击。</div>
+    </section>
+
+    <section id="terminalStatusCard" class="terminal-panel" aria-live="polite"></section>
+
     <div class="tabs" role="tablist" aria-label="演示区域切换">
       <button type="button" class="tab-button active" data-tab-button="customer" onclick="switchTab('customer')">客户申请端</button>
       <button type="button" class="tab-button" data-tab-button="bank" onclick="switchTab('bank')">银行审批工作台</button>
@@ -549,14 +825,17 @@
             <div class="button-stack">
               <button type="button" onclick="runAction(event, '检查 backend 状态', checkBackendStatus)">检查 backend 状态</button>
               <button type="button" onclick="runAction(event, '检查 agent-service 状态', checkAgentStatus)">检查 agent-service 状态</button>
-              <button type="button" class="primary" onclick="runAction(event, '生成一笔脱敏演示申请', prepareDemoData)">生成一笔脱敏演示申请</button>
+              <div class="button-row">
+                <button type="button" class="primary" onclick="runAction(event, '生成低风险样例', prepareDemoData, 'low')">生成低风险样例</button>
+                <button type="button" class="warning" onclick="runAction(event, '生成高风险样例', prepareDemoData, 'high')">生成高风险样例</button>
+              </div>
               <button type="button" onclick="runAction(event, '初始化 demo admin', initAdmin)">初始化 demo admin</button>
               <button type="button" onclick="runAction(event, '登录 demo admin', loginAdmin)">登录 demo admin</button>
               <button type="button" onclick="runAction(event, '创建 demo customer', createCustomer)">创建 demo customer</button>
               <button type="button" onclick="runAction(event, '创建 loan application', createLoanApplication)">创建 loan application</button>
               <button type="button" onclick="runAction(event, '提交申请', submitApplication)">提交申请</button>
             </div>
-            <div class="notice">仅用于本地面试 Demo：自动创建脱敏客户、贷款申请并提交。Agent 不负责生成真实客户数据，演示按钮只是 seed/mock fixture。</div>
+            <div class="notice">仅用于本地面试 Demo：自动创建脱敏客户、贷款申请并提交。可使用“生成一笔脱敏演示申请”的低风险或高风险样例入口；Agent 不负责生成真实客户数据，演示按钮只是 seed/mock fixture。</div>
             <div id="message" class="message">等待操作。</div>
           </div>
         </aside>
@@ -577,7 +856,7 @@
           <article class="card wide">
             <h2>申请端说明</h2>
             <div class="card-content">
-              <div class="notice">真实业务流程：客户和贷款申请由业务系统录入并提交；审批人员在申请提交后触发 AI Review 作为辅助审核。本地演示快捷入口只是为了面试时快速生成一笔脱敏样例。</div>
+              <div class="notice">真实业务中客户和贷款申请来自业务系统；真实业务流程是客户和贷款申请由业务系统录入并提交，审批人员在申请提交后触发 AI Review 作为辅助审核。本地演示快捷入口只是为了面试时快速生成一笔脱敏样例。</div>
             </div>
           </article>
         </section>
@@ -590,12 +869,14 @@
           <h2>银行审批工作台</h2>
           <div class="panel-body">
             <div class="button-stack">
-              <button type="button" class="primary" onclick="runAction(event, '触发 AI Review', runAiReview)">触发 AI Review</button>
-              <button type="button" onclick="runAction(event, '查询 AI Reports', fetchAiReports)">查询 AI Reports</button>
-              <button type="button" onclick="runAction(event, '查询 Agent Logs', fetchAgentLogs)">查询 Agent Logs</button>
-              <button type="button" onclick="runAction(event, '查询审批历史', fetchApprovalHistory)">查询审批历史</button>
+              <button type="button" class="primary" data-ai-review-button onclick="runAction(event, '触发 AI Review', runAiReview)">AI Review</button>
+              <button type="button" class="secondary" onclick="runAction(event, '查询 AI Reports', fetchAiReports)">查询报告</button>
+              <button type="button" class="secondary" onclick="runAction(event, '查询 Agent Logs', fetchAgentLogs)">查询日志</button>
+              <button type="button" class="secondary" onclick="runAction(event, '查询审批历史', fetchApprovalHistory)">查询审批历史</button>
+              <button type="button" class="secondary" onclick="runAction(event, '重新开始演示', prepareDemoData, 'low')">重新开始演示</button>
             </div>
-            <div class="notice">人工审批边界提示：AI Review 是审批人员在申请提交后触发的辅助审核；最终 APPROVED / REJECTED / NEED_MORE_INFO 必须由人工审批接口确认。</div>
+            <div class="notice">人工审批边界提示：AI Review 是审批人员在申请提交后触发的辅助审核；当前 LLM Provider 可为 DashScope/OpenAI-compatible；真实 LLM 只用于报告生成，不拥有最终审批写库权限。</div>
+            <div id="approvalButtonHelp" class="button-help">Approve / Reject 仅在 AI_REVIEWED 后可用；Need More Info 可在 SUBMITTED、RESUBMITTED 或 AI_REVIEWED 时由人工触发。</div>
           </div>
         </aside>
 
@@ -689,6 +970,18 @@
       assetProofCount: 2
     };
     const DEMO_LOAN = { amount: 80000, termMonths: 24, purpose: "interview demo loan" };
+    const HIGH_RISK_CUSTOMER = {
+      name: "High Risk Demo Customer",
+      idCardMasked: "4401********9099",
+      phoneMasked: "139****9099",
+      age: 24,
+      monthlyIncome: 4200,
+      workYears: 1,
+      existingDebt: 90000,
+      overdueCount: 3,
+      assetProofCount: 0
+    };
+    const HIGH_RISK_LOAN = { amount: 180000, termMonths: 36, purpose: "high risk interview demo loan" };
 
     const state = {
       token: localStorage.getItem("smartcredit_demo_token") || "",
@@ -707,7 +1000,12 @@
       lastJson: {},
       currentJsonText: "{}",
       finalApprovalCompleted: false,
-      nextSuccessMessage: null
+      nextSuccessMessage: null,
+      selectedPreset: "low",
+      demoCustomer: DEMO_CUSTOMER,
+      demoLoan: DEMO_LOAN,
+      loadingTimer: null,
+      loadingStartedAt: null
     };
 
     function unwrapResult(json) {
@@ -772,15 +1070,22 @@
     async function runAction(event, label, action, ...args) {
       const button = event && event.currentTarget;
       const oldText = button ? button.textContent : "";
+      const isAiReview = action === runAiReview;
       try {
         if (button) {
           button.disabled = true;
+          button.classList.toggle("is-loading", isAiReview);
           button.textContent = label + "中...";
         }
-        setMessage(label + "中...", "info");
+        if (isAiReview) {
+          startAiReviewLoading(button);
+        } else {
+          setMessage(label + "中...", "info");
+        }
         const result = await action(...args);
         updateStatusPanel();
         renderLlmInfo();
+        renderTerminalStatus();
         setMessage(state.nextSuccessMessage || label + "成功。", "ok");
         state.nextSuccessMessage = null;
         return result;
@@ -789,8 +1094,12 @@
         setMessage(label + "失败：" + error.message, "error");
         return null;
       } finally {
+        if (isAiReview) {
+          stopAiReviewLoading();
+        }
         if (button) {
           button.textContent = oldText;
+          button.classList.remove("is-loading");
           if (button.dataset.locked !== "true") {
             button.disabled = false;
           }
@@ -806,7 +1115,14 @@
       document.getElementById("bankTab").classList.toggle("active", tabName === "bank");
     }
 
-    async function prepareDemoData() {
+    function selectDemoPreset(preset) {
+      state.selectedPreset = preset === "high" ? "high" : "low";
+      state.demoCustomer = state.selectedPreset === "high" ? HIGH_RISK_CUSTOMER : DEMO_CUSTOMER;
+      state.demoLoan = state.selectedPreset === "high" ? HIGH_RISK_LOAN : DEMO_LOAN;
+    }
+
+    async function prepareDemoData(preset = "low") {
+      selectDemoPreset(preset);
       try {
         await initAdmin();
       } catch (error) {
@@ -835,6 +1151,34 @@
       state.nextSuccessMessage = "脱敏演示申请已生成并提交，可以在审批工作台触发 AI Review。";
       switchTab("bank");
       return { applicationId: state.applicationId, status: state.applicationStatus };
+    }
+
+    function startAiReviewLoading(button) {
+      state.loadingStartedAt = Date.now();
+      const panel = document.getElementById("aiReviewLoading");
+      const elapsed = document.getElementById("aiReviewElapsed");
+      panel.classList.add("active");
+      setManualApprovalLocked(true);
+      setMessage("AI Review 正在执行：规则评分、ML baseline、Policy RAG、合规检查和真实 LLM 报告生成中。真实 LLM 可能需要 30-90 秒，请勿重复点击。已等待 0s", "info");
+      const tick = () => {
+        const seconds = Math.floor((Date.now() - state.loadingStartedAt) / 1000);
+        elapsed.textContent = "已等待 " + seconds + "s";
+        if (button) {
+          button.textContent = "AI Review 执行中 · " + seconds + "s";
+        }
+        setMessage("AI Review 正在执行：规则评分、ML baseline、Policy RAG、合规检查和真实 LLM 报告生成中。真实 LLM 可能需要 30-90 秒，请勿重复点击。已等待 " + seconds + "s", "info");
+      };
+      tick();
+      clearInterval(state.loadingTimer);
+      state.loadingTimer = setInterval(tick, 1000);
+    }
+
+    function stopAiReviewLoading() {
+      clearInterval(state.loadingTimer);
+      state.loadingTimer = null;
+      state.loadingStartedAt = null;
+      document.getElementById("aiReviewLoading").classList.remove("active");
+      refreshManualApprovalButtons();
     }
 
     async function checkBackendStatus() {
@@ -920,7 +1264,7 @@
       requireLogin();
       const data = await apiRequest("/api/customers", {
         method: "POST",
-        body: JSON.stringify(DEMO_CUSTOMER)
+        body: JSON.stringify(state.demoCustomer || DEMO_CUSTOMER)
       });
       state.customerId = data.id;
       state.currentCustomer = data;
@@ -936,7 +1280,7 @@
       }
       const data = await apiRequest("/api/loan-applications", {
         method: "POST",
-        body: JSON.stringify(Object.assign({ customerId: state.customerId }, DEMO_LOAN))
+        body: JSON.stringify(Object.assign({ customerId: state.customerId }, state.demoLoan || DEMO_LOAN))
       });
       state.applicationId = data.id;
       state.applicationStatus = data.status || "DRAFT";
@@ -956,6 +1300,9 @@
       renderApplicationDetail();
       renderLoanCard();
       renderLlmInfo();
+      renderAgentLogs([]);
+      renderPolicyReferences([]);
+      renderTerminalStatus();
       return data;
     }
 
@@ -992,6 +1339,7 @@
       renderLlmInfo();
       refreshManualApprovalButtons();
       renderMaterialReassessment();
+      state.nextSuccessMessage = "AI Review 完成，已生成 Agent Trace 和审批辅助报告。";
       return data;
     }
 
@@ -1095,39 +1443,43 @@
 
     function renderCustomerCard() {
       const customer = state.currentCustomer || {};
+      const fallbackCustomer = state.demoCustomer || DEMO_CUSTOMER;
       document.getElementById("customerCard").innerHTML = [
-        row("客户姓名", customer.name || DEMO_CUSTOMER.name),
-        row("证件号", customer.idCardMasked || DEMO_CUSTOMER.idCardMasked),
-        row("手机号", customer.phoneMasked || DEMO_CUSTOMER.phoneMasked),
-        row("年龄", customer.age || DEMO_CUSTOMER.age),
-        row("月收入", customer.monthlyIncome || DEMO_CUSTOMER.monthlyIncome),
-        row("工作年限", customer.workYears || DEMO_CUSTOMER.workYears),
-        row("现有负债", customer.existingDebt || DEMO_CUSTOMER.existingDebt),
-        row("逾期次数", customer.overdueCount ?? DEMO_CUSTOMER.overdueCount),
-        row("资产证明", customer.assetProofCount ?? DEMO_CUSTOMER.assetProofCount)
+        row("样例类型", state.selectedPreset === "high" ? "高风险样例" : "低风险样例"),
+        row("客户姓名", customer.name || fallbackCustomer.name),
+        row("证件号", customer.idCardMasked || fallbackCustomer.idCardMasked),
+        row("手机号", customer.phoneMasked || fallbackCustomer.phoneMasked),
+        row("年龄", customer.age || fallbackCustomer.age),
+        row("月收入", customer.monthlyIncome || fallbackCustomer.monthlyIncome),
+        row("工作年限", customer.workYears || fallbackCustomer.workYears),
+        row("现有负债", customer.existingDebt || fallbackCustomer.existingDebt),
+        row("逾期次数", customer.overdueCount ?? fallbackCustomer.overdueCount),
+        row("资产证明", customer.assetProofCount ?? fallbackCustomer.assetProofCount)
       ].join("");
     }
 
     function renderLoanCard() {
       const application = state.currentApplication || {};
+      const fallbackLoan = state.demoLoan || DEMO_LOAN;
       document.getElementById("loanCard").innerHTML = [
         row("customerId", state.customerId || "-"),
         row("applicationId", application.id || state.applicationId || "-"),
-        row("贷款金额", application.amount || DEMO_LOAN.amount),
-        row("期限（月）", application.termMonths || DEMO_LOAN.termMonths),
-        row("用途", application.purpose || DEMO_LOAN.purpose),
+        row("贷款金额", application.amount || fallbackLoan.amount),
+        row("期限（月）", application.termMonths || fallbackLoan.termMonths),
+        row("用途", application.purpose || fallbackLoan.purpose),
         row("状态", state.applicationStatus || application.status || "-")
       ].join("");
     }
 
     function renderApplicationDetail() {
       const application = state.currentApplication || {};
+      const fallbackLoan = state.demoLoan || DEMO_LOAN;
       document.getElementById("applicationDetailCard").innerHTML = [
         row("application_id", application.id || state.applicationId || "-"),
         row("customer_id", state.customerId || "-"),
-        row("amount", application.amount || DEMO_LOAN.amount),
-        row("term_months", application.termMonths || DEMO_LOAN.termMonths),
-        row("purpose", application.purpose || DEMO_LOAN.purpose),
+        row("amount", application.amount || fallbackLoan.amount),
+        row("term_months", application.termMonths || fallbackLoan.termMonths),
+        row("purpose", application.purpose || fallbackLoan.purpose),
         row("status", state.applicationStatus || application.status || "-"),
         row("workflow_id", state.workflowId || "-")
       ].join("");
@@ -1225,8 +1577,8 @@
         return '<div class="tool-trace"><div class="muted">暂无工具调用记录</div></div>';
       }
       return '<div class="tool-trace">' +
-        '<div class="tool-trace-title"><span>Tool Calls</span><span>read-only/auditable assistance</span></div>' +
-        '<div class="muted">Agent does not call final approval write tools; final approval is confirmed by human buttons.</div>' +
+        '<div class="tool-trace-title"><span>Tool Calls · 工具调用审计</span><span>read-only / auditable</span></div>' +
+        '<div class="muted">Tool Trace 展示 Agent 调用材料检查、风险评分、Policy RAG、合规护栏和 ReportGenerationTool；read-only/auditable assistance。Agent does not call final approval write tools；最终审批仍由人工按钮确认。</div>' +
         calls.map((toolCall) => renderToolCall(toolCall)).join("") +
       '</div>';
     }
@@ -1239,17 +1591,24 @@
       const output = getValue(toolCall, "output_summary", "outputSummary") || "-";
       const error = getValue(toolCall, "error_message", "errorMessage");
       const failed = String(status).toUpperCase() === "FAILED";
-      const rows = [
-        toolRow("Tool Name", name + " / " + toolNameDescription(name)),
-        toolRow("Status", status),
-        toolRow("Duration", (duration ?? "-") + " ms"),
-        toolRow("Input Summary", translateSummary(input)),
-        toolRow("Output Summary", translateSummary(output))
-      ];
-      if (failed && error) {
-        rows.push(toolRow("Error Message", error));
-      }
-      return '<div class="tool-call ' + (failed ? "failed" : "") + '">' + rows.join("") + '</div>';
+      const statusClass = failed ? "error" : "ok";
+      const llmTool = name === "ReportGenerationTool";
+      const durationText = (duration ?? "-") + " ms";
+      const errorHtml = failed && error
+        ? '<div><span class="label">错误：</span>' + escapeHtml(error) + '</div>'
+        : "";
+      return '<div class="tool-call ' + (failed ? "failed " : "") + (llmTool ? "llm-tool" : "") + '">' +
+        '<div class="tool-head">' +
+          '<div><div class="tool-name">' + escapeHtml(name) + '</div><div class="tool-desc">' + escapeHtml(toolNameDescription(name)) + '</div></div>' +
+          '<div><span class="badge ' + statusClass + '">' + escapeHtml(status) + '</span> <span class="duration-chip">' + escapeHtml(durationText) + '</span></div>' +
+        '</div>' +
+        (llmTool ? '<div class="notice">ReportGenerationTool：真实 LLM 报告生成可能较慢，通常需要等待 30-90 秒。</div>' : "") +
+        '<div class="tool-summary">' +
+          '<div><span class="label">输入摘要：</span>' + escapeHtml(translateSummary(input)) + '</div>' +
+          '<div><span class="label">输出摘要：</span>' + escapeHtml(translateSummary(output)) + '</div>' +
+          errorHtml +
+        '</div>' +
+      '</div>';
     }
 
     function toolRow(label, value) {
@@ -1272,10 +1631,10 @@
     function renderAgentLogs(logs) {
       const target = document.getElementById("agentLogsCard");
       if (!Array.isArray(logs) || !logs.length) {
-        target.innerHTML = '<div class="muted">暂无 Agent logs。</div>';
+        target.innerHTML = renderAgentChain([]) + '<div class="muted">暂无 Agent logs。AI Review 完成后会展示 IntakeAgent -> RiskAgent -> SeniorReviewAgent? -> PolicyAgent -> ComplianceAgent -> DecisionAgent。</div>';
         return;
       }
-      target.innerHTML = '<ol class="timeline">' + logs.map((item) => {
+      target.innerHTML = renderAgentChain(logs) + '<ol class="timeline">' + logs.map((item) => {
         const name = getValue(item, "agent_name", "agentName") || "-";
         const status = item.status || "-";
         const duration = getValue(item, "duration_ms", "durationMs");
@@ -1293,6 +1652,20 @@
           '</div>' +
         '</li>';
       }).join("") + '</ol>';
+    }
+
+    function renderAgentChain(logs) {
+      const names = new Set((logs || []).map((item) => getValue(item, "agent_name", "agentName") || ""));
+      const expected = ["IntakeAgent", "RiskAgent", "SeniorReviewAgent", "PolicyAgent", "ComplianceAgent", "DecisionAgent"];
+      const chips = expected.map((name) => {
+        const hit = names.has(name);
+        const optional = name === "SeniorReviewAgent";
+        return '<span class="agent-chip ' + (hit ? "hit " : "") + (optional ? "optional" : "") + '">' + escapeHtml(name) + (optional && !hit ? "?" : "") + '</span>';
+      }).join("");
+      const seniorNote = names.has("SeniorReviewAgent")
+        ? "高风险路径已进入 SeniorReviewAgent，高级人工复核要求会进入后续报告。"
+        : "低风险路径未进入 SeniorReviewAgent；这是条件分支结果，不是缺失日志。";
+      return '<div class="timeline-chain">' + chips + '</div><div class="notice">' + seniorNote + '</div>';
     }
 
     function renderManualApproval(data) {
@@ -1325,6 +1698,14 @@
       const status = state.applicationStatus || (state.currentApplication || {}).status || "-";
       const history = renderMaterialUpdates();
       const boundary = '<div class="notice">补件内容是本地 mock 摘要；不上传真实身份证、手机号、征信报告或银行流水。补件后必须重新 AI Review，旧 AI report 保留，最终审批仍由人工确认。</div>';
+      if (status === "APPROVED" || status === "REJECTED") {
+        target.innerHTML =
+          boundary +
+          '<div class="notice">该申请已完成最终人工审批，不能继续补件或重复审批。若要重新演示，请生成新的演示申请。</div>' +
+          '<button type="button" class="secondary" onclick="runAction(event, \'重新开始演示\', prepareDemoData, \'low\')">重新开始演示</button>' +
+          history;
+        return;
+      }
       if (status === "NEED_MORE_INFO") {
         target.innerHTML =
           boundary +
@@ -1492,28 +1873,86 @@
     function updateStatusPanel() {
       document.getElementById("currentApplicationId").textContent = state.applicationId || "-";
       document.getElementById("currentWorkflowId").textContent = state.workflowId || "-";
+      document.getElementById("topApplicationStatus").textContent = state.applicationStatus || (state.currentApplication || {}).status || "-";
+      renderDemoStepper();
+      renderTerminalStatus();
     }
 
     function refreshManualApprovalButtons() {
       const status = state.applicationStatus || (state.currentApplication || {}).status || "";
+      const finalStatus = status === "APPROVED" || status === "REJECTED";
       document.querySelectorAll("[data-manual-approval]").forEach((button) => {
         const action = button.dataset.manualAction;
         let enabled = false;
-        if (status === "AI_REVIEWED") {
+        let reason = "请先生成并提交演示申请。";
+        if (finalStatus) {
+          reason = "该申请已完成最终人工审批，不能继续补件或重复审批。";
+        } else if (status === "AI_REVIEWED") {
           enabled = true;
+          reason = "AI Review 已完成，可以由人工做最终确认。";
         } else if ((status === "SUBMITTED" || status === "RESUBMITTED") && action === "need-more-info") {
           enabled = true;
+          reason = "当前状态允许人工要求补件。";
+        } else if (status === "SUBMITTED" || status === "RESUBMITTED") {
+          reason = "Approve / Reject 需要先完成 AI Review。";
+        } else if (status === "MATERIAL_UPDATED") {
+          reason = "补件后需要先重新提交申请。";
+        } else if (status === "NEED_MORE_INFO") {
+          reason = "请先在补件复审区提交材料摘要。";
         }
         button.disabled = !enabled;
         button.dataset.locked = enabled ? "false" : "true";
+        button.title = enabled ? reason : reason;
       });
+      const help = document.getElementById("approvalButtonHelp");
+      if (help) {
+        help.textContent = finalStatus
+          ? "该申请已完成最终人工审批，不能继续补件或重复审批。若要重新演示，请生成新的演示申请。"
+          : "Approve / Reject 仅在 AI_REVIEWED 后可用；Need More Info 可在 SUBMITTED、RESUBMITTED 或 AI_REVIEWED 时由人工触发。";
+      }
+      renderTerminalStatus();
     }
 
     function setManualApprovalLocked(locked) {
       document.querySelectorAll("[data-manual-approval]").forEach((button) => {
         button.disabled = locked;
         button.dataset.locked = locked ? "true" : "false";
+        button.title = locked ? "AI Review 正在执行，请等待 Agent Trace 和报告生成完成。" : "";
       });
+    }
+
+    function renderDemoStepper() {
+      const status = state.applicationStatus || (state.currentApplication || {}).status || "";
+      const hasAiReview = Boolean(state.aiReview || state.aiReport || state.workflowId);
+      const terminal = status === "APPROVED" || status === "REJECTED";
+      const steps = [
+        { label: "创建申请", active: Boolean(state.applicationId), done: Boolean(state.applicationId) },
+        { label: "AI Review", active: status === "SUBMITTED" || status === "RESUBMITTED", done: hasAiReview },
+        { label: "查看 Trace", active: hasAiReview && !terminal, done: Boolean((state.agentLogs || []).length || hasAiReview) },
+        { label: "Need More Info", active: status === "AI_REVIEWED", done: status === "NEED_MORE_INFO" || status === "MATERIAL_UPDATED" || status === "RESUBMITTED" || terminal },
+        { label: "补件", active: status === "NEED_MORE_INFO", done: status === "MATERIAL_UPDATED" || status === "RESUBMITTED" || terminal },
+        { label: "重提复评", active: status === "MATERIAL_UPDATED" || status === "RESUBMITTED", done: terminal || (status === "AI_REVIEWED" && Boolean(state.materialUpdates.length)) },
+        { label: terminal ? "演示完成" : "人工终审", active: status === "AI_REVIEWED" || terminal, done: terminal }
+      ];
+      document.getElementById("demoStepper").innerHTML = steps.map((step, index) => {
+        const className = "demo-step" + (step.done ? " done" : "") + (step.active ? " active" : "");
+        return '<div class="' + className + '"><span class="step-badge">' + (index + 1) + '</span><strong>' + escapeHtml(step.label) + '</strong><span>' + escapeHtml(status || "等待开始") + '</span></div>';
+      }).join("");
+    }
+
+    function renderTerminalStatus() {
+      const status = state.applicationStatus || (state.currentApplication || {}).status || "";
+      const panel = document.getElementById("terminalStatusCard");
+      if (status !== "APPROVED" && status !== "REJECTED") {
+        panel.classList.remove("active");
+        panel.innerHTML = "";
+        return;
+      }
+      panel.classList.add("active");
+      panel.innerHTML =
+        '<div class="terminal-title"><span>演示完成 · ' + escapeHtml(status) + '</span><span class="badge ok">Human-in-the-loop</span></div>' +
+        '<div>该申请已完成最终人工审批，不能继续补件或重复审批。若要重新演示，请生成新的演示申请。</div>' +
+        '<div class="button-row" style="margin-top: 10px;"><button type="button" class="secondary" onclick="runAction(event, \'重新开始演示\', prepareDemoData, \'low\')">重新开始演示</button><button type="button" class="secondary" onclick="switchTab(\'customer\')">返回客户申请端</button></div>';
     }
 
     function decisionToStatus(decision) {

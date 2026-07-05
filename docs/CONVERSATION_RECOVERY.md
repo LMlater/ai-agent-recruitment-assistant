@@ -1,5 +1,16 @@
 # Conversation Recovery
 
+## 第 14 轮恢复要点
+
+1. 用户本机没有 Docker，但 MySQL 已初始化，backend-service 此前可启动。
+2. Redis 当前不可用，但主链路不强依赖 Redis；无 Redis 时仍可先启动 backend-service 验证核心 demo。
+3. agent-service `/health` 此前正常；用户希望继续使用真实 DashScope/OpenAI-compatible LLM，不强制切 Mock。
+4. 本轮只优化 `backend-service/src/main/resources/static/demo.html` 的前端演示体验和必要文档，不改审批状态机、Java 后端业务逻辑或 Python Agent 主流程。
+5. Demo UI 已加入能力 badge、演示步骤条、真实 LLM loading/elapsed seconds、终态解释、“重新开始演示”、Tool Calls 小卡片和 Agent Timeline 流程链。
+6. 页面新增低风险/高风险样例按钮；高风险样例用于展示 HIGH risk 和 `SeniorReviewAgent`。
+7. 真实 LLM 只用于报告生成，不拥有最终审批写库权限；最终 `APPROVED` / `REJECTED` 仍必须由人工按钮确认。
+8. 普通测试和 CI 仍不依赖真实 LLM，不得提交 `.env`、真实 API Key、真实身份证、手机号、征信报告或银行流水。
+
 ## 无 Docker 启动文档修正
 
 1. 本轮只修正文档，不新增业务功能，不修改代码逻辑、审批状态机、Agent 主流程或数据库业务表。

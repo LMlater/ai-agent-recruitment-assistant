@@ -80,6 +80,8 @@ http://localhost:8080/demo.html
 6. 提交补件摘要并重新提交，再次 AI Review。
 7. 人工 Approve / Reject，查看审批历史和审计留痕。
 
+提示：面试现场可以使用真实 DashScope/OpenAI-compatible LLM 生成报告，但真实 LLM 可能需要 30-90 秒。等待时可讲解 Agent Trace、Tool Trace、Policy RAG 和 human-in-the-loop 边界；LLM 只生成审批辅助报告，不拥有最终审批写库权限。本机 Redis 当前不是核心 demo 主链路强依赖，无 Redis 时仍可先启动 backend-service 验证主流程。
+
 ## 不能夸大的边界
 
 - 不是真实银行生产系统。

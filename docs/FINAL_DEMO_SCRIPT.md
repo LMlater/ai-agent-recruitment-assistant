@@ -2,6 +2,14 @@
 
 本脚本用于面试现场演示。原则是讲清楚工程能力和业务边界，不夸大为真实银行生产系统。
 
+## 第 14 轮演示提示：真实 LLM 等待体验
+
+- 面试现场可以使用真实 DashScope/OpenAI-compatible LLM 生成审批辅助报告，但要提前说明真实 LLM 报告生成可能需要 30-90 秒。
+- 等待 AI Review 时，不要重复点击按钮；可以讲解页面上的 Agent trace、Tool Trace、Policy RAG、human-in-the-loop 边界和最终人工审批责任。
+- 如果现场网络不稳定、真实 LLM 超时或 provider 不可用，可以临时切回 Mock LLM fallback；普通测试和 CI 仍不依赖真实 LLM。
+- 推荐演示高风险样例，用来展示 `SeniorReviewAgent` 条件分支；低风险样例可能不会进入 `SeniorReviewAgent`，这是正常路径。
+- 需要强调：真实 LLM 只用于报告生成，不拥有最终审批写库权限，最终 `APPROVED` / `REJECTED` 必须由人工按钮确认。
+
 ## 3 分钟演示脚本
 
 第 1 分钟：介绍项目定位和架构。
