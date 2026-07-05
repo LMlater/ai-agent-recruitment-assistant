@@ -1,5 +1,14 @@
 # Conversation Recovery
 
+## Round 16.1 恢复要点
+
+1. 本轮只修复正式前端 `frontend-service/src/App.vue` 的 Agent Trace / Tool Calls 展示字段兼容问题，不新增业务功能。
+2. 根因不是后端 Agent 没执行，而是前端直接读取原始 `agentResults`，没有统一兼容后端与 Python Agent 返回的 `snake_case` 字段。
+3. 新增 `normalizeAgentResult` / `normalizeToolCall` 等归一化函数，兼容 `agent_name`、`tool_name`、`duration_ms`、`input_summary`、`output_summary`、`error_message`。
+4. `agentTimeline`、`toolCalls`、`hasSeniorReview` 都已改为基于 normalized agent results；高风险返回 `agent_name=SeniorReviewAgent` 时可以正确识别。
+5. Agent Trace 会展示 Agent 名称、状态、耗时、输入摘要、输出摘要；无输出摘要时显示“该 Agent 暂无输出摘要，但状态已记录。”
+6. Tool Calls 会展示真实工具名、中文说明、状态、耗时、输入摘要、输出摘要和错误信息；不再把真实工具统一显示成“Agent 工具调用”。
+
 ## Round 16 恢复要点
 
 1. 本轮新增正式前端 `frontend-service`，技术栈为 Vue 3 + Vite + Element Plus；旧 `demo.html` 保留为 fallback。

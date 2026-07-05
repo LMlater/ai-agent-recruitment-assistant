@@ -1,5 +1,62 @@
 # Validation Log
 
+## Round 16.1: Frontend Agent / Tool Trace Normalization
+
+日期：2026-07-05
+
+### targeted Round 16.1 static tests
+
+```powershell
+cd agent-service
+python -m pytest tests\test_round16_frontend_workspace.py -q
+```
+
+结果：通过，`3 passed, 1 warning`。新增覆盖 `normalizeAgentResult`、`normalizeToolCall`、`agent_name`、`tool_name`、`duration_ms`、`input_summary`、`output_summary`、`error_message`，并确认 `hasSeniorReview` 基于 normalized agent name，页面不再依赖 `tool.toolName || tool.name`。
+
+### agent-service
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：通过，`75 passed, 1 skipped, 2 warnings`。跳过项仍为真实 LLM smoke 类测试；普通测试保持 Mock LLM，不调用真实 API。警告包括 Starlette/httpx deprecation 和本机 `.pytest_cache` 写入权限警告。
+
+### backend-service
+
+```powershell
+cd backend-service
+mvn -Dmaven.resources.skip=true test
+```
+
+结果：PowerShell 直接执行时将 `-Dmaven.resources.skip=true` 解析异常，Maven 报 `Unknown lifecycle phase ".resources.skip=true"`。随后使用等价的 PowerShell 引号形式：
+
+```powershell
+mvn "-Dmaven.resources.skip=true" test
+```
+
+结果：进入测试阶段后失败于默认 Maven 本地仓库写入权限，`D:\maven\apache-maven-3.9.9-bin\apache-maven-3.9.9\mvn_repo\...\surefire-junit-platform\3.2.5` 出现 `AccessDeniedException`。本地替代验证使用仓库内 Maven repo：
+
+```powershell
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" test
+```
+
+结果：通过，`Tests run: 34, Failures: 0, Errors: 0, Skipped: 0`。
+
+### frontend-service
+
+```powershell
+cd frontend-service
+npm run build
+```
+
+结果：首次在沙箱内失败于 esbuild 子进程 `spawn EPERM`；提权后通过，`vite v6.4.3` 构建成功，`1590 modules transformed`。保留 Vite/Rollup 的大 chunk 与 `#__PURE__` 注释位置警告。
+
+### 安全记录
+
+- 本轮只修正式前端展示层字段归一化，不改 Java 后端业务逻辑，不改 Python Agent 流程，不改审批状态机。
+- 未提交 `.env`、真实 API Key、本地敏感配置、真实身份证、真实手机号、征信报告或银行流水。
+
 ## Round 16: Batch File AI Review + Formal Frontend Workspace
 
 日期：2026-07-05

@@ -194,29 +194,33 @@
 
                 <el-tabs v-model="detailTab">
                   <el-tab-pane label="Agent Trace" name="trace">
-                    <div v-if="!agentTimeline.length" class="empty">尚无 Agent Trace。低风险路径未进入 SeniorReviewAgent，这是正常条件分支。</div>
+                    <div v-if="!agentTimeline.length" class="empty">尚无 Agent Trace。当前路径未进入 SeniorReviewAgent，这是正常条件分支。</div>
                     <div v-for="agent in agentTimeline" :key="agent.agentName" class="timeline-card">
                       <strong>{{ agent.agentName }}</strong>
                       <el-tag style="margin-left: 8px" :type="agent.status === 'SUCCESS' ? 'success' : 'warning'">{{ agent.status || "-" }}</el-tag>
-                      <div class="hint">{{ agent.summary || agent.outputSummary || "暂无摘要" }}</div>
+                      <div class="tool-meta">
+                        <span>duration: {{ formatDuration(agent.durationMs) }}</span>
+                        <span>inputSummary: {{ agent.inputSummary || "-" }}</span>
+                      </div>
+                      <div class="hint">outputSummary: {{ agent.outputSummary || "该 Agent 暂无输出摘要，但状态已记录。" }}</div>
                     </div>
                     <el-alert v-if="!hasSeniorReview" type="info" :closable="false">
-                      低风险路径未进入 SeniorReviewAgent，这是正常条件分支。
+                      当前路径未进入 SeniorReviewAgent，这是正常条件分支。
                     </el-alert>
                   </el-tab-pane>
 
                   <el-tab-pane label="Tool Calls" name="tools">
                     <div v-if="!toolCalls.length" class="empty">暂无 Tool Calls。</div>
                     <div v-for="(tool, index) in toolCalls" :key="`${tool.toolName}-${index}`" class="tool-card">
-                      <strong>{{ tool.toolName || tool.name }}</strong>
-                      <div class="hint">{{ toolDescription(tool.toolName || tool.name) }}</div>
+                      <strong>{{ tool.toolName }}</strong>
+                      <div class="hint">{{ toolDescription(tool.toolName) }}</div>
                       <div class="tool-meta">
                         <span>status: {{ tool.status || "-" }}</span>
-                        <span>duration: {{ tool.durationMs || tool.duration || "-" }}</span>
+                        <span>duration: {{ formatDuration(tool.durationMs) }}</span>
                         <span>inputSummary: {{ tool.inputSummary || "-" }}</span>
                         <span>outputSummary: {{ tool.outputSummary || "-" }}</span>
                       </div>
-                      <div v-if="tool.error" class="danger-note">error: {{ tool.error }}</div>
+                      <div v-if="tool.errorMessage" class="danger-note">error: {{ tool.errorMessage }}</div>
                     </div>
                   </el-tab-pane>
 
@@ -313,9 +317,10 @@ const highRiskCount = computed(() => batchRows.value.filter((row) => row.riskLev
 const needMoreInfoCount = computed(() => batchRows.value.filter((row) => row.aiDecision === "NEED_MORE_INFO").length);
 const approveSuggestionCount = computed(() => batchRows.value.filter((row) => row.aiDecision === "APPROVE").length);
 const rejectSuggestionCount = computed(() => batchRows.value.filter((row) => row.aiDecision === "REJECT").length);
-const agentTimeline = computed(() => selectedRow.value?.agentResults || []);
-const hasSeniorReview = computed(() => agentTimeline.value.some((agent) => agent.agentName === "SeniorReviewAgent" || agent.name === "SeniorReviewAgent"));
-const toolCalls = computed(() => flattenToolCalls(selectedRow.value?.agentResults || []));
+const normalizedAgentResults = computed(() => normalizeAgentResults(selectedRow.value?.agentResults || []));
+const agentTimeline = computed(() => normalizedAgentResults.value);
+const hasSeniorReview = computed(() => agentTimeline.value.some((agent) => agent.agentName === "SeniorReviewAgent"));
+const toolCalls = computed(() => agentTimeline.value.flatMap((agent) => agent.toolCalls));
 const policyReferences = computed(() => selectedRow.value?.policyReferences || []);
 const canFinalApprove = computed(() => selectedRow.value?.status === "AI_REVIEWED");
 const canNeedMoreInfo = computed(() => ["SUBMITTED", "RESUBMITTED", "AI_REVIEWED"].includes(selectedRow.value?.status));
@@ -496,18 +501,76 @@ function extractPolicyReferences(result) {
 }
 
 function normalizeLogs(logs) {
-  return (logs || []).map((log) => ({
-    agentName: log.agentName || log.agent_name || "Agent",
-    status: log.status,
-    summary: log.outputSummary || log.output_summary || log.inputSummary || ""
-  }));
+  return (logs || []).map((log) =>
+    normalizeAgentResult({
+      agentName: log.agentName || log.agent_name || log.name,
+      status: log.status,
+      inputSummary: log.inputSummary || log.input_summary || "",
+      outputSummary: log.outputSummary || log.output_summary || log.summary || log.inputSummary || log.input_summary || "",
+      startedAt: log.startedAt || log.started_at || "",
+      endedAt: log.endedAt || log.ended_at || "",
+      durationMs: log.durationMs ?? log.duration_ms ?? "",
+      result: log.result || {}
+    })
+  );
 }
 
-function flattenToolCalls(agentResults) {
-  return agentResults.flatMap((agent) => {
-    const result = agent.result || {};
-    return result.tool_calls || result.toolCalls || [];
-  });
+function normalizeAgentResults(agentResults) {
+  return (agentResults || []).map(normalizeAgentResult);
+}
+
+function normalizeAgentResult(agent) {
+  const result = normalizeResult(agent.result);
+  return {
+    agentName: agent.agentName || agent.agent_name || agent.name || "Agent",
+    status: agent.status || "-",
+    inputSummary: agent.inputSummary || agent.input_summary || "",
+    outputSummary: agent.outputSummary || agent.output_summary || agent.summary || "",
+    startedAt: agent.startedAt || agent.started_at || "",
+    endedAt: agent.endedAt || agent.ended_at || "",
+    durationMs: agent.durationMs ?? agent.duration_ms ?? "",
+    result,
+    toolCalls: normalizeToolCalls(agent.toolCalls || agent.tool_calls || result.tool_calls || result.toolCalls || [])
+  };
+}
+
+function normalizeResult(result) {
+  if (!result) {
+    return {};
+  }
+  if (typeof result === "string") {
+    try {
+      return JSON.parse(result);
+    } catch {
+      return {};
+    }
+  }
+  return result;
+}
+
+function normalizeToolCalls(tools) {
+  return (tools || []).map(normalizeToolCall);
+}
+
+function normalizeToolCall(tool) {
+  return {
+    toolName: tool.toolName || tool.tool_name || tool.name || "Tool",
+    status: tool.status || "-",
+    durationMs: tool.durationMs ?? tool.duration_ms ?? tool.duration ?? "",
+    inputSummary: tool.inputSummary || tool.input_summary || "",
+    outputSummary: tool.outputSummary || tool.output_summary || "",
+    errorMessage: tool.errorMessage || tool.error_message || tool.error || ""
+  };
+}
+
+function formatDuration(duration) {
+  if (duration === undefined || duration === null || duration === "") {
+    return "-";
+  }
+  if (typeof duration === "string" && /ms$|s$/i.test(duration)) {
+    return duration;
+  }
+  return `${duration}ms`;
 }
 
 function isTerminal(status) {

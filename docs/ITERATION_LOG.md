@@ -1,5 +1,15 @@
 # Iteration Log
 
+## Round 16.1: Fix Frontend Agent Tool Trace Normalization
+
+- 修复 `frontend-service/src/App.vue` 中正式前端 Agent Trace / Tool Calls 对后端与 Python Agent `snake_case` 字段兼容不足的问题。
+- 新增统一归一化层：`normalizeAgentResult` / `normalizeToolCall` / `normalizeAgentResults` / `normalizeToolCalls`，兼容 `agent_name`、`tool_name`、`duration_ms`、`input_summary`、`output_summary`、`error_message` 等字段。
+- `agentTimeline`、`toolCalls`、`hasSeniorReview` 现在都基于 normalized agent results，而不是直接读取原始 `agentResults`。
+- Agent Trace 现在展示 Agent 名称、状态、耗时、输入摘要和输出摘要；缺少输出摘要时显示“该 Agent 暂无输出摘要，但状态已记录。”，避免空白卡片。
+- Tool Calls 现在展示真实工具名、中文说明、状态、耗时、输入摘要、输出摘要和错误信息，不再依赖 `tool.toolName || tool.name` 的原始字段兜底。
+- `SeniorReviewAgent` 识别兼容 `agentName` / `agent_name` / `name`，只有 normalized timeline 中确实不存在该 Agent 时才显示“当前路径未进入 SeniorReviewAgent，这是正常条件分支。”。
+- 本轮只修正式前端展示层字段兼容问题，不改后端业务逻辑、不改 Python Agent 流程、不新增业务功能、不提交 `.env` 或真实 API Key。
+
 ## Round 16: Batch File AI Review + Formal Frontend Workspace
 
 - 修复 `demo.html` 待审申请列表中点击 `AI预审` 没有明显 loading 的问题：`runAction` 支持 `{ aiReview: true }` 标记，`runAiReviewForApplication` 现在会触发 AI Review loading、按钮禁用和等待秒数提示。

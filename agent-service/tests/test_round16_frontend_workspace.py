@@ -98,3 +98,35 @@ def test_round16_frontend_workspace_static_assets_exist_and_cover_flow():
     assert "Promise.all" not in app_vue
     assert "/batch-import-sample" not in app_vue
     assert "一键导入内置样例" not in app_vue
+
+
+def test_round16_1_frontend_agent_tool_trace_normalization():
+    app_vue = _read_repo_text("frontend-service/src/App.vue")
+
+    for expected in (
+        "normalizeAgentResult",
+        "normalizeToolCall",
+        "normalizeAgentResults",
+        "normalizeToolCalls",
+        "agent.agent_name",
+        "tool.tool_name",
+        "agent.duration_ms",
+        "tool.duration_ms",
+        "agent.input_summary",
+        "tool.input_summary",
+        "agent.output_summary",
+        "tool.output_summary",
+        "tool.error_message",
+        "const normalizedAgentResults = computed",
+        "const agentTimeline = computed(() => normalizedAgentResults.value)",
+        'agent.agentName === "SeniorReviewAgent"',
+        "当前路径未进入 SeniorReviewAgent，这是正常条件分支。",
+        "该 Agent 暂无输出摘要，但状态已记录。",
+        "formatDuration(agent.durationMs)",
+        "formatDuration(tool.durationMs)",
+    ):
+        assert expected in app_vue
+
+    assert "const agentTimeline = computed(() => selectedRow.value?.agentResults || [])" not in app_vue
+    assert "tool.toolName || tool.name" not in app_vue
+    assert "function flattenToolCalls" not in app_vue
