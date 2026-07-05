@@ -73,26 +73,26 @@
               <span>duration: {{ formatDuration(agent.durationMs) }}</span>
               <span>inputSummary: {{ agent.inputSummary || "-" }}</span>
               <span>outputSummary: {{ agent.outputSummary || "-" }}</span>
-              <span v-if="toolSummaryFromOutput(agent.outputSummary)">工具摘要：{{ toolSummaryFromOutput(agent.outputSummary) }}</span>
             </div>
           </div>
         </el-tab-pane>
 
         <el-tab-pane label="Tool Calls" name="tools">
-          <div v-if="!toolCalls.length" class="empty">暂无结构化 Tool Calls；如果 Agent Trace 的 outputSummary 中包含 tools=...，请检查解析逻辑或重新执行 AI Review。</div>
-          <div v-for="(tool, index) in toolCalls" :key="`${tool.toolName}-${index}`" class="tool-card">
+          <div v-if="!toolCalls.length" class="empty">
+            暂无 Tool Calls。若 Agent Trace 的 outputSummary 已出现 tools=...，例如 tools=RiskRuleTool:SUCCESS(0ms)，前端会从持久化 Agent 日志中解析并展示。
+          </div>
+          <div v-for="(tool, index) in toolCalls" :key="`${tool.agentName}-${tool.toolName}-${index}`" class="tool-card">
             <strong>{{ tool.toolName }}</strong>
+            <el-tag class="inline-tag" :type="tool.status === 'SUCCESS' ? 'success' : 'warning'">{{ tool.status || "-" }}</el-tag>
             <div class="hint">{{ toolChineseDescription(tool.toolName) }}</div>
             <div class="tool-meta">
-              <span>所属 Agent: {{ tool.agentName || "-" }}</span>
-              <span>状态: {{ tool.status || "-" }}</span>
-              <span>耗时: {{ formatDuration(tool.durationMs) }}</span>
-              <span>来源: {{ toolSourceText(tool.source) }}</span>
-              <span>输入摘要: {{ tool.inputSummary || "-" }}</span>
-              <span>输出摘要: {{ tool.outputSummary || "-" }}</span>
+              <span>所属 Agent：{{ tool.agentName || "-" }}</span>
+              <span>来源：{{ tool.source || "-" }}</span>
+              <span>耗时：{{ formatDuration(tool.durationMs) }}</span>
+              <span>输入摘要：{{ tool.inputSummary || "-" }}</span>
+              <span>输出摘要：{{ tool.outputSummary || "-" }}</span>
             </div>
-            <div v-if="tool.source === 'parsed_output_summary'" class="hint top-gap">该工具调用从持久化 Agent 日志 outputSummary 中解析得到。</div>
-            <div v-if="tool.errorMessage" class="danger-note">error: {{ tool.errorMessage }}</div>
+            <div v-if="tool.errorMessage" class="danger-note">错误信息：{{ tool.errorMessage }}</div>
           </div>
         </el-tab-pane>
 
@@ -163,6 +163,8 @@ import {
 } from "../api.js";
 
 const CURRENT_APPLICATION_ID_KEY = "smartcredit.frontend.currentApplicationId";
+const STRUCTURED_TOOL_CALL_SOURCE = "结构化 tool_calls 字段";
+const OUTPUT_SUMMARY_TOOL_CALL_SOURCE = "从 Agent 日志 outputSummary 解析";
 const route = useRoute();
 const router = useRouter();
 const applicationId = computed(() => route.params.applicationId);
@@ -258,17 +260,13 @@ function resolveToolCalls(item, result, agentName, outputSummary) {
   const structured = normalizeToolCalls(
     item.toolCalls || item.tool_calls || result.tool_calls || result.toolCalls || [],
     agentName,
-    "structured"
+    STRUCTURED_TOOL_CALL_SOURCE
   );
-
-  if (structured.length) {
-    return structured;
-  }
-
+  if (structured.length) return structured;
   return parseToolCallsFromOutputSummary(outputSummary, agentName);
 }
 
-function normalizeToolCalls(items, agentName, source = "structured") {
+function normalizeToolCalls(items, agentName = "", source = STRUCTURED_TOOL_CALL_SOURCE) {
   return (items || []).map((item) => ({
     toolName: item.toolName || item.tool_name || item.name || "Tool",
     status: item.status || "-",
@@ -282,41 +280,30 @@ function normalizeToolCalls(items, agentName, source = "structured") {
 }
 
 function parseToolCallsFromOutputSummary(outputSummary, agentName) {
-  if (!outputSummary || !outputSummary.includes("tools=")) {
-    return [];
-  }
-
+  if (!outputSummary || typeof outputSummary !== "string" || !outputSummary.includes("tools=")) return [];
   const toolsPart = outputSummary.split("tools=").pop() || "";
   return toolsPart
     .split(",")
-    .map((raw) => raw.trim())
-    .map((raw) => {
-      const match = raw.match(/^([A-Za-z0-9_]+)\s*:\s*([A-Z_]+)\s*\(([^)]*)\)$/);
-      if (!match) {
-        return null;
-      }
+    .map(r => r.trim())
+    .map(r => {
+      const m = r.match(/^([A-Za-z0-9_]+):([A-Z_]+)\(([^)]*)\)$/);
+      if (!m) return null;
+      const [, toolName, status, duration] = m;
       return {
-        toolName: match[1],
-        status: match[2],
-        durationMs: match[3],
-        inputSummary: "",
-        outputSummary: "",
+        toolName,
+        status,
+        durationMs: duration,
+        inputSummary: "-",
+        outputSummary: `持久化日志摘要：${r}`,
         errorMessage: "",
-        source: "parsed_output_summary",
-        agentName
+        agentName,
+        source: OUTPUT_SUMMARY_TOOL_CALL_SOURCE
       };
     })
     .filter(Boolean);
 }
 
-function toolSummaryFromOutput(outputSummary) {
-  if (!outputSummary || !outputSummary.includes("tools=")) {
-    return "";
-  }
-  return outputSummary.split("tools=").pop()?.trim() || "";
-}
-
-function agentChineseDescription(agentName) {
+function agentChineseDescription(name) {
   return {
     IntakeAgent: "材料完整性检查：校验客户基础信息和贷款申请材料是否齐全。",
     RiskAgent: "风险评估：执行规则风控评分，并融合 ML baseline 风险信号。",
@@ -324,10 +311,10 @@ function agentChineseDescription(agentName) {
     PolicyAgent: "制度检索：基于模拟信贷制度库进行 Policy RAG 检索。",
     ComplianceAgent: "合规护栏：检查 AI 建议是否越过自动审批边界。",
     DecisionAgent: "报告生成：汇总风险、制度引用、工具调用和审批辅助建议。"
-  }[agentName] || "Agent 执行节点。";
+  }[name] || "Agent 节点";
 }
 
-function toolChineseDescription(toolName) {
+function toolChineseDescription(name) {
   return {
     MaterialChecklistTool: "材料清单工具：检查客户和申请字段是否完整。",
     RiskRuleTool: "规则风控工具：根据负债、逾期、收入、资产等字段计算规则风险。",
@@ -336,92 +323,13 @@ function toolChineseDescription(toolName) {
     PolicySearchTool: "制度检索工具：从模拟信贷制度库中检索相关条款。",
     ComplianceGuardrailTool: "合规护栏工具：确认 AI 只给辅助建议，不自动终审。",
     ReportGenerationTool: "报告生成工具：调用 Mock/真实 LLM 生成审批辅助报告。"
-  }[toolName] || "Agent 工具调用。";
+  }[name] || "工具";
 }
 
-function toolSourceText(source) {
-  return {
-    structured: "结构化 tool_calls",
-    parsed_output_summary: "从 Agent 日志摘要解析"
-  }[source] || source || "-";
-}
+function parseJson(v){try{return JSON.parse(v)}catch{return null}}
 
-function parseJson(value) {
-  if (!value || typeof value !== "string") {
-    return null;
-  }
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
-}
-
-async function handleManualApprove() {
-  const updated = await manualApprove(applicationId.value, manualComment.value);
-  application.value.status = updated.status || "APPROVED";
-  approvalHistory.value = await getApprovalHistory(applicationId.value);
-  ElMessage.success("人工通过已完成");
-}
-
-async function handleManualReject() {
-  const updated = await manualReject(applicationId.value, manualComment.value);
-  application.value.status = updated.status || "REJECTED";
-  approvalHistory.value = await getApprovalHistory(applicationId.value);
-  ElMessage.success("人工拒绝已完成");
-}
-
-async function handleManualNeedMoreInfo() {
-  const updated = await manualNeedMoreInfo(applicationId.value, manualComment.value);
-  application.value.status = updated.status || "NEED_MORE_INFO";
-  approvalHistory.value = await getApprovalHistory(applicationId.value);
-  ElMessage.success("已要求补件");
-}
-
-async function handleUpdateMaterials() {
-  const updated = await updateMaterials(applicationId.value, materialSummary.value);
-  application.value.status = updated.status || "MATERIAL_UPDATED";
-  materialUpdates.value = await getMaterialUpdates(applicationId.value);
-  ElMessage.success("提交补件摘要完成");
-}
-
-async function handleResubmit() {
-  const updated = await resubmit(applicationId.value);
-  application.value.status = updated.status || "RESUBMITTED";
-  ElMessage.success("重新提交完成，可回到工作台再次 AI 检测");
-}
-
-function formatDuration(duration) {
-  if (duration === undefined || duration === null || duration === "") {
-    return "-";
-  }
-  return typeof duration === "string" && /ms$|s$/i.test(duration) ? duration : `${duration}ms`;
-}
-
-function formatMoney(value) {
-  if (value === undefined || value === null || value === "") {
-    return "-";
-  }
-  return Number(value).toLocaleString("zh-CN");
-}
-
-function statusText(status) {
-  return {
-    SUBMITTED: "待 AI 预审",
-    AI_REVIEWED: "AI 已预审",
-    NEED_MORE_INFO: "要求补件",
-    MATERIAL_UPDATED: "已补件",
-    RESUBMITTED: "已重提",
-    APPROVED: "人工通过",
-    REJECTED: "人工拒绝"
-  }[status] || status || "-";
-}
-
-function decisionText(decision) {
-  return {
-    APPROVE: "建议通过",
-    REJECT: "建议拒绝",
-    NEED_MORE_INFO: "建议补件"
-  }[decision] || decision || "-";
-}
+function formatDuration(d){if(!d)return"-";return typeof d==="string"&&/ms$|s$/i.test(d)?d:`${d}ms`}
+function formatMoney(v){if(!v)return"-";return Number(v).toLocaleString("zh-CN")}
+function statusText(s){return {SUBMITTED:"待 AI 预审",AI_REVIEWED:"AI 已预审",NEED_MORE_INFO:"要求补件",MATERIAL_UPDATED:"已补件",RESUBMITTED:"已重提",APPROVED:"人工通过",REJECTED:"人工拒绝"}[s]||s||"-"}
+function decisionText(d){return {APPROVE:"建议通过",REJECT:"建议拒绝",NEED_MORE_INFO:"建议补件"}[d]||d||"-"}
 </script>
