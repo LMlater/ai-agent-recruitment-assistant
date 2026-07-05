@@ -246,3 +246,13 @@
 - 增强 `scripts/check_demo_readiness.py`：检查 CI workflow、两个 Dockerfile、完整 Compose 四服务和最终交付文档，`--skip-services` 不要求本地服务已启动。
 - 更新 README、Demo Guide、Architecture、Final Interview Delivery、Resume Notes、Conversation Recovery、Validation Log，补齐 CI/Docker/Compose/readiness 的面试讲法。
 - 未新增业务能力，未删除第 8/9/10 轮成果；Tool Trace、SeniorReviewAgent、补件复审状态机和人工最终审批边界保持不变。
+## Round 17: Frontend Navigation, Auth Gate and Detail Page Polish
+
+- 引入 `vue-router`，新增 `/login`、`/workspace`、`/applications/:applicationId` 三类正式前端路由。
+- `App.vue` 改为应用外壳：Header 展示“当前用户：admin / 退出登录”或“未登录 / 去登录”，顶部能力标签变成可点击快捷入口。
+- 新增 `LoginPage.vue`、`WorkspacePage.vue`、`ApplicationDetail.vue`，工作台只保留 CSV 上传、批量 AI 检测进度和结果表格，完整详情移动到独立详情页。
+- 新增前端 token helper：`clearToken()`、`hasToken()`、`requireToken()`；除登录和 init-admin 外，API 在无 token 时先抛出“请先登录 demo admin”。
+- 左侧导航改为真实路由和 `scrollIntoView`，不再只设置 `activeSection`。
+- 批量结果保存到 `smartcredit.frontend.lastBatchRows`，刷新工作台可恢复；退出登录时清空。
+- 后端已有 `JwtAuthInterceptor` 保护 `/api/**`，排除 `/api/auth/login` 和 `/api/auth/init-admin`，本轮未改审批状态机、Agent 流程或新增后端批量 Review 接口。
+- 纳入 `frontend-service/package-lock.json`，锁定 `vue-router` 和现有 npm 依赖。

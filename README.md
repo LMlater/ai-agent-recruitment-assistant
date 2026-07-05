@@ -599,3 +599,14 @@ python scripts/run_llm_review_demo.py --compact
 `--mock` 用于稳定展示，不调用百炼；`--real` 使用本地百炼配置，可能受网络和模型响应影响；`--compact` 使用更短上下文和较小生成参数，更适合真实模型演示。真实 LLM 超时时会触发 fallback，这是预期保护机制，不是系统崩溃。
 
 配置方式和安全边界见 `docs/LLM_INTEGRATION.md`。仓库只提交 `.env.example` 占位符，不提交真实 API Key。
+## Round 17: 正式前端路由与详情页
+
+正式 Vue 前端现在使用 `Vue Router`，主入口仍是 `frontend-service`，推荐访问 `http://localhost:5173`。路由包括：
+
+- `/login`：demo admin 登录页。
+- `/workspace`：CSV 上传、批量 AI 检测进度、文件内申请检测结果。
+- `/applications/:id`：单笔申请详情页，支持 `?tab=summary|trace|tools|policy|history|materials|approval`。
+
+推荐演示路径：登录 demo admin，上传 `docs/sample_import/loan_applications_sample.csv`，点击批量 AI 检测，进入单笔详情页展示 AI 报告、Agent Trace、Tool Calls、Policy References，然后执行人工审批或补件复审。若看起来“不登录也能用”，通常是浏览器 `localStorage` 里仍保留上次的 `smartcredit.frontend.token`；点击“退出登录”或清空 localStorage 后，再访问 `/workspace` 会被重定向到 `/login`。
+
+`backend-service/src/main/resources/static/demo.html` 仍保留为无 Node 环境下的 fallback，不是正式前端主演示入口。

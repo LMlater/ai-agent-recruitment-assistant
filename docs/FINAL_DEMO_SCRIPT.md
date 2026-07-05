@@ -129,3 +129,16 @@ CI 分别跑 Python pytest、Java Maven test 和 readiness 静态检查。Docker
 ### 这个项目离真实银行生产还差什么？
 
 还需要真实数据治理、模型验证与监控、权限体系、风控策略引擎、真实制度库和向量库、灰度发布、告警、合规模型评审、安全审计和生产级运维。本项目是公开数据 + 模拟制度 + 工程验证的面试展示版。
+## Round 17: 正式前端演示路径
+
+1. 启动 `agent-service`、`backend-service` 和 `frontend-service`。
+2. 访问 `http://localhost:5173/login`，初始化并登录 demo admin。
+3. 进入 `/workspace`，上传 `docs/sample_import/loan_applications_sample.csv`。
+4. 点击“批量 AI 检测上传文件”，前端会顺序调用单笔 AI Review 接口，不新增后端批量 Review 接口。
+5. 在结果表格点击“查看详情”，进入 `/applications/:id`。
+6. 在详情页切换 `AI 报告 / Agent Trace / Tool Calls / Policy References / 审批历史 / 补件复审 / 人工审批`。
+7. 演示人工通过、人工拒绝或要求补件；最终 `APPROVED / REJECTED / NEED_MORE_INFO` 仍由人工按钮确认。
+
+顶部能力标签现在是快捷入口：CSV 和 Batch 跳回工作台对应区域；Tool Trace、Policy RAG、Human-in-the-loop、Real LLM Report 在已有当前申请时跳转到详情页对应 tab。左侧导航也执行真实路由或滚动，不再只是改变高亮。
+
+如果浏览器 localStorage 里还有上次登录 token，看起来会像已经登录。点击“退出登录”或清空 localStorage 后，再访问 `/workspace` 或 `/applications/:id` 会被重定向到 `/login`。`demo.html` 仍是 fallback，不是主演示入口。

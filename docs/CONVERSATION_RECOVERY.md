@@ -205,3 +205,11 @@
 30. 第 4 轮第三段稳定真实 LLM demo：`run_llm_review_demo.py` 支持 `--mock`、`--real`、`--compact`，真实 demo 默认使用更长 timeout 和更小 max tokens，且 prompt 会压缩制度引用和风险字段。
 
 不要写入真实密钥、真实身份证、真实手机号或其他敏感信息。
+## Round 17 恢复要点
+
+1. 当前正式前端已经从单页工作台拆成 Vue Router 页面：`/login`、`/workspace`、`/applications/:applicationId`。
+2. 继续演示时优先使用 `frontend-service`，`demo.html` 仅作为 fallback 保留。
+3. Header 登录态由 `smartcredit.frontend.token` 判断；“退出登录”会清理 token、当前申请和 `smartcredit.frontend.lastBatchRows`。
+4. 工作台刷新后恢复批量结果属于预期行为；若要验证未登录门控，先退出登录或清空 localStorage。
+5. 左侧导航和顶部能力标签已经是真实快捷入口。没有当前申请时，详情/Trace/Policy/Approval 入口会提示“请先选择申请”。
+6. 本轮没有改 Java 审批状态机、Python Agent 流程，也没有新增后端批量 AI Review 接口。

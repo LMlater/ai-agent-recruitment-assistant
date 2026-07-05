@@ -953,3 +953,58 @@ docker compose config
 - Docker/Compose 默认使用 Mock LLM：`LLM_PROVIDER=mock`、`LLM_ENABLE_REAL_API=false`。
 - Demo 密码和 MySQL/Redis 密码只用于本地演示文档和 Compose 默认值，不代表生产配置。
 - 第 8/9/10 轮业务成果未删除；AI/ML/RAG/LLM 仍只生成审批辅助建议，最终 `APPROVED` / `REJECTED` 仍必须走人工审批接口。
+## Round 17 验证记录
+
+日期：2026-07-05
+
+### 前端静态测试红灯
+
+```powershell
+python -m pytest agent-service\tests\test_round16_frontend_workspace.py::test_round17_frontend_router_auth_and_detail_page_polish -q
+```
+
+结果：按预期失败，缺少 `frontend-service/src/router.js` 等 Round 17 路由与详情页文件。
+
+### 前端静态测试绿灯
+
+```powershell
+python -m pytest agent-service\tests\test_round16_frontend_workspace.py -q
+```
+
+结果：`4 passed`。pytest cache 写入 `agent-service/.pytest_cache` 时有本地 Windows 权限 warning，不影响断言结果。
+
+### 前端构建
+
+```powershell
+cd frontend-service
+npm install
+npm run build
+```
+
+结果：`npm install` 成功，新增并锁定 `vue-router`，`0 vulnerabilities`。`npm run build` 在普通沙箱下因 esbuild 子进程 `spawn EPERM` 失败，提升权限重跑后成功：Vite transformed 1609 modules，生成 `dist/index.html`、CSS 和 JS bundle。构建仅有 Rollup PURE 注释和 chunk size warning。
+
+### 后端鉴权检查
+
+`backend-service/src/main/java/com/smartcredit/config/AppConfig.java` 已注册 `JwtAuthInterceptor`，保护 `/api/**`，仅排除 `/api/auth/login`、`/api/auth/init-admin`、swagger/openapi；`JwtAuthInterceptor` 在缺少 `Authorization: Bearer ...` 时抛出 `Missing Authorization bearer token`。因此未登录调用 `POST /api/loan-applications/batch-import` 和 `POST /api/loan-applications/{id}/ai-review` 属于受保护路径，本轮未大改后端。
+
+### 全量验证
+
+```powershell
+cd agent-service
+python -m pytest tests -q
+```
+
+结果：`76 passed, 1 skipped, 2 warnings`。warning 为 Starlette/httpx deprecation 与本地 pytest cache 写入权限，不影响结果。
+
+```powershell
+cd backend-service
+mvn "-Dmaven.repo.local=D:\PythonProject\ai-agent-recruitment-assistant\.m2\repository" "-Dmaven.resources.skip=true" test
+```
+
+结果：`Tests run: 34, Failures: 0, Errors: 0, Skipped: 0`，`BUILD SUCCESS`。
+
+```powershell
+python scripts\check_demo_readiness.py --skip-services
+```
+
+结果：`ok=true`，`issues=[]`。

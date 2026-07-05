@@ -290,3 +290,11 @@ mvn -Dmaven.resources.skip=true test
 ```text
 生成演示申请 -> AI Review -> Need More Info -> 补件 -> 重新提交 -> 再次 AI Review -> 人工 Approve/Reject
 ```
+## Round 17: 正式前端登录态与路由排障
+
+- 正式前端入口：`http://localhost:5173/login`、`/workspace`、`/applications/:id`。
+- 如果未登录访问 `/workspace` 或 `/applications/:id`，Vue Router 守卫会跳转到 `/login`。
+- 如果看起来“不登录也能用”，通常是浏览器 `localStorage` 仍保留 `smartcredit.frontend.token`。点击 Header 的“退出登录”会同时清理 token 和 `smartcredit.frontend.lastBatchRows`。
+- 工作台刷新后仍显示上次批量结果，是因为前端把本次 `batchRows` 轻量保存到 `smartcredit.frontend.lastBatchRows`。退出登录会清空。
+- 顶部能力标签和左侧导航都是真实快捷入口；需要先选择申请后，才能跳转到详情页的 Trace、Policy、Approval 等 tab。
+- `backend-service/src/main/resources/static/demo.html` 只是 fallback 页面，正式演示优先使用 Vue 前端。

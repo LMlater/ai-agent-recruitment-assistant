@@ -12,17 +12,34 @@ export function setToken(token) {
   }
 }
 
+export function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+export function hasToken() {
+  return Boolean(getToken());
+}
+
+export function requireToken() {
+  const token = getToken();
+  if (!token) {
+    throw new Error("请先登录 demo admin");
+  }
+  return token;
+}
+
 async function request(path, options = {}) {
   const headers = { Accept: "application/json", ...(options.headers || {}) };
   if (options.body !== undefined && !(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
-  const token = getToken();
+  const token = options.requireAuth === false ? getToken() : requireToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(path, { ...options, headers });
+  const { requireAuth, ...fetchOptions } = options;
+  const response = await fetch(path, { ...fetchOptions, headers });
   const text = await response.text();
   const payload = text ? JSON.parse(text) : null;
   if (!response.ok) {
@@ -40,6 +57,7 @@ async function request(path, options = {}) {
 export async function initAdmin() {
   return request("/api/auth/init-admin", {
     method: "POST",
+    requireAuth: false,
     body: JSON.stringify({
       username: "admin",
       password: "Admin@123456",
@@ -51,6 +69,7 @@ export async function initAdmin() {
 export async function login(username, password) {
   const data = await request("/api/auth/login", {
     method: "POST",
+    requireAuth: false,
     body: JSON.stringify({ username, password })
   });
   setToken(data?.token);
@@ -58,8 +77,9 @@ export async function login(username, password) {
 }
 
 export async function downloadCsvTemplate() {
+  const token = requireToken();
   const response = await fetch("/api/loan-applications/batch-import-template", {
-    headers: { Authorization: `Bearer ${getToken()}` }
+    headers: { Authorization: `Bearer ${token}` }
   });
   if (!response.ok) {
     throw new Error(`下载 CSV 模板失败：HTTP ${response.status}`);
